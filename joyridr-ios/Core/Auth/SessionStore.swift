@@ -34,6 +34,7 @@ final class SessionStore {
     func restore() async {
         guard tokens.current != nil else {
             state = .signedOut
+            await api.ping()
             return
         }
         state = .loading

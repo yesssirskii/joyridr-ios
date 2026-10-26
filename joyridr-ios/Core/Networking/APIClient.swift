@@ -30,6 +30,14 @@ final class APIClient {
         try await send("POST", path, body: body, authorized: authorized)
     }
 
+    /// Quick request to `/health`. On a real iPhone the first request to your Mac triggers the
+    /// "Allow Local Network access?" prompt, so we do it on launch instead of during login.
+    func ping() async {
+        var request = URLRequest(url: baseURL.appending(path: "/health"))
+        request.timeoutInterval = 5
+        _ = try? await session.data(for: request)
+    }
+
     /// For endpoints that return 204 No Content.
     func post(_ path: String, body: (any Encodable)? = nil, authorized: Bool = true) async throws {
         let _: EmptyResponse = try await send("POST", path, body: body, authorized: authorized)

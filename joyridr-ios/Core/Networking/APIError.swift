@@ -15,7 +15,11 @@ enum APIError: LocalizedError {
             // For validation errors, the first field message is more useful than the generic title.
             fieldErrors.values.first?.first ?? message
         case .cannotConnect:
-            "Can't reach the JOYRIDR server. Check your connection (and that the API is running)."
+            #if DEBUG
+            "Can't reach the JOYRIDR server at \(AppConfig.apiBaseURL.absoluteString). Is the API running, and are your iPhone and Mac on the same Wi-Fi?"
+            #else
+            "Can't reach the JOYRIDR server. Check your internet connection."
+            #endif
         case .sessionExpired:
             "Your session has expired. Please log in again."
         case .invalidResponse:

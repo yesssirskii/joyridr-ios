@@ -10,11 +10,28 @@ SwiftUI app for JOYRIDR (iOS 27, Xcode 27). The backend lives in [`joyridr`](htt
    Without location permission the app falls back to Zagreb anyway.
 4. Log in with a demo account (password `Password123!`): `rider@joyridr.dev` or `driver@joyridr.dev`, or sign up.
 
-To point the app at another server, set a `JOYRIDR_API_URL` environment variable in the scheme (Product › Scheme › Edit Scheme › Run › Arguments).
+## Run it on your iPhone
+
+The app works straight from the home screen and talks to the backend on your Mac over Wi-Fi.
+
+1. Start the backend as usual. In Development it listens on your whole network (port 5105), not just on the Mac.
+2. Make sure the iPhone and the Mac are on the **same Wi-Fi**.
+3. In Xcode pick your iPhone as the run destination and press Run (once is enough; after that you can open it from the home screen).
+4. On first launch, tap **Allow** for Local Network access (and Location).
+
+Phone builds use the `JOYRIDR_API_URL` build setting (target › Build Settings › User-Defined), currently
+`http://M2-MacBook-Air.local:5105`. The `.local` name keeps working when your Mac's IP address changes.
+On a different Mac, change it to that Mac's name (System Settings › General › Sharing › Local hostname).
+
+The Simulator always uses `http://localhost:5105`. To override either one temporarily, set a
+`JOYRIDR_API_URL` environment variable in the scheme (Product › Scheme › Edit Scheme › Run › Arguments).
+
+If the app says it can't reach the server, the message shows the address it tried.
 
 ## Project layout
 
 ```
+Info.plist          Only holds JoyridrAPIURL; everything else is generated from build settings
 joyridr-ios/
 ├── App/            Entry point and RootView (login vs rider app vs driver app)
 ├── Core/
