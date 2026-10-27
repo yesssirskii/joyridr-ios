@@ -22,6 +22,7 @@ nonisolated struct CarSummary: Codable, Hashable, Identifiable {
 
 nonisolated struct DriverSummary: Codable, Hashable, Identifiable {
     let id: UUID
+    /// "Ivan K." (first name + last initial).
     let displayName: String
     let avatarUrl: String?
     let city: String?
@@ -49,4 +50,58 @@ nonisolated struct Page<Item: Decodable>: Decodable {
     let pageSize: Int
     let totalCount: Int
     let hasMore: Bool
+}
+
+nonisolated enum Transmission: String, Codable, Hashable {
+    case manual, automatic
+
+    var title: String { self == .manual ? "Manual" : "Automatic" }
+}
+
+nonisolated struct CarPhoto: Codable, Hashable, Identifiable {
+    let id: UUID
+    let url: String
+    let sortOrder: Int
+}
+
+/// `GET /api/cars/{id}`: everything about one car.
+nonisolated struct CarDetail: Codable, Hashable, Identifiable {
+    let id: UUID
+    let make: String
+    let model: String
+    let year: Int
+    let color: String
+    let category: CarCategory
+    let transmission: Transmission
+    let horsepower: Int
+    let zeroToHundredSeconds: Decimal?
+    let topSpeedKmh: Int?
+    let passengerSeats: Int
+    let description: String?
+    let pricePerHour: Decimal
+    let currency: String
+    let photos: [CarPhoto]
+    let driver: DriverSummary
+
+    var name: String { "\(make) \(model)" }
+}
+
+extension CarCategory {
+    var title: String {
+        switch self {
+        case .sportsCar: "Sports car"
+        case .supercar: "Supercar"
+        case .hypercar: "Hypercar"
+        }
+    }
+}
+
+extension DriverSummary {
+    /// "Ivan" from "Ivan K.".
+    var firstName: String { displayName.split(separator: " ").first.map(String.init) ?? displayName }
+
+    /// "★ 4.9 (12)", or "New" when there are no reviews yet.
+    var ratingText: String {
+        ratingCount == 0 ? "New" : "★ \(ratingAverage.formatted(.number.precision(.fractionLength(1)))) (\(ratingCount))"
+    }
 }

@@ -39,10 +39,12 @@ final class ExploreModel {
     }
     var radiusKm = 30
 
-    private let api: APIClient
+    private let carsService: CarsService
+    private let chat: ChatService
 
-    init(api: APIClient = .shared) {
-        self.api = api
+    init(carsService: CarsService = CarsService(), chat: ChatService = ChatService()) {
+        self.carsService = carsService
+        self.chat = chat
     }
 
     var locationLabel: String { "\(locationName), \(radiusKm) km" }
@@ -58,13 +60,7 @@ final class ExploreModel {
         locationName = location.isFallback ? "Zagreb" : "Near you"
 
         do {
-            let page: Page<NearbyCar> = try await api.get("/api/cars/nearby", query: [
-                "latitude": String(location.coordinate.latitude),
-                "longitude": String(location.coordinate.longitude),
-                "radiusKm": String(radiusKm),
-                "pageSize": "50",
-            ])
-            cars = sorted(page.items)
+            cars = sorted(try await carsService.nearby(location.coordinate, radiusKm: radiusKm))
             state = .loaded
         } catch {
             state = .failed(error.localizedDescription)
@@ -74,8 +70,8 @@ final class ExploreModel {
     }
 
     func loadUnreadCount() async {
-        if let unread: UnreadCount = try? await api.get("/api/conversations/unread-count") {
-            unreadMessages = unread.count
+        if let count = try? await chat.unreadCount() {
+            unreadMessages = count
         }
     }
 

@@ -17,10 +17,12 @@ final class RequestsModel {
     private(set) var busyRideIDs: Set<Ride.ID> = []
     var actionError: String?
 
-    private let api: APIClient
+    private let rides: RidesService
+    private let chat: ChatService
 
-    init(api: APIClient = .shared) {
-        self.api = api
+    init(rides: RidesService = RidesService(), chat: ChatService = ChatService()) {
+        self.rides = rides
+        self.chat = chat
     }
 
     func loadIfNeeded() async {
@@ -31,30 +33,29 @@ final class RequestsModel {
         if requests.isEmpty && upcoming.isEmpty { state = .loading }
         do {
             // Both requests run at the same time.
-            async let requestsPage: Page<Ride> = api.get("/api/rides", query: ["view": "requests", "pageSize": "50"])
-            async let upcomingPage: Page<Ride> = api.get("/api/rides", query: ["view": "upcoming", "pageSize": "50"])
-            let (pending, scheduled) = try await (requestsPage, upcomingPage)
-            requests = pending.items
+            async let pending = rides.list(.requests)
+            async let scheduled = rides.list(.upcoming)
+            requests = try await pending
             // "upcoming" also contains requests; those are already shown above.
-            upcoming = scheduled.items.filter { $0.status == .confirmed || $0.status == .inProgress }
+            upcoming = try await scheduled.filter { $0.status == .confirmed || $0.status == .inProgress }
             state = .loaded
         } catch {
             state = .failed(error.localizedDescription)
         }
-        if let unread: UnreadCount = try? await api.get("/api/conversations/unread-count") {
-            unreadMessages = unread.count
+        if let count = try? await chat.unreadCount() {
+            unreadMessages = count
         }
     }
 
     func confirm(_ ride: Ride) async {
         await perform(on: ride) {
-            let _: Ride = try await self.api.post("/api/rides/\(ride.id.uuidString)/confirm")
+            _ = try await self.rides.confirm(ride.id)
         }
     }
 
     func decline(_ ride: Ride) async {
         await perform(on: ride) {
-            let _: Ride = try await self.api.post("/api/rides/\(ride.id.uuidString)/decline", body: ReasonRequest(reason: nil))
+            _ = try await self.rides.decline(ride.id)
         }
     }
 
@@ -69,8 +70,4 @@ final class RequestsModel {
             await load() // the ride may have changed (e.g. expired), so show its real state
         }
     }
-}
-
-nonisolated struct ReasonRequest: Encodable {
-    let reason: String?
 }
