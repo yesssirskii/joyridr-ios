@@ -374,15 +374,15 @@
 				DEVELOPMENT_TEAM = 5H7T3AKKZY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "JOYRIDR connects to the development server on your Mac over Wi-Fi.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "JOYRIDR uses your location to show sports cars and supercars near you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "JOYRIDR uses your location to show sports cars and supercars near you.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "JOYRIDR connects to the development server on your Mac over Wi-Fi.";
-				INFOPLIST_FILE = "Info.plist";
-				JOYRIDR_API_URL = "http://M2-MacBook-Air.local:5105";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				JOYRIDR_API_URL = "http://M2-MacBook-Air.local:5105";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -410,15 +410,15 @@
 				DEVELOPMENT_TEAM = 5H7T3AKKZY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "JOYRIDR connects to the development server on your Mac over Wi-Fi.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "JOYRIDR uses your location to show sports cars and supercars near you.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "JOYRIDR uses your location to show sports cars and supercars near you.";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "JOYRIDR connects to the development server on your Mac over Wi-Fi.";
-				INFOPLIST_FILE = "Info.plist";
-				JOYRIDR_API_URL = "http://M2-MacBook-Air.local:5105";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				JOYRIDR_API_URL = "http://M2-MacBook-Air.local:5105";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

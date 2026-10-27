@@ -54,8 +54,10 @@ struct FilterPill: View {
         .foregroundStyle(.white)
         .padding(.horizontal, 18)
         .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: 44)
-        .background(Color(white: 0.06), in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.18), lineWidth: 1))
+        .background {
+            RedGlow().clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+        }
+        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(.white.opacity(0.18), lineWidth: 1))
     }
 }
 
