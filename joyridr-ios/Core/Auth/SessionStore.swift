@@ -15,10 +15,12 @@ final class SessionStore {
     private(set) var state: State = .loading
 
     private let api: APIClient
+    private let auth: AuthService
     private let tokens: TokenStore
 
     init(api: APIClient = .shared, tokens: TokenStore = .shared) {
         self.api = api
+        self.auth = AuthService(api: api)
         self.tokens = tokens
         api.onSessionExpired = { [weak self] in
             self?.state = .signedOut
@@ -39,7 +41,7 @@ final class SessionStore {
         }
         state = .loading
         do {
-            state = .signedIn(try await api.get("/api/me"))
+            state = .signedIn(try await auth.me())
         } catch APIError.cannotConnect {
             state = .offline(APIError.cannotConnect.localizedDescription)
         } catch {
@@ -49,26 +51,23 @@ final class SessionStore {
     }
 
     func login(email: String, password: String) async throws {
-        let response: AuthResponse = try await api.post(
-            "/api/auth/login", body: LoginRequest(email: email, password: password), authorized: false)
-        try await finishSignIn(response)
+        try await finishSignIn(auth.login(email: email, password: password))
     }
 
     func register(_ request: RegisterRequest) async throws {
-        let response: AuthResponse = try await api.post("/api/auth/register", body: request, authorized: false)
-        try await finishSignIn(response)
+        try await finishSignIn(auth.register(request))
     }
 
     /// Reloads the user and profile, e.g. after editing them.
     func reloadMe() async {
-        if let me: Me = try? await api.get("/api/me") {
+        if let me = try? await auth.me() {
             state = .signedIn(me)
         }
     }
 
     func logout() async {
         if let refreshToken = tokens.current?.refreshToken {
-            try? await api.post("/api/auth/logout", body: RefreshRequest(refreshToken: refreshToken), authorized: false)
+            await auth.logout(refreshToken: refreshToken)
         }
         tokens.clear()
         state = .signedOut
@@ -76,6 +75,6 @@ final class SessionStore {
 
     private func finishSignIn(_ response: AuthResponse) async throws {
         tokens.save(response)
-        state = .signedIn(try await api.get("/api/me"))
+        state = .signedIn(try await auth.me())
     }
 }

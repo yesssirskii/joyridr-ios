@@ -5,6 +5,10 @@ struct ExploreView: View {
     @State private var model = ExploreModel()
     @State private var showProfile = false
     @State private var showChat = false
+    /// The car whose booking sheet is open.
+    @State private var selectedCar: NearbyCar?
+    /// Ties each car row to its booking sheet, so the sheet zooms out of the row it was opened from.
+    @Namespace private var rideTransition
 
     var body: some View {
         NavigationStack {
@@ -57,8 +61,9 @@ struct ExploreView: View {
             .onChange(of: model.radiusKm) {
                 Task { await model.load() }
             }
-            .navigationDestination(for: NearbyCar.self) { item in
-                ComingSoonView(title: item.car.name, message: "Car details and booking are coming next.", systemImage: "car.side.fill")
+            .sheet(item: $selectedCar, onDismiss: { Task { await model.load() } }) { item in
+                NewRideView(car: item)
+                    .navigationTransition(.zoom(sourceID: item.id, in: rideTransition))
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat) {
@@ -97,10 +102,13 @@ struct ExploreView: View {
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.cars) { item in
-                    NavigationLink(value: item) {
+                    Button {
+                        selectedCar = item
+                    } label: {
                         CarRow(item: item)
                     }
                     .buttonStyle(.plain)
+                    .matchedTransitionSource(id: item.id, in: rideTransition)
                 }
             }
         }

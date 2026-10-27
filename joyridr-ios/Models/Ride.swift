@@ -4,7 +4,7 @@ nonisolated enum RideStatus: String, Codable, Hashable {
     case awaitingPayment, requested, confirmed, inProgress, completed, declined, cancelled, expired
 }
 
-nonisolated enum MeetingPointType: String, Codable, Hashable {
+nonisolated enum MeetingPointType: String, Codable, Hashable, CaseIterable {
     case driverComesToRider, riderComesToDriver, agreedLocation
 
     var title: String {

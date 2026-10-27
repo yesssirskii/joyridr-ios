@@ -39,16 +39,18 @@ joyridr-ios/
 │   ├── Auth/       TokenStore (Keychain) and SessionStore (who's logged in)
 │   └── Location/   One-shot location for the nearby search
 ├── Models/         Codable structs that mirror the backend's JSON
+├── Services/       One struct per backend area (Auth, Cars, Drivers, Rides, Chat); every endpoint call lives here
 ├── DesignSystem/   Theme (colours, fonts), racing stripes, buttons, fields, shared components
 └── Features/
     ├── Auth/       Login, choose role, sign up
     ├── Rider/      Explore (nearby cars)
+    ├── Booking/    New ride sheet (zooms out of the tapped car), car & driver info sheet, request sent
     ├── Driver/     Ride requests (confirm/decline) and upcoming rides
     └── Profile/    Profile sheet with log out
 ```
 
-How data flows: a screen owns an `@Observable` model (e.g. `ExploreModel`), the model calls `APIClient`, and the view re-renders when the model's properties change. `SessionStore` is shared through `.environment(...)`.
+How data flows: a screen owns an `@Observable` model (e.g. `ExploreModel`), the model calls a service (e.g. `CarsService`), the service calls `APIClient`, and the view re-renders when the model's properties change. `SessionStore` is shared through `.environment(...)`.
 
 ## Not built yet
 
-My rides, car detail + booking, chat, the driver's My cars and Schedule tabs (they show "coming soon" screens), Google/Apple sign-in, password reset, and the custom display font (`Theme.display` uses SF Pro Expanded as a stand-in).
+My rides, chat, the driver's My cars and Schedule tabs (they show "coming soon" screens), Google/Apple sign-in, password reset, and the custom display font (`Theme.display` uses SF Pro Expanded as a stand-in).
