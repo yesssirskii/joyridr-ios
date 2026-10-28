@@ -6,6 +6,7 @@ struct RideRequestCard: View {
     let isBusy: Bool
     let onConfirm: () -> Void
     let onDecline: () -> Void
+    let onMessage: () -> Void
 
     @State private var confirmDecline = false
 
@@ -28,6 +29,8 @@ struct RideRequestCard: View {
                     Spacer()
                     Text(ride.price.price(ride.currency))
                         .font(.title3.weight(.bold))
+                    CircleIconButton(systemImage: "bubble.left", size: 40,
+                                     accessibilityLabel: "Message \(ride.rider.displayName)", action: onMessage)
                 }
 
                 Divider().overlay(.white.opacity(0.1))

@@ -8,7 +8,7 @@ struct RideDetailView: View {
     @State private var model: RideDetailModel
     @State private var showCarInfo = false
     @State private var confirmCancel = false
-    @State private var showChatComingSoon = false
+    @State private var showChat = false
     @FocusState private var commentFocused: Bool
 
     init(ride: Ride) {
@@ -102,10 +102,10 @@ struct RideDetailView: View {
         } message: {
             Text(model.cancelConsequence)
         }
-        .alert("Coming soon", isPresented: $showChatComingSoon) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Chat with drivers is on the way.")
+        .sheet(isPresented: $showChat) {
+            ConversationSheet(otherUser: ChatParticipant(
+                id: ride.driver.id, displayName: ride.driver.displayName,
+                avatarUrl: ride.driver.avatarUrl, isDriver: true))
         }
     }
 
@@ -179,7 +179,7 @@ struct RideDetailView: View {
     private var actions: some View {
         VStack(spacing: 12) {
             Button {
-                showChatComingSoon = true
+                showChat = true
             } label: {
                 Label("Message \(model.driverFirstName)", systemImage: "bubble.left.fill")
             }

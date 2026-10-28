@@ -66,9 +66,8 @@ struct ExploreView: View {
                     .navigationTransition(.zoom(sourceID: item.id, in: rideTransition))
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
-            .sheet(isPresented: $showChat) {
-                ComingSoonView(title: "Messages", message: "Chat with drivers is coming soon.", systemImage: "bubble.left.and.bubble.right")
-                    .presentationDetents([.medium])
+            .sheet(isPresented: $showChat, onDismiss: { Task { await model.loadUnreadCount() } }) {
+                InboxView()
             }
             .toolbar(.hidden, for: .navigationBar)
         }
