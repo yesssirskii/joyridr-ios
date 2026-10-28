@@ -15,11 +15,11 @@ struct MyRidesView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     HomeHeader { showProfile = true }
 
-                    Picker("Rides", selection: $model.view) {
-                        Text("Upcoming").tag(RidesService.View.upcoming)
-                        Text("Past").tag(RidesService.View.past)
+                    // Same pills as the radius and sort buttons in Explore; the selected one glows.
+                    HStack(spacing: 14) {
+                        viewPill(.upcoming, title: "Upcoming", systemImage: "calendar")
+                        viewPill(.past, title: "Past", systemImage: "clock.arrow.circlepath")
                     }
-                    .pickerStyle(.segmented)
 
                     SectionTitle(
                         title: model.view == .upcoming ? "Upcoming rides" : "Past rides",
@@ -59,6 +59,16 @@ struct MyRidesView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
         }
+    }
+
+    private func viewPill(_ view: RidesService.View, title: String, systemImage: String) -> some View {
+        Button {
+            model.view = view
+        } label: {
+            FilterPill(systemImage: systemImage, title: title, isSelected: model.view == view)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(model.view == view ? .isSelected : [])
     }
 
     @ViewBuilder

@@ -43,6 +43,8 @@ struct FilterPill: View {
     let title: String
     /// Stretch to share the row's width, or just fit the text.
     var fillsWidth = true
+    /// When used as a toggle (e.g. Upcoming / Past), the unselected pill is dimmed.
+    var isSelected = true
 
     var body: some View {
         HStack(spacing: 8) {
@@ -51,13 +53,15 @@ struct FilterPill: View {
                 .lineLimit(1)
         }
         .font(.subheadline.weight(.semibold))
-        .foregroundStyle(.white)
+        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
         .padding(.horizontal, 18)
         .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: 44)
         .background {
-            RedGlow().clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            RedGlow()
+                .opacity(isSelected ? 1 : 0.3)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
         }
-        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(.white.opacity(0.18), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(.white.opacity(isSelected ? 0.18 : 0.08), lineWidth: 1))
     }
 }
 
