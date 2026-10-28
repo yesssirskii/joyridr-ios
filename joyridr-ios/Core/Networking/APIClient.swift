@@ -43,13 +43,42 @@ final class APIClient {
         let _: EmptyResponse = try await send("POST", path, body: body, authorized: authorized)
     }
 
+    func put<Response: Decodable>(_ path: String, body: any Encodable) async throws -> Response {
+        try await send("PUT", path, body: body)
+    }
+
+    func delete(_ path: String) async throws {
+        let _: EmptyResponse = try await send("DELETE", path, body: nil)
+    }
+
+    /// Uploads one file as multipart/form-data (field name "file"), e.g. a car photo.
+    func upload<Response: Decodable>(_ path: String, data: Data, fileName: String, mimeType: String) async throws -> Response {
+        try await send("POST", path, payload: .file(data: data, fileName: fileName, mimeType: mimeType))
+    }
+
     // MARK: Internals
+
+    /// What goes in the request body.
+    private enum Payload {
+        case json(any Encodable)
+        case file(data: Data, fileName: String, mimeType: String)
+    }
 
     private func send<Response: Decodable>(
         _ method: String,
         _ path: String,
         query: [String: String] = [:],
         body: (any Encodable)?,
+        authorized: Bool = true
+    ) async throws -> Response {
+        try await send(method, path, query: query, payload: body.map(Payload.json), authorized: authorized)
+    }
+
+    private func send<Response: Decodable>(
+        _ method: String,
+        _ path: String,
+        query: [String: String] = [:],
+        payload: Payload?,
         authorized: Bool = true,
         isRetry: Bool = false
     ) async throws -> Response {
@@ -64,9 +93,22 @@ final class APIClient {
         var request = URLRequest(url: components.url!)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        if let body {
+        switch payload {
+        case let .json(body):
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONEncoder.api.encode(body)
+        case let .file(data, fileName, mimeType):
+            let boundary = "joyridr-\(UUID().uuidString)"
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            var body = Data()
+            body.append(Data("--\(boundary)\r\n".utf8))
+            body.append(Data("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".utf8))
+            body.append(Data("Content-Type: \(mimeType)\r\n\r\n".utf8))
+            body.append(data)
+            body.append(Data("\r\n--\(boundary)--\r\n".utf8))
+            request.httpBody = body
+        case nil:
+            break
         }
         if authorized, let accessToken = tokens.current?.accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
@@ -83,7 +125,7 @@ final class APIClient {
 
         if http.statusCode == 401 && authorized && !isRetry {
             try await refreshTokens()
-            return try await send(method, path, query: query, body: body, authorized: authorized, isRetry: true)
+            return try await send(method, path, query: query, payload: payload, authorized: authorized, isRetry: true)
         }
 
         guard (200..<300).contains(http.statusCode) else {
