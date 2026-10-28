@@ -53,9 +53,8 @@ struct MyRidesView: View {
                     .navigationTransition(.zoom(sourceID: ride.id, in: rideTransition))
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
-            .sheet(isPresented: $showChat) {
-                ComingSoonView(title: "Messages", message: "Chat with drivers is coming soon.", systemImage: "bubble.left.and.bubble.right")
-                    .presentationDetents([.medium])
+            .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
+                InboxView()
             }
             .toolbar(.hidden, for: .navigationBar)
         }

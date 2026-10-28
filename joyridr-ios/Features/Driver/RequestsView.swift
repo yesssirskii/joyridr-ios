@@ -6,6 +6,8 @@ struct RequestsView: View {
     @State private var model = RequestsModel()
     @State private var showProfile = false
     @State private var showChat = false
+    /// The rider whose chat is open from a request card.
+    @State private var chatWith: ChatParticipant?
 
     var body: some View {
         NavigationStack {
@@ -57,9 +59,11 @@ struct RequestsView: View {
                 Text(model.actionError ?? "")
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
-            .sheet(isPresented: $showChat) {
-                ComingSoonView(title: "Messages", message: "Chat with riders is coming soon.", systemImage: "bubble.left.and.bubble.right")
-                    .presentationDetents([.medium])
+            .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
+                InboxView()
+            }
+            .sheet(item: $chatWith, onDismiss: { Task { await model.load() } }) { rider in
+                ConversationSheet(otherUser: rider)
             }
             .toolbar(.hidden, for: .navigationBar)
         }
@@ -97,7 +101,11 @@ struct RequestsView: View {
                         ride: ride,
                         isBusy: model.busyRideIDs.contains(ride.id),
                         onConfirm: { Task { await model.confirm(ride) } },
-                        onDecline: { Task { await model.decline(ride) } })
+                        onDecline: { Task { await model.decline(ride) } },
+                        onMessage: {
+                            chatWith = ChatParticipant(id: ride.rider.id, displayName: ride.rider.displayName,
+                                                       avatarUrl: ride.rider.avatarUrl, isDriver: false)
+                        })
                 }
             }
         }
