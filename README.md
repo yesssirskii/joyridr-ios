@@ -43,7 +43,7 @@ joyridr-ios/
 ├── DesignSystem/   Theme (colours, fonts), racing stripes, buttons, fields, shared components
 └── Features/
     ├── Auth/       Login, choose role, sign up
-    ├── Rider/      Explore (nearby cars)
+    ├── Rider/      Explore (nearby cars), My rides (upcoming/past) and ride details (cancel, rate)
     ├── Booking/    New ride sheet (zooms out of the tapped car), car & driver info sheet, request sent
     ├── Driver/     Ride requests (confirm/decline) and upcoming rides
     └── Profile/    Profile sheet with log out
@@ -53,4 +53,4 @@ How data flows: a screen owns an `@Observable` model (e.g. `ExploreModel`), the 
 
 ## Not built yet
 
-My rides, chat, the driver's My cars and Schedule tabs (they show "coming soon" screens), Google/Apple sign-in, password reset, and the custom display font (`Theme.display` uses SF Pro Expanded as a stand-in).
+Chat, the driver's My cars and Schedule tabs (they show "coming soon" screens), Google/Apple sign-in, password reset, and the custom display font (`Theme.display` uses SF Pro Expanded as a stand-in).

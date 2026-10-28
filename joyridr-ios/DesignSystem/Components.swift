@@ -43,6 +43,8 @@ struct FilterPill: View {
     let title: String
     /// Stretch to share the row's width, or just fit the text.
     var fillsWidth = true
+    /// When used as a toggle (e.g. Upcoming / Past), the unselected pill is dimmed.
+    var isSelected = true
 
     var body: some View {
         HStack(spacing: 8) {
@@ -51,13 +53,15 @@ struct FilterPill: View {
                 .lineLimit(1)
         }
         .font(.subheadline.weight(.semibold))
-        .foregroundStyle(.white)
+        .foregroundStyle(isSelected ? .white : Theme.textSecondary)
         .padding(.horizontal, 18)
         .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: 44)
         .background {
-            RedGlow().clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
+            RedGlow()
+                .opacity(isSelected ? 1 : 0.3)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.cardRadius))
         }
-        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(.white.opacity(0.18), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(.white.opacity(isSelected ? 0.18 : 0.08), lineWidth: 1))
     }
 }
 
@@ -179,5 +183,33 @@ extension Decimal {
     /// "180 €" style price, formatted for the user's locale.
     func price(_ currency: String) -> String {
         formatted(.currency(code: currency).precision(.fractionLength(0...2)))
+    }
+}
+
+/// Compact car card: photo, car name, a subtitle and an ⓘ button for the full car and driver details.
+/// Used at the top of the booking and ride detail sheets.
+struct CarSummaryCard: View {
+    let photoPath: String?
+    let title: String
+    let subtitle: String
+    let onInfo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            RemoteImage(path: photoPath)
+                .frame(width: 56, height: 56)
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.headline)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            Spacer(minLength: 8)
+            CircleIconButton(systemImage: "info", size: 40, accessibilityLabel: "Car and driver details", action: onInfo)
+        }
+        .padding(14)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
     }
 }

@@ -4,6 +4,7 @@ import SwiftUI
 /// Opens from the car's row in Explore with a zoom transition.
 struct NewRideView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.selectRiderTab) private var selectRiderTab
     @State private var model: NewRideModel
     @State private var showDetails = false
 
@@ -15,7 +16,10 @@ struct NewRideView: View {
         NavigationStack {
             Group {
                 if let ride = model.createdRide {
-                    RequestSentView(ride: ride, timeZone: model.timeZone) { dismiss() }
+                    RequestSentView(ride: ride, timeZone: model.timeZone, onDone: { dismiss() }, onViewRides: {
+                        dismiss()
+                        selectRiderTab(.myRides)
+                    })
                 } else {
                     form
                 }
@@ -77,24 +81,11 @@ struct NewRideView: View {
 
     /// Compact car summary with the button that opens the full car and driver details.
     private var carSummary: some View {
-        HStack(spacing: 14) {
-            RemoteImage(path: model.car.car.photoUrl ?? model.car.driver.avatarUrl)
-                .frame(width: 56, height: 56)
-                .clipShape(Circle())
-            VStack(alignment: .leading, spacing: 3) {
-                Text(model.car.car.name)
-                    .font(.headline)
-                Text("\(model.car.driver.displayName) · \(model.car.driver.ratingText)")
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.textSecondary)
-            }
-            Spacer(minLength: 8)
-            CircleIconButton(systemImage: "info", size: 40, accessibilityLabel: "Car and driver details") {
-                showDetails = true
-            }
-        }
-        .padding(14)
-        .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
+        CarSummaryCard(
+            photoPath: model.car.car.photoUrl ?? model.car.driver.avatarUrl,
+            title: model.car.car.name,
+            subtitle: "\(model.car.driver.displayName) · \(model.car.driver.ratingText)",
+            onInfo: { showDetails = true })
     }
 
     private var dayStrip: some View {
