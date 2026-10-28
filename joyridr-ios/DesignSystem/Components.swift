@@ -213,3 +213,16 @@ struct CarSummaryCard: View {
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
     }
 }
+
+extension View {
+    /// Keeps `isVisible` in sync with the on-screen keyboard. Used to hide bottom bars while typing,
+    /// so they don't ride up with the keyboard and cover the field being edited.
+    func trackKeyboard(_ isVisible: Binding<Bool>) -> some View {
+        onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            isVisible.wrappedValue = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            isVisible.wrappedValue = false
+        }
+    }
+}

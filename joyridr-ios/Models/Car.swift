@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated enum CarCategory: String, Codable, Hashable {
+nonisolated enum CarCategory: String, Codable, Hashable, CaseIterable {
     case sportsCar, supercar, hypercar
 }
 
@@ -52,7 +52,7 @@ nonisolated struct Page<Item: Decodable>: Decodable {
     let hasMore: Bool
 }
 
-nonisolated enum Transmission: String, Codable, Hashable {
+nonisolated enum Transmission: String, Codable, Hashable, CaseIterable {
     case manual, automatic
 
     var title: String { self == .manual ? "Manual" : "Automatic" }
@@ -82,8 +82,44 @@ nonisolated struct CarDetail: Codable, Hashable, Identifiable {
     let currency: String
     let photos: [CarPhoto]
     let driver: DriverSummary
+    /// Every car is reviewed by an admin before riders can see it.
+    let status: CarStatus
+    /// The driver can hide a car from search without deleting it.
+    let isActive: Bool
+    /// Only sent to the car's owner.
+    let licensePlate: String?
+    /// Only sent to the car's owner, when an admin rejected the car.
+    let rejectionReason: String?
 
     var name: String { "\(make) \(model)" }
+
+    /// Approved and not hidden: riders can find and book it.
+    var isLive: Bool { status == .approved && isActive }
+
+    var coverPhotoUrl: String? { photos.min { $0.sortOrder < $1.sortOrder }?.url }
+}
+
+nonisolated enum CarStatus: String, Codable, Hashable {
+    case pendingReview, approved, rejected
+}
+
+/// Body of `POST /api/cars` and `PUT /api/cars/{id}`.
+nonisolated struct UpsertCarRequest: Encodable {
+    let make: String
+    let model: String
+    let year: Int
+    let color: String
+    let category: CarCategory
+    let transmission: Transmission
+    let horsepower: Int
+    let zeroToHundredSeconds: Decimal?
+    let topSpeedKmh: Int?
+    let passengerSeats: Int
+    let description: String?
+    let licensePlate: String?
+    let pricePerHour: Decimal
+    let currency: String
+    let isActive: Bool
 }
 
 extension CarCategory {

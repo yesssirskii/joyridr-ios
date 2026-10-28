@@ -7,6 +7,7 @@ struct NewRideView: View {
     @Environment(\.selectRiderTab) private var selectRiderTab
     @State private var model: NewRideModel
     @State private var showDetails = false
+    @State private var keyboardVisible = false
 
     init(car: NearbyCar) {
         _model = State(initialValue: NewRideModel(car: car))
@@ -33,6 +34,12 @@ struct NewRideView: View {
                     }
                     ToolbarItem(placement: .principal) {
                         Text("New ride").displayTitle(18)
+                    }
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") {
+                            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        }
                     }
                 }
             }
@@ -72,7 +79,11 @@ struct NewRideView: View {
             .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom) { bottomBar }
+        // Hidden while typing the note, so it doesn't ride up with the keyboard and cover the field.
+        .safeAreaInset(edge: .bottom) {
+            if !keyboardVisible { bottomBar }
+        }
+        .trackKeyboard($keyboardVisible)
         // Reloads the free times whenever the day or duration changes, and cancels the previous load.
         .task(id: model.slotsQuery) { await model.loadSlots() }
         .animation(.snappy, value: model.selectedSlot)
