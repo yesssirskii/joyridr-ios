@@ -32,7 +32,18 @@ nonisolated struct MeetingPoint: Codable, Hashable {
     let address: String?
 }
 
-/// A booking. Only the fields the app uses so far; the backend sends more.
+nonisolated enum PaymentStatus: String, Codable, Hashable {
+    case pending, authorized, captured, voided, refunded, partiallyRefunded, failed
+}
+
+nonisolated struct RidePayment: Codable, Hashable {
+    let status: PaymentStatus
+    let amount: Decimal
+    let refundedAmount: Decimal
+    let currency: String
+}
+
+/// A booking, as returned by `GET /api/rides` and `GET /api/rides/{id}`.
 nonisolated struct Ride: Codable, Hashable, Identifiable {
     let id: UUID
     let status: RideStatus
@@ -47,6 +58,17 @@ nonisolated struct Ride: Codable, Hashable, Identifiable {
     let price: Decimal
     let currency: String
     let respondBy: Date?
+    let createdAt: Date
+    let confirmedAt: Date?
+    let declineReason: String?
+    let cancelledAt: Date?
+    /// True if the logged-in user cancelled it, false if the other person did, nil if not cancelled.
+    let cancelledByMe: Bool?
+    let cancellationReason: String?
+    let completedAt: Date?
+    let payment: RidePayment?
+    /// Completed and not reviewed by the logged-in user yet.
+    let canReview: Bool
 }
 
 nonisolated struct UnreadCount: Decodable {

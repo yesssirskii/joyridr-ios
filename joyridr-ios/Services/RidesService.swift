@@ -12,6 +12,10 @@ struct RidesService {
         return page.items
     }
 
+    func ride(_ rideID: Ride.ID) async throws -> Ride {
+        try await api.get("/api/rides/\(rideID.uuidString)")
+    }
+
     /// Books a ride. It starts as "requested" and waits for the driver to confirm.
     func request(_ request: CreateRideRequest) async throws -> Ride {
         try await api.post("/api/rides", body: request)
@@ -24,8 +28,23 @@ struct RidesService {
     func decline(_ rideID: Ride.ID, reason: String? = nil) async throws -> Ride {
         try await api.post("/api/rides/\(rideID.uuidString)/decline", body: ReasonRequest(reason: reason))
     }
+
+    /// Rider: free (or full refund) until 24 h before a confirmed ride. Driver: always a full refund for the rider.
+    func cancel(_ rideID: Ride.ID, reason: String? = nil) async throws -> Ride {
+        try await api.post("/api/rides/\(rideID.uuidString)/cancel", body: ReasonRequest(reason: reason))
+    }
+
+    /// Rate the other person after a completed ride (once).
+    func review(_ rideID: Ride.ID, rating: Int, comment: String?) async throws {
+        let _: Review = try await api.post("/api/rides/\(rideID.uuidString)/reviews", body: ReviewRequest(rating: rating, comment: comment))
+    }
 }
 
 nonisolated struct ReasonRequest: Encodable {
     let reason: String?
+}
+
+nonisolated struct ReviewRequest: Encodable {
+    let rating: Int
+    let comment: String?
 }

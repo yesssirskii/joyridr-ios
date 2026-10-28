@@ -5,6 +5,7 @@ struct RequestSentView: View {
     let ride: Ride
     let timeZone: TimeZone
     let onDone: () -> Void
+    var onViewRides: (() -> Void)?
 
     var body: some View {
         ZStack {
@@ -37,8 +38,14 @@ struct RequestSentView: View {
                 }
 
                 Spacer()
-                Button("Done", action: onDone)
-                    .buttonStyle(.primary)
+                VStack(spacing: 12) {
+                    Button("Done", action: onDone)
+                        .buttonStyle(.primary)
+                    if let onViewRides {
+                        Button("See it in My rides", action: onViewRides)
+                            .buttonStyle(.secondary)
+                    }
+                }
             }
             .padding(.horizontal, Theme.horizontalPadding)
             .padding(.bottom, 12)

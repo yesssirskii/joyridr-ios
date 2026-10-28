@@ -181,3 +181,31 @@ extension Decimal {
         formatted(.currency(code: currency).precision(.fractionLength(0...2)))
     }
 }
+
+/// Compact car card: photo, car name, a subtitle and an ⓘ button for the full car and driver details.
+/// Used at the top of the booking and ride detail sheets.
+struct CarSummaryCard: View {
+    let photoPath: String?
+    let title: String
+    let subtitle: String
+    let onInfo: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            RemoteImage(path: photoPath)
+                .frame(width: 56, height: 56)
+                .clipShape(Circle())
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.headline)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            Spacer(minLength: 8)
+            CircleIconButton(systemImage: "info", size: 40, accessibilityLabel: "Car and driver details", action: onInfo)
+        }
+        .padding(14)
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
+    }
+}
