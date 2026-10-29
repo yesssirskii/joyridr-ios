@@ -25,7 +25,7 @@ struct SectionTitle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
-                .displayTitle(18)
+                .displayTitle(15)
                 .accessibilityAddTraits(.isHeader)
             if let subtitle {
                 Text(subtitle)

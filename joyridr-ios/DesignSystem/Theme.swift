@@ -17,12 +17,10 @@ enum Theme {
     static let available = Color(red: 0.45, green: 0.95, blue: 0.35)
 
     // MARK: Fonts
-    /// The wide, heavy display font used for the wordmark and section titles.
-    /// This uses SF Pro Expanded Black as a stand-in. To use your Figma font instead, add the
-    /// .otf/.ttf file to the project, list it under "Fonts provided by application" in the target's
-    /// Info settings, and return `.custom("YourFontName", size: size)` here.
+    /// BBH Bartle, the display font used for the wordmark and section titles.
+    /// Registered under "Fonts provided by application" in the target's Info settings.
     static func display(_ size: CGFloat) -> Font {
-        .system(size: size, weight: .black).width(.expanded)
+        .custom("BBHBartle-Regular", size: size, relativeTo: .largeTitle)
     }
 
     // MARK: Sizes
