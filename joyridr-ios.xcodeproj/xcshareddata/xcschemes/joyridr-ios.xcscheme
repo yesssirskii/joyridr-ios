@@ -17,6 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6076DAF9308A699100DC722B"
                BuildableName = "joyridr-ios.app"
+               BlueprintName = "joyridr-ios"
                ReferencedContainer = "container:joyridr-ios.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -68,6 +69,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6076DAF9308A699100DC722B"
             BuildableName = "joyridr-ios.app"
+            BlueprintName = "joyridr-ios"
             ReferencedContainer = "container:joyridr-ios.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -91,6 +93,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6076DAF9308A699100DC722B"
             BuildableName = "joyridr-ios.app"
+            BlueprintName = "joyridr-ios"
             ReferencedContainer = "container:joyridr-ios.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

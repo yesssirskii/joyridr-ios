@@ -2,9 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Backend address used on a real iPhone. Comes from the JOYRIDR_API_URL build setting
-	     (target › Build Settings › User-Defined). Xcode merges this with the generated Info.plist. -->
 	<key>JoyridrAPIURL</key>
 	<string>$(JOYRIDR_API_URL)</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>BBHBartle-Regular.ttf</string>
+	</array>
 </dict>
 </plist>
