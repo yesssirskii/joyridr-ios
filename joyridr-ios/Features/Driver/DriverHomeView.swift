@@ -11,7 +11,7 @@ struct DriverHomeView: View {
                 MyCarsView()
             }
             Tab("Schedule", systemImage: "calendar") {
-                ComingSoonView(title: "Schedule", message: "Set the days and times you're available.", systemImage: "calendar")
+                ScheduleView()
             }
         }
     }

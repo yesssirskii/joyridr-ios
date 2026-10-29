@@ -278,7 +278,10 @@ struct ChipStyle: ButtonStyle {
             .font(.subheadline.weight(.semibold))
             .monospacedDigit()
             .foregroundStyle(.white)
-            .padding(.horizontal, 14)
+            .lineLimit(1)
+            // Chips that size to their text never wrap; ones that share a row shrink their padding instead.
+            .fixedSize(horizontal: !fillsWidth, vertical: false)
+            .padding(.horizontal, fillsWidth ? 4 : 14)
             .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: 38)
             .background(isSelected ? Theme.brandRed : Color.white.opacity(0.08), in: Capsule())
             .opacity(configuration.isPressed ? 0.7 : 1)

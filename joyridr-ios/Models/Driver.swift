@@ -30,3 +30,46 @@ nonisolated struct WeeklySchedule: Codable, Hashable {
     let timeZoneId: String
     let windows: [Window]
 }
+
+/// Body of `PUT /api/drivers/me/schedule`: the whole week, replacing what was there.
+nonisolated struct UpdateWeeklyScheduleRequest: Encodable {
+    let windows: [WeeklySchedule.Window]
+}
+
+/// A one-off block (holiday, car in service…) when riders can't book the driver.
+nonisolated struct TimeOff: Codable, Hashable, Identifiable {
+    let id: UUID
+    let startsAt: Date
+    let endsAt: Date
+    let reason: String?
+}
+
+nonisolated struct CreateTimeOffRequest: Encodable {
+    let startsAt: Date
+    let endsAt: Date
+    let reason: String?
+}
+
+/// Body of `PUT /api/drivers/me`. The endpoint replaces every field, so send the current values for the ones you don't change.
+nonisolated struct UpdateDriverProfileRequest: Encodable {
+    let bio: String?
+    let city: String?
+    let baseLatitude: Double?
+    let baseLongitude: Double?
+    let baseAddress: String?
+    let serviceRadiusKm: Int
+    let timeZoneId: String
+    let isAcceptingRides: Bool
+
+    /// Copies the profile with only "accepting rides" changed.
+    init(_ profile: DriverProfile, isAcceptingRides: Bool) {
+        bio = profile.bio
+        city = profile.city
+        baseLatitude = profile.baseLatitude
+        baseLongitude = profile.baseLongitude
+        baseAddress = profile.baseAddress
+        serviceRadiusKm = profile.serviceRadiusKm
+        timeZoneId = profile.timeZoneId
+        self.isAcceptingRides = isAcceptingRides
+    }
+}
