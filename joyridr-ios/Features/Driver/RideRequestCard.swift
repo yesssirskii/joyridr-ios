@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// A ride request the driver can confirm or decline.
+/// A ride request the driver can confirm or decline. Tapping anywhere else opens the full details.
 struct RideRequestCard: View {
     let ride: Ride
     let isBusy: Bool
+    let onOpen: () -> Void
     let onConfirm: () -> Void
     let onDecline: () -> Void
     let onMessage: () -> Void
@@ -20,9 +21,7 @@ struct RideRequestCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(ride.rider.displayName)
                             .font(.headline)
-                        Text(ride.rider.ratingCount == 0
-                             ? "New rider"
-                             : "★ \(ride.rider.ratingAverage.formatted(.number.precision(.fractionLength(1)))) · \(ride.rider.ratingCount) reviews")
+                        Text(ride.rider.ratingText)
                             .font(.footnote)
                             .foregroundStyle(Theme.textSecondary)
                     }
@@ -35,16 +34,22 @@ struct RideRequestCard: View {
 
                 Divider().overlay(.white.opacity(0.1))
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Label(ride.car.name, systemImage: "car.fill")
-                    Label(timeText, systemImage: "calendar")
-                    Label(meetingText, systemImage: "mappin.and.ellipse")
-                    if let note = ride.riderNote, !note.isEmpty {
-                        Label("“\(note)”", systemImage: "text.bubble")
-                            .foregroundStyle(Theme.textSecondary)
+                HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(ride.car.name, systemImage: "car.fill")
+                        Label(timeText, systemImage: "calendar")
+                        Label(meetingText, systemImage: "mappin.and.ellipse")
+                        if let note = ride.riderNote, !note.isEmpty {
+                            Label("“\(note)”", systemImage: "text.bubble")
+                                .foregroundStyle(Theme.textSecondary)
+                        }
                     }
+                    .font(.subheadline)
+                    Spacer(minLength: 8)
+                    Image(systemName: "arrow.right")
+                        .font(.title3)
+                        .foregroundStyle(Theme.textSecondary)
                 }
-                .font(.subheadline)
 
                 if let respondBy = ride.respondBy {
                     // A date with style: .relative counts down by itself.
@@ -62,6 +67,10 @@ struct RideRequestCard: View {
                 .disabled(isBusy)
             }
         }
+        // The buttons inside keep their own taps; everywhere else opens the details.
+        .contentShape(.rect)
+        .onTapGesture(perform: onOpen)
+        .accessibilityAction(named: "Details", onOpen)
         .confirmationDialog("Decline this ride?", isPresented: $confirmDecline, titleVisibility: .visible) {
             Button("Decline ride", role: .destructive, action: onDecline)
         } message: {

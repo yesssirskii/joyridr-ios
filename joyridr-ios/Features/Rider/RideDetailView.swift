@@ -147,19 +147,7 @@ struct RideDetailView: View {
                 .foregroundStyle(Theme.available)
         } else {
             VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 10) {
-                    ForEach(1...5, id: \.self) { star in
-                        Button {
-                            model.rating = star
-                        } label: {
-                            Image(systemName: star <= model.rating ? "star.fill" : "star")
-                                .font(.title)
-                                .foregroundStyle(star <= model.rating ? Theme.accentRed : Theme.textSecondary)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
-                    }
-                }
+                StarRatingPicker(rating: $model.rating)
                 TextField("", text: $model.comment,
                           prompt: Text("How was the ride with \(model.driverFirstName)?").foregroundStyle(Theme.textSecondary),
                           axis: .vertical)
@@ -241,46 +229,7 @@ private struct RideStatusBanner: View {
     let driverFirstName: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: icon)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(color)
-                .frame(width: 30)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.headline)
-                Text(message)
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.textSecondary)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: Theme.cardRadius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(color.opacity(0.35), lineWidth: 1))
-        .accessibilityElement(children: .combine)
-    }
-
-    private var icon: String {
-        switch ride.status {
-        case .awaitingPayment: "creditcard"
-        case .requested: "hourglass"
-        case .confirmed: "checkmark.seal.fill"
-        case .inProgress: "flag.checkered"
-        case .completed: "trophy.fill"
-        case .declined, .cancelled: "xmark.circle.fill"
-        case .expired: "clock.badge.xmark"
-        }
-    }
-
-    private var color: Color {
-        switch ride.status {
-        case .confirmed, .completed: Theme.available
-        case .inProgress: .yellow
-        case .requested, .awaitingPayment: .orange
-        case .declined, .cancelled, .expired: Theme.textSecondary
-        }
+        StatusBanner(icon: ride.status.icon, color: ride.status.color, title: title, message: message)
     }
 
     private var title: String {

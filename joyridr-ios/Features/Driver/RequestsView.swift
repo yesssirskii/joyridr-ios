@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Driver home: incoming ride requests to confirm or decline, then upcoming rides.
+/// Tapping a request or a ride zooms its details out of the card.
 struct RequestsView: View {
     @Environment(SessionStore.self) private var session
     @State private var model = RequestsModel()
@@ -8,6 +9,8 @@ struct RequestsView: View {
     @State private var showChat = false
     /// The rider whose chat is open from a request card.
     @State private var chatWith: ChatParticipant?
+    @State private var selectedRide: Ride?
+    @Namespace private var rideTransition
 
     var body: some View {
         NavigationStack {
@@ -27,7 +30,14 @@ struct RequestsView: View {
                         GlowCard {
                             VStack(spacing: 14) {
                                 ForEach(model.upcoming) { ride in
-                                    UpcomingRideRow(ride: ride)
+                                    Button {
+                                        selectedRide = ride
+                                    } label: {
+                                        UpcomingRideRow(ride: ride)
+                                            .contentShape(.rect)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .matchedTransitionSource(id: ride.id, in: rideTransition)
                                 }
                             }
                         }
@@ -57,6 +67,10 @@ struct RequestsView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(model.actionError ?? "")
+            }
+            .sheet(item: $selectedRide, onDismiss: { Task { await model.load() } }) { ride in
+                DriverRideDetailView(ride: ride)
+                    .navigationTransition(.zoom(sourceID: ride.id, in: rideTransition))
             }
             .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
@@ -100,12 +114,14 @@ struct RequestsView: View {
                     RideRequestCard(
                         ride: ride,
                         isBusy: model.busyRideIDs.contains(ride.id),
+                        onOpen: { selectedRide = ride },
                         onConfirm: { Task { await model.confirm(ride) } },
                         onDecline: { Task { await model.decline(ride) } },
                         onMessage: {
                             chatWith = ChatParticipant(id: ride.rider.id, displayName: ride.rider.displayName,
                                                        avatarUrl: ride.rider.avatarUrl, isDriver: false)
                         })
+                    .matchedTransitionSource(id: ride.id, in: rideTransition)
                 }
             }
         }

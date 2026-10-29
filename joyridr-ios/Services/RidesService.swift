@@ -29,6 +29,15 @@ struct RidesService {
         try await api.post("/api/rides/\(rideID.uuidString)/decline", body: ReasonRequest(reason: reason))
     }
 
+    /// Driver: from 30 minutes before the start time.
+    func start(_ rideID: Ride.ID) async throws -> Ride {
+        try await api.post("/api/rides/\(rideID.uuidString)/start")
+    }
+
+    func complete(_ rideID: Ride.ID) async throws -> Ride {
+        try await api.post("/api/rides/\(rideID.uuidString)/complete")
+    }
+
     /// Rider: free (or full refund) until 24 h before a confirmed ride. Driver: always a full refund for the rider.
     func cancel(_ rideID: Ride.ID, reason: String? = nil) async throws -> Ride {
         try await api.post("/api/rides/\(rideID.uuidString)/cancel", body: ReasonRequest(reason: reason))
