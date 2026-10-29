@@ -289,24 +289,10 @@ private struct TimeOffRow: View {
 
 private struct PausedBanner: View {
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: "pause.circle.fill")
-                .font(.title2)
-                .foregroundStyle(.orange)
-            VStack(alignment: .leading, spacing: 4) {
-                Text("New requests are paused")
-                    .font(.headline)
-                Text("Your cars are hidden from JoyRiders. Tap “Paused” to start taking rides again.")
-                    .font(.subheadline)
-                    .foregroundStyle(Theme.textSecondary)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.orange.opacity(0.14), in: RoundedRectangle(cornerRadius: Theme.cardRadius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.cardRadius).stroke(Color.orange.opacity(0.35), lineWidth: 1))
-        .transition(.opacity.combined(with: .move(edge: .top)))
+        StatusBanner(
+            icon: "pause.circle.fill", color: .orange, title: "New requests are paused",
+            message: "Your cars are hidden from JoyRiders. Tap “Paused” to start taking rides again.")
+            .transition(.opacity.combined(with: .move(edge: .top)))
     }
 }
 
