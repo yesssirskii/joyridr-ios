@@ -18,7 +18,6 @@ struct MyCarsView: View {
 
     @State private var model = MyCarsModel()
     @State private var editor: EditorTarget?
-    @State private var showProfile = false
     @State private var showChat = false
     @Namespace private var carTransition
 
@@ -26,7 +25,7 @@ struct MyCarsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    HomeHeader { showProfile = true }
+                    HomeHeader()
 
                     HStack(spacing: 14) {
                         Button {
@@ -61,7 +60,7 @@ struct MyCarsView: View {
             .background {
                 ZStack(alignment: .top) {
                     Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15, length: 0.4)
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
                 }
                 .ignoresSafeArea()
             }
@@ -76,7 +75,6 @@ struct MyCarsView: View {
                 CarEditorView(car: target.car)
                     .navigationTransition(.zoom(sourceID: target.id, in: carTransition))
             }
-            .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
                 InboxView()
             }

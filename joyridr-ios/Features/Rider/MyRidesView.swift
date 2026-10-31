@@ -4,7 +4,6 @@ import SwiftUI
 struct MyRidesView: View {
     @Environment(\.selectRiderTab) private var selectRiderTab
     @State private var model = MyRidesModel()
-    @State private var showProfile = false
     @State private var showChat = false
     @State private var selectedRide: Ride?
     @Namespace private var rideTransition
@@ -13,7 +12,7 @@ struct MyRidesView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    HomeHeader { showProfile = true }
+                    HomeHeader()
 
                     // Same pills as the radius and sort buttons in Explore; the selected one glows.
                     HStack(spacing: 14) {
@@ -36,7 +35,7 @@ struct MyRidesView: View {
             .background {
                 ZStack(alignment: .top) {
                     Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15, length: 0.4)
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
                 }
                 .ignoresSafeArea()
             }
@@ -52,7 +51,6 @@ struct MyRidesView: View {
                 RideDetailView(ride: ride)
                     .navigationTransition(.zoom(sourceID: ride.id, in: rideTransition))
             }
-            .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
                 InboxView()
             }

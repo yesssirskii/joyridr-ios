@@ -8,7 +8,8 @@ struct RacingStripes: View {
     /// Where the first stripe crosses the top edge, as a fraction of the width.
     var startX: CGFloat = -0.35
     /// How far down the screen the stripes reach, as a fraction of the height.
-    var length: CGFloat = 0.75
+    /// Leave it nil to run every stripe off the right edge of the screen.
+    var length: CGFloat? = nil
     var color = Theme.brandRed
 
     var body: some View {
@@ -16,9 +17,11 @@ struct RacingStripes: View {
             for index in 0..<count {
                 let x = size.width * startX + CGFloat(index) * spacing
                 var path = Path()
-                path.move(to: CGPoint(x: x, y: -20))
                 // Steep diagonal towards the bottom right, like in Figma (about 55°).
-                path.addLine(to: CGPoint(x: x + size.height * length * 0.7, y: size.height * length))
+                let slope: CGFloat = 0.7
+                let endY = length.map { size.height * $0 } ?? (size.width + lineWidth - x) / slope
+                path.move(to: CGPoint(x: x, y: -20))
+                path.addLine(to: CGPoint(x: x + endY * slope, y: endY))
                 context.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt))
             }
         }

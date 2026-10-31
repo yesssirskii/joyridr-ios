@@ -5,7 +5,6 @@ import SwiftUI
 struct RequestsView: View {
     @Environment(SessionStore.self) private var session
     @State private var model = RequestsModel()
-    @State private var showProfile = false
     @State private var showChat = false
     /// The rider whose chat is open from a request card.
     @State private var chatWith: ChatParticipant?
@@ -16,7 +15,7 @@ struct RequestsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    HomeHeader { showProfile = true }
+                    HomeHeader()
 
                     if let driver = session.me?.driverProfile, driver.baseLatitude == nil {
                         SetupHintCard()
@@ -50,7 +49,7 @@ struct RequestsView: View {
             .background {
                 ZStack(alignment: .top) {
                     Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15, length: 0.4)
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
                 }
                 .ignoresSafeArea()
             }
@@ -72,7 +71,6 @@ struct RequestsView: View {
                 DriverRideDetailView(ride: ride)
                     .navigationTransition(.zoom(sourceID: ride.id, in: rideTransition))
             }
-            .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
                 InboxView()
             }

@@ -3,7 +3,6 @@ import SwiftUI
 /// Rider home: nearby cars, closest first.
 struct ExploreView: View {
     @State private var model = ExploreModel()
-    @State private var showProfile = false
     @State private var showChat = false
     /// The car whose booking sheet is open.
     @State private var selectedCar: NearbyCar?
@@ -14,7 +13,7 @@ struct ExploreView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    HomeHeader { showProfile = true }
+                    HomeHeader()
 
                     HStack(spacing: 14) {
                         Menu {
@@ -48,7 +47,7 @@ struct ExploreView: View {
             .background {
                 ZStack(alignment: .top) {
                     Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15, length: 0.4)
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
                 }
                 .ignoresSafeArea()
             }
@@ -65,7 +64,6 @@ struct ExploreView: View {
                 NewRideView(car: item)
                     .navigationTransition(.zoom(sourceID: item.id, in: rideTransition))
             }
-            .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat, onDismiss: { Task { await model.loadUnreadCount() } }) {
                 InboxView()
             }

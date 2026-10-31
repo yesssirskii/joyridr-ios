@@ -22,7 +22,7 @@ struct InboxView: View {
             .background {
                 ZStack(alignment: .top) {
                     Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15, length: 0.35)
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
                 }
                 .ignoresSafeArea()
             }

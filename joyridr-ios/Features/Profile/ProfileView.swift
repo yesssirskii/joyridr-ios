@@ -8,9 +8,9 @@ struct ProfileView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                if let me = session.me {
-                    Section {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    if let me = session.me {
                         HStack(spacing: 16) {
                             RemoteImage(path: me.user.avatarUrl, placeholder: "person.fill")
                                 .frame(width: 64, height: 64)
@@ -22,35 +22,38 @@ struct ProfileView: View {
                                     .font(.subheadline)
                                     .foregroundStyle(Theme.accentRed)
                             }
+                            Spacer(minLength: 0)
                         }
-                        .padding(.vertical, 6)
-                    }
-                    .listRowBackground(Theme.card)
+                        .padding(14)
+                        .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
 
-                    BookingSection("Account") {
-                        LabeledValue(label: "Email", value: me.user.email)
-                        LabeledValue(label: "Phone", value: me.user.phoneNumber ?? "Not added yet")
-                        LabeledValue(label: "Member since", value: me.user.createdAt.formatted(.dateTime.month(.wide).year()))
-                    }
+                        BookingSection("Account") {
+                            VStack(alignment: .leading, spacing: 14) {
+                                LabeledValue(label: "Email", value: me.user.email)
+                                LabeledValue(label: "Phone", value: me.user.phoneNumber ?? "Not added yet")
+                                LabeledValue(label: "Member since", value: me.user.createdAt.formatted(.dateTime.month(.wide).year()))
+                            }
+                        }
 
-                    if let driver = me.driverProfile {
-                        BookingSection("Driver") {
-                            LabeledValue(label: "Verification", value: driver.isVerified ? "Verified ✓" : "Not verified yet")
-                            LabeledValue(label: "Rating", value: driver.ratingCount == 0 ? "No reviews yet" : "★ \(driver.ratingAverage.formatted(.number.precision(.fractionLength(1)))) (\(driver.ratingCount))")
-                            LabeledValue(label: "Completed rides", value: "\(driver.completedRides)")
+                        if let driver = me.driverProfile {
+                            BookingSection("Driver") {
+                                VStack(alignment: .leading, spacing: 14) {
+                                    LabeledValue(label: "Verification", value: driver.isVerified ? "Verified ✓" : "Not verified yet")
+                                    LabeledValue(label: "Rating", value: driver.ratingCount == 0 ? "No reviews yet" : "★ \(driver.ratingAverage.formatted(.number.precision(.fractionLength(1)))) (\(driver.ratingCount))")
+                                    LabeledValue(label: "Completed rides", value: "\(driver.completedRides)")
+                                }
+                            }
                         }
                     }
-                }
 
-                Section {
-                    Button("Log out", role: .destructive) { confirmLogout = true }
-                        .frame(maxWidth: .infinity)
+                    Button("Log out", systemImage: "rectangle.portrait.and.arrow.right") { confirmLogout = true }
+                        .buttonStyle(.secondary)
                 }
-                .listRowBackground(Theme.card)
+                .padding(.horizontal, Theme.horizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
-            .scrollContentBackground(.hidden)
             .background { RedGlow().ignoresSafeArea() }
-            .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

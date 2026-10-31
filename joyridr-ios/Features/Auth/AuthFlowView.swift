@@ -49,7 +49,7 @@ struct AuthBackground: View {
     var body: some View {
         ZStack {
             Theme.background
-            RacingStripes(count: 4, lineWidth: 16, spacing: 42, startX: -0.3, length: 0.8)
+            RacingStripes(count: 4, lineWidth: 16, spacing: 42, startX: -0.3)
         }
         .ignoresSafeArea()
     }

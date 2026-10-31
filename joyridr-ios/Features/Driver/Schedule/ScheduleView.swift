@@ -8,7 +8,6 @@ struct ScheduleView: View {
     @State private var addingTimeOff = false
     @State private var confirmPause = false
     @State private var deletingTimeOff: TimeOff?
-    @State private var showProfile = false
     @State private var showChat = false
     @Namespace private var scheduleTransition
 
@@ -18,7 +17,7 @@ struct ScheduleView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    HomeHeader { showProfile = true }
+                    HomeHeader()
 
                     HStack(spacing: 14) {
                         Button {
@@ -66,7 +65,7 @@ struct ScheduleView: View {
             .background {
                 ZStack(alignment: .top) {
                     Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15, length: 0.4)
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
                 }
                 .ignoresSafeArea()
             }
@@ -116,7 +115,6 @@ struct ScheduleView: View {
             } message: {
                 Text(model.errorMessage ?? "")
             }
-            .sheet(isPresented: $showProfile) { ProfileView() }
             .sheet(isPresented: $showChat, onDismiss: { Task { await model.load() } }) {
                 InboxView()
             }

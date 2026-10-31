@@ -2,12 +2,12 @@ import SwiftUI
 
 /// "JOYRIDR" wordmark with the notifications bell and the profile button, at the top of both home screens.
 /// The bell shows when a `NotificationBadge` is in the environment and opens the inbox with a zoom.
+/// The profile button opens the profile sheet the same way.
 struct HomeHeader: View {
-    let onProfile: () -> Void
-
     @Environment(NotificationBadge.self) private var badge: NotificationBadge?
     @State private var showNotifications = false
-    @Namespace private var bellTransition
+    @State private var showProfile = false
+    @Namespace private var headerTransition
 
     var body: some View {
         HStack(spacing: 10) {
@@ -24,13 +24,18 @@ struct HomeHeader: View {
                             .offset(x: 4, y: -4)
                     }
                     .accessibilityValue(badge.unreadCount > 0 ? "\(badge.unreadCount) unread" : "")
-                    .matchedTransitionSource(id: "bell", in: bellTransition)
+                    .matchedTransitionSource(id: "bell", in: headerTransition)
             }
-            CircleIconButton(systemImage: "person", accessibilityLabel: "Profile", action: onProfile)
+            CircleIconButton(systemImage: "person", accessibilityLabel: "Profile") { showProfile = true }
+                .matchedTransitionSource(id: "profile", in: headerTransition)
         }
         .sheet(isPresented: $showNotifications, onDismiss: { Task { await badge?.refresh() } }) {
             NotificationsView()
-                .navigationTransition(.zoom(sourceID: "bell", in: bellTransition))
+                .navigationTransition(.zoom(sourceID: "bell", in: headerTransition))
+        }
+        .sheet(isPresented: $showProfile) {
+            ProfileView()
+                .navigationTransition(.zoom(sourceID: "profile", in: headerTransition))
         }
     }
 }
