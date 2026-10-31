@@ -22,6 +22,8 @@ extension EnvironmentValues {
 /// The rider's app: Explore and My rides tabs.
 struct RiderHomeView: View {
     @State private var tab: RiderTab = .explore
+    @State private var notificationBadge = NotificationBadge()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         TabView(selection: $tab) {
@@ -33,5 +35,10 @@ struct RiderHomeView: View {
             }
         }
         .environment(\.selectRiderTab, SelectRiderTabAction { tab = $0 })
+        .environment(notificationBadge)
+        .task { await notificationBadge.keepFresh() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await notificationBadge.refresh() } }
+        }
     }
 }

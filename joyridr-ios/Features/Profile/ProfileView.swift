@@ -27,20 +27,18 @@ struct ProfileView: View {
                     }
                     .listRowBackground(Theme.card)
 
-                    Section("Account") {
+                    BookingSection("Account") {
                         LabeledValue(label: "Email", value: me.user.email)
                         LabeledValue(label: "Phone", value: me.user.phoneNumber ?? "Not added yet")
                         LabeledValue(label: "Member since", value: me.user.createdAt.formatted(.dateTime.month(.wide).year()))
                     }
-                    .listRowBackground(Theme.card)
 
                     if let driver = me.driverProfile {
-                        Section("Driver") {
+                        BookingSection("Driver") {
                             LabeledValue(label: "Verification", value: driver.isVerified ? "Verified ✓" : "Not verified yet")
                             LabeledValue(label: "Rating", value: driver.ratingCount == 0 ? "No reviews yet" : "★ \(driver.ratingAverage.formatted(.number.precision(.fractionLength(1)))) (\(driver.ratingCount))")
                             LabeledValue(label: "Completed rides", value: "\(driver.completedRides)")
                         }
-                        .listRowBackground(Theme.card)
                     }
                 }
 
@@ -55,8 +53,11 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text("Profile").displayTitle(18)
                 }
             }
             .confirmationDialog("Log out of JOYRIDR?", isPresented: $confirmLogout, titleVisibility: .visible) {

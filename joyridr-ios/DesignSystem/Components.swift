@@ -1,18 +1,36 @@
 import SwiftUI
 
-/// "JOYRIDR" wordmark with the profile button, at the top of both home screens.
+/// "JOYRIDR" wordmark with the notifications bell and the profile button, at the top of both home screens.
+/// The bell shows when a `NotificationBadge` is in the environment and opens the inbox with a zoom.
 struct HomeHeader: View {
     let onProfile: () -> Void
 
+    @Environment(NotificationBadge.self) private var badge: NotificationBadge?
+    @State private var showNotifications = false
+    @Namespace private var bellTransition
+
     var body: some View {
-        HStack {
+        HStack(spacing: 10) {
             Text("JOYRIDR")
                 .font(Theme.display(34))
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 16)
+            if let badge {
+                CircleIconButton(systemImage: "bell", accessibilityLabel: "Notifications") { showNotifications = true }
+                    .overlay(alignment: .topTrailing) {
+                        CountBadge(count: badge.unreadCount)
+                            .offset(x: 4, y: -4)
+                    }
+                    .accessibilityValue(badge.unreadCount > 0 ? "\(badge.unreadCount) unread" : "")
+                    .matchedTransitionSource(id: "bell", in: bellTransition)
+            }
             CircleIconButton(systemImage: "person", accessibilityLabel: "Profile", action: onProfile)
+        }
+        .sheet(isPresented: $showNotifications, onDismiss: { Task { await badge?.refresh() } }) {
+            NotificationsView()
+                .navigationTransition(.zoom(sourceID: "bell", in: bellTransition))
         }
     }
 }
