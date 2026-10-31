@@ -97,7 +97,7 @@ struct DayEditorView: View {
                 ToolbarItem(placement: .principal) {
                     Text(day.title).displayTitle(18)
                 }
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                 }
             }
