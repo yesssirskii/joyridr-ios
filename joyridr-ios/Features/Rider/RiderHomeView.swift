@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum RiderTab: Hashable {
-    case explore, myRides
+    case explore, myRides, reviews
 }
 
 /// Switches the rider's tab. Call it like a function: `selectRiderTab(.myRides)`.
@@ -19,8 +19,9 @@ extension EnvironmentValues {
     @Entry var selectRiderTab = SelectRiderTabAction()
 }
 
-/// The rider's app: Explore and My rides tabs.
+/// The rider's app: Explore and My rides tabs. Admins use it too and get an extra Reviews tab.
 struct RiderHomeView: View {
+    @Environment(SessionStore.self) private var session
     @State private var tab: RiderTab = .explore
     @State private var notificationBadge = NotificationBadge()
     @Environment(\.scenePhase) private var scenePhase
@@ -32,6 +33,11 @@ struct RiderHomeView: View {
             }
             Tab("My rides", systemImage: "car.fill", value: .myRides) {
                 MyRidesView()
+            }
+            if session.me?.user.role == .admin {
+                Tab("Reviews", systemImage: "checkmark.seal.fill", value: .reviews) {
+                    CarReviewsView()
+                }
             }
         }
         .environment(\.selectRiderTab, SelectRiderTabAction { tab = $0 })

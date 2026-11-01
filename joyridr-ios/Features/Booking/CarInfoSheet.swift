@@ -134,7 +134,8 @@ struct CarInfoSheet: View {
     }
 }
 
-private struct SpecTile: View {
+/// Icon, value and label in a small grey tile ("830 hp"). Also used in the admin car review.
+struct SpecTile: View {
     let systemImage: String
     let value: String
     let label: String
