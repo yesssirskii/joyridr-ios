@@ -201,6 +201,7 @@ private extension NotificationKind {
     var icon: String {
         switch self {
         case .rideRequested: "tray.and.arrow.down.fill"
+        case .rideRequestReminder: "hourglass"
         case .rideConfirmed: "checkmark.seal.fill"
         case .rideDeclined, .rideCancelled: "xmark.circle.fill"
         case .rideExpired: "clock.badge.xmark"
@@ -217,7 +218,7 @@ private extension NotificationKind {
     var color: Color {
         switch self {
         case .rideConfirmed, .rideCompleted, .carApproved: Theme.available
-        case .rideRequested, .carRejected: .orange
+        case .rideRequested, .rideRequestReminder, .carRejected: .orange
         case .rideStarted, .newReview: .yellow
         case .meetingPointUpdated, .unknown: Theme.accentRed
         case .rideDeclined, .rideCancelled, .rideExpired: Theme.textSecondary
