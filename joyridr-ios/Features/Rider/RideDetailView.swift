@@ -82,7 +82,7 @@ struct RideDetailView: View {
                     Spacer()
                     Button("Done") { commentFocused = false }
                 }
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Close", systemImage: "xmark") { dismiss() }
                 }
             }

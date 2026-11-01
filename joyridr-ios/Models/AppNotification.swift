@@ -2,7 +2,7 @@ import Foundation
 
 /// What a notification is about. Matches the backend's NotificationType.
 nonisolated enum NotificationKind: String, Hashable {
-    case rideRequested, rideConfirmed, rideDeclined, rideCancelled, rideExpired, rideStarted, rideCompleted
+    case rideRequested, rideRequestReminder, rideConfirmed, rideDeclined, rideCancelled, rideExpired, rideStarted, rideCompleted
     case meetingPointUpdated, carApproved, carRejected, newReview
     /// A type this version of the app doesn't know yet, so one new type can't break the whole list.
     case unknown
