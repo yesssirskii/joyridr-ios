@@ -1,12 +1,14 @@
 import SwiftUI
 
 /// Grey pill text field from the login/sign-up designs.
+/// The whole pill is tappable, not just the line of text in the middle.
 struct PillTextField: View {
     let placeholder: String
     @Binding var text: String
     var isSecure = false
 
     @State private var isRevealed = false
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         HStack {
@@ -17,11 +19,15 @@ struct PillTextField: View {
                     TextField("", text: $text, prompt: prompt)
                 }
             }
+            .focused($isFocused)
             .foregroundStyle(Theme.textPrimary)
 
             if isSecure {
                 Button {
+                    // Showing or hiding swaps SecureField for TextField, which would drop the keyboard.
+                    let wasFocused = isFocused
                     isRevealed.toggle()
+                    if wasFocused { isFocused = true }
                 } label: {
                     Image(systemName: isRevealed ? "eye.slash" : "eye")
                         .foregroundStyle(Theme.textSecondary)
@@ -32,6 +38,9 @@ struct PillTextField: View {
         .padding(.horizontal, 22)
         .frame(height: Theme.fieldHeight)
         .background(Theme.field, in: Capsule())
+        // The text field itself is only one line tall, so taps on the rest of the pill focus it too.
+        .contentShape(Capsule())
+        .onTapGesture { isFocused = true }
     }
 
     private var prompt: Text {
