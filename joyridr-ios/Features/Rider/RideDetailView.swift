@@ -83,7 +83,7 @@ struct RideDetailView: View {
                     Button("Done") { commentFocused = false }
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
             }
             .refreshable { await model.refresh() }

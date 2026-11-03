@@ -59,18 +59,25 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
                 ToolbarItem(placement: .principal) {
                     Text("Profile").displayTitle(18)
                 }
             }
-            .confirmationDialog("Log out of JOYRIDR?", isPresented: $confirmLogout, titleVisibility: .visible) {
+            // An alert rather than a confirmation dialog: centred, larger, and it dims the screen behind it.
+            .alert("Log out of JOYRIDR?", isPresented: $confirmLogout) {
+                Button("Cancel", role: .cancel) {}
                 Button("Log out", role: .destructive) {
                     Task { await session.logout() }
                 }
+            } message: {
+                Text("You'll need your email and password to log back in.")
             }
         }
+        // Alerts take their button colour from the tint: white makes Cancel neutral, and Log out stays red
+        // because it's destructive. (The app's tint is red, which made both buttons red.)
+        .tint(.white)
     }
 }
 

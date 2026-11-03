@@ -98,7 +98,7 @@ struct DayEditorView: View {
                     Text(day.title).displayTitle(18)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
             }
             .animation(.snappy, value: day.windows)

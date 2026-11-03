@@ -27,7 +27,7 @@ struct CarInfoSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
             }
         }
