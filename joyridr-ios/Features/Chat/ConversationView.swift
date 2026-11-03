@@ -259,7 +259,7 @@ struct ConversationSheet: View {
             ConversationView(otherUser: otherUser)
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Close", systemImage: "xmark") { dismiss() }
+                        CloseButton { dismiss() }
                     }
                 }
         }

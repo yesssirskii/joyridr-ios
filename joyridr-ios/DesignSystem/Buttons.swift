@@ -118,3 +118,13 @@ struct SecondaryButtonStyle: ButtonStyle {
 extension ButtonStyle where Self == SecondaryButtonStyle {
     static var secondary: SecondaryButtonStyle { SecondaryButtonStyle() }
 }
+
+/// The ✕ in the top-left corner that closes a sheet. White, so it stands out better than the app's red tint.
+struct CloseButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button("Close", systemImage: "xmark", action: action)
+            .tint(.white)
+    }
+}

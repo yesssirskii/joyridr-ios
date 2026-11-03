@@ -30,7 +30,7 @@ struct NewRideView: View {
             .toolbar {
                 if model.createdRide == nil {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Close", systemImage: "xmark") { dismiss() }
+                        CloseButton { dismiss() }
                     }
                     ToolbarItem(placement: .principal) {
                         Text("New ride").displayTitle(18)

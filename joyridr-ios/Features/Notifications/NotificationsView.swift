@@ -51,7 +51,7 @@ struct NotificationsView: View {
                     }
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
             }
             .refreshable { await model.load() }

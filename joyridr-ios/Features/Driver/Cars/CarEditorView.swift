@@ -146,7 +146,7 @@ struct CarEditorView: View {
                     Text(model.isNew ? "New car" : "Edit car").displayTitle(18)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()

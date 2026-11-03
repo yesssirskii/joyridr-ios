@@ -58,7 +58,7 @@ struct TimeOffEditorView: View {
                     Text("Time off").displayTitle(18)
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close", systemImage: "xmark") { dismiss() }
+                    CloseButton { dismiss() }
                 }
             }
             .onChange(of: start) { _, newStart in
