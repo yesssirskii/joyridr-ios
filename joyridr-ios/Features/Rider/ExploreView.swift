@@ -2,6 +2,8 @@ import SwiftUI
 
 /// Rider home: nearby cars, closest first.
 struct ExploreView: View {
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
     @State private var model = ExploreModel()
     @State private var showChat = false
     /// The car whose booking sheet is open.
@@ -60,6 +62,12 @@ struct ExploreView: View {
             .onChange(of: model.radiusKm) {
                 Task { await model.load() }
             }
+            // Coming back from Settings with location turned on.
+            .onChange(of: scenePhase) {
+                if scenePhase == .active, model.state == .locationOff {
+                    Task { await model.load() }
+                }
+            }
             .sheet(item: $selectedCar, onDismiss: { Task { await model.load() } }) { item in
                 NewRideView(car: item)
                     .navigationTransition(.zoom(sourceID: item.id, in: rideTransition))
@@ -86,6 +94,28 @@ struct ExploreView: View {
                 Label("Couldn't load cars", systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
+            } actions: {
+                Button("Try again") { Task { await model.load() } }
+                    .buttonStyle(.primary)
+                    .frame(width: 180)
+            }
+        case .locationOff:
+            ContentUnavailableView {
+                Label("Location is off", systemImage: "location.slash")
+            } description: {
+                Text("JOYRIDR needs your location to find cars near you.")
+            } actions: {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                }
+                .buttonStyle(.primary)
+                .frame(width: 180)
+            }
+        case .locationUnavailable:
+            ContentUnavailableView {
+                Label("Can't find your location", systemImage: "location.magnifyingglass")
+            } description: {
+                Text("Check that you have a signal, then try again.")
             } actions: {
                 Button("Try again") { Task { await model.load() } }
                     .buttonStyle(.primary)

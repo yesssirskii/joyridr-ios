@@ -43,6 +43,8 @@ struct ProfileView: View {
                                     LabeledValue(label: "Completed rides", value: "\(driver.completedRides)")
                                 }
                             }
+
+                            BaseLocationSection(driver: driver)
                         }
                     }
 

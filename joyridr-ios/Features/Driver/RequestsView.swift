@@ -136,7 +136,7 @@ private struct SetupHintCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Finish setting up")
                     .font(.headline)
-                Text("Add your location, a car and your schedule so JoyRiders can find you. Setup screens are coming next.")
+                Text("Add your base location in Profile (top right) so JoyRiders can find your cars.")
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
             }

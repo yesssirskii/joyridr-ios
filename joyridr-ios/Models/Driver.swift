@@ -61,15 +61,25 @@ nonisolated struct UpdateDriverProfileRequest: Encodable {
     let timeZoneId: String
     let isAcceptingRides: Bool
 
-    /// Copies the profile with only "accepting rides" changed.
-    init(_ profile: DriverProfile, isAcceptingRides: Bool) {
+    /// Where a driver is based, which is where riders find their cars.
+    struct Base {
+        let latitude: Double
+        let longitude: Double
+        let city: String?
+        let address: String?
+        /// The schedule's hours are in this zone, so it moves with the base.
+        let timeZoneId: String
+    }
+
+    /// Copies the profile, changing only what's passed.
+    init(_ profile: DriverProfile, isAcceptingRides: Bool? = nil, base: Base? = nil, serviceRadiusKm: Int? = nil) {
         bio = profile.bio
-        city = profile.city
-        baseLatitude = profile.baseLatitude
-        baseLongitude = profile.baseLongitude
-        baseAddress = profile.baseAddress
-        serviceRadiusKm = profile.serviceRadiusKm
-        timeZoneId = profile.timeZoneId
-        self.isAcceptingRides = isAcceptingRides
+        city = base?.city ?? profile.city
+        baseLatitude = base?.latitude ?? profile.baseLatitude
+        baseLongitude = base?.longitude ?? profile.baseLongitude
+        baseAddress = base.map(\.address) ?? profile.baseAddress
+        self.serviceRadiusKm = serviceRadiusKm ?? profile.serviceRadiusKm
+        timeZoneId = base?.timeZoneId ?? profile.timeZoneId
+        self.isAcceptingRides = isAcceptingRides ?? profile.isAcceptingRides
     }
 }
