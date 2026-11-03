@@ -1,22 +1,27 @@
 import Foundation
 
 enum AppConfig {
-    /// Where the backend runs, in this order:
-    /// 1. A `JOYRIDR_API_URL` environment variable in the scheme (only applies when started from Xcode).
-    /// 2. Simulator: `localhost`, because the Simulator shares your Mac's network.
-    /// 3. Real iPhone: the `JOYRIDR_API_URL` build setting (your Mac's `.local` name), which reaches the
-    ///    Mac over Wi-Fi. Change it under target › Build Settings › User-Defined if you use another Mac.
+    /// Where the backend runs. Pick the scheme next to the Run button:
+    /// - **JOYRIDR Local**: the API on your Mac. The Simulator reaches it at `localhost`; a real iPhone
+    ///   over Wi-Fi at the Mac's `.local` name.
+    /// - **JOYRIDR Dev**: the Dev server on Railway. Release builds (TestFlight) use it too, for now.
+    ///
+    /// Each build configuration sets its address in `JOYRIDR_API_URL` (target › Build Settings › User-Defined),
+    /// which Info.plist passes to the app as `JoyridrAPIURL`.
+    /// A `JOYRIDR_API_URL` environment variable overrides it (only when started from Xcode or `simctl`).
     static let apiBaseURL: URL = {
         if let override = ProcessInfo.processInfo.environment["JOYRIDR_API_URL"], let url = URL(string: override) {
             return url
         }
-        #if !targetEnvironment(simulator)
-        if let value = Bundle.main.object(forInfoDictionaryKey: "JoyridrAPIURL") as? String,
-           !value.isEmpty, !value.hasPrefix("$("), let url = URL(string: value) {
-            return url
+        #if LOCAL && targetEnvironment(simulator)
+        return URL(string: "http://localhost:5105")!   // the Simulator shares your Mac's network
+        #else
+        guard let value = Bundle.main.object(forInfoDictionaryKey: "JoyridrAPIURL") as? String,
+              let url = URL(string: value) else {
+            fatalError("JOYRIDR_API_URL isn't set for this build configuration.")
         }
+        return url
         #endif
-        return URL(string: "http://localhost:5105")!
     }()
 
     /// Turns a server path like "/uploads/cars/1.jpg" into a full URL.
