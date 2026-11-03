@@ -126,13 +126,17 @@ final class NewRideModel {
         var latitude: Double?
         var longitude: Double?
         if meetingPoint == .driverComesToRider {
-            let location = await LocationProvider.currentLocation()
-            guard !location.isFallback else {
+            switch await LocationProvider.currentLocation() {
+            case let .found(coordinate):
+                latitude = coordinate.latitude
+                longitude = coordinate.longitude
+            case .denied:
                 errorMessage = "Allow location access so \(car.driver.firstName) knows where to pick you up, or choose another meeting option."
                 return
+            case .unavailable:
+                errorMessage = "Couldn't find your location. Try again, or choose another meeting option."
+                return
             }
-            latitude = location.coordinate.latitude
-            longitude = location.coordinate.longitude
         }
 
         let trimmedAddress = address.trimmingCharacters(in: .whitespacesAndNewlines)

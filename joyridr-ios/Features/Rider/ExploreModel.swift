@@ -26,6 +26,10 @@ final class ExploreModel {
     enum LoadState: Equatable {
         case idle, loading, loaded
         case failed(String)
+        /// Location is off for JOYRIDR; nothing to search around until it's turned on in Settings.
+        case locationOff
+        /// Allowed, but no fix this time.
+        case locationUnavailable
     }
 
     static let radiusOptions = [10, 30, 50, 100]
@@ -41,6 +45,8 @@ final class ExploreModel {
 
     private let carsService: CarsService
     private let chat: ChatService
+    /// Where `locationName` was looked up, so small moves don't ask Apple Maps again.
+    private var namedLocation: CLLocation?
 
     init(carsService: CarsService = CarsService(), chat: ChatService = ChatService()) {
         self.carsService = carsService
@@ -55,18 +61,35 @@ final class ExploreModel {
 
     func load() async {
         if cars.isEmpty { state = .loading }
-
-        let location = await LocationProvider.currentLocation()
-        locationName = location.isFallback ? "Zagreb" : "Near you"
-
-        do {
-            cars = sorted(try await carsService.nearby(location.coordinate, radiusKm: radiusKm))
-            state = .loaded
-        } catch {
-            state = .failed(error.localizedDescription)
-        }
-
+        await loadNearby()
         await loadUnreadCount()
+    }
+
+    private func loadNearby() async {
+        switch await LocationProvider.currentLocation() {
+        case .denied:
+            cars = []
+            locationName = "Location off"
+            state = .locationOff
+        case .unavailable:
+            state = .locationUnavailable
+        case let .found(coordinate):
+            await updateLocationName(for: coordinate)
+            do {
+                cars = sorted(try await carsService.nearby(coordinate, radiusKm: radiusKm))
+                state = .loaded
+            } catch {
+                state = .failed(error.localizedDescription)
+            }
+        }
+    }
+
+    /// "Samobor" for the pill, looked up again only after moving more than a kilometre.
+    private func updateLocationName(for coordinate: CLLocationCoordinate2D) async {
+        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        if let namedLocation, namedLocation.distance(from: location) < 1_000 { return }
+        locationName = await LocationProvider.place(at: coordinate)?.city ?? "Near you"
+        namedLocation = location
     }
 
     func loadUnreadCount() async {
