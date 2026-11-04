@@ -16,6 +16,8 @@ nonisolated enum UserRole: String, Codable, Hashable {
 nonisolated struct User: Codable, Hashable, Identifiable {
     let id: UUID
     let email: String
+    /// Always lower-case, shown as "@ivan.kovac".
+    let username: String
     let firstName: String
     let lastName: String
     let phoneNumber: String?
@@ -24,6 +26,38 @@ nonisolated struct User: Codable, Hashable, Identifiable {
     let createdAt: Date
 
     var fullName: String { "\(firstName) \(lastName)" }
+}
+
+/// The backend's username rules, so the app can say what's wrong before sending.
+nonisolated enum Username {
+    static let rules = "3–20 characters: letters, numbers, dots and underscores."
+
+    /// "@Ivan.Kovac " -> "ivan.kovac", the form the backend stores.
+    static func normalize(_ text: String) -> String {
+        var username = text.trimmingCharacters(in: .whitespaces).lowercased()
+        if username.hasPrefix("@") { username.removeFirst() }
+        return username
+    }
+
+    static func isValid(_ username: String) -> Bool {
+        username.wholeMatch(of: /[a-z0-9._]{3,20}/) != nil
+    }
+}
+
+/// Body of `PUT /api/me`. The endpoint replaces every field, so send the current values for the ones you don't change.
+nonisolated struct UpdateMeRequest: Encodable {
+    let username: String
+    let firstName: String
+    let lastName: String
+    let phoneNumber: String?
+
+    /// Copies the user, changing only what's passed.
+    init(_ user: User, username: String? = nil) {
+        self.username = username ?? user.username
+        firstName = user.firstName
+        lastName = user.lastName
+        phoneNumber = user.phoneNumber
+    }
 }
 
 nonisolated struct RiderProfile: Codable, Hashable {

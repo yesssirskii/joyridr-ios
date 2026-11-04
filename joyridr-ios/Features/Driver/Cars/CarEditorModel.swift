@@ -73,7 +73,8 @@ final class CarEditorModel {
     func addPhotos(_ items: [PhotosPickerItem]) async {
         for item in items.prefix(Self.maxPhotos - photoCount - uploadingCount) {
             guard let data = try? await item.loadTransferable(type: Data.self),
-                  let (jpeg, preview) = Self.prepare(data) else {
+                  // At most 2000 px; the backend allows 10 MB per photo.
+                  let (jpeg, preview) = JPEGImage.prepare(data, maxSide: 2000) else {
                 errorMessage = "One of the photos couldn't be read."
                 continue
             }
@@ -200,20 +201,5 @@ final class CarEditorModel {
     private static func decimal(_ text: String) -> Decimal? {
         let cleaned = text.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")
         return cleaned.isEmpty ? nil : Decimal(string: cleaned, locale: Locale(identifier: "en_US_POSIX"))
-    }
-
-    /// Shrinks to at most 2000 px and converts to JPEG (the backend allows 10 MB per photo).
-    private static func prepare(_ data: Data) -> (Data, UIImage)? {
-        guard let image = UIImage(data: data) else { return nil }
-        let maxSide: CGFloat = 2000
-        let scale = min(1, maxSide / max(image.size.width, image.size.height))
-        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        let resized = UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            image.draw(in: CGRect(origin: .zero, size: size))
-        }
-        guard let jpeg = resized.jpegData(compressionQuality: 0.82) else { return nil }
-        return (jpeg, resized)
     }
 }
