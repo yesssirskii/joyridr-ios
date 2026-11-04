@@ -27,16 +27,21 @@ struct AuthFlowView: View {
 
 /// "JOYRIDR / LET'S GO FOR A RIDE!" at the top of the auth screens.
 struct AuthHeader: View {
+    /// Sign-up hides "Let's go for a ride!" to leave room for its longer form.
+    var showsTagline = true
+
     var body: some View {
         VStack(spacing: 6) {
             Text("JOYRIDR")
                 .font(Theme.display(54))
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
-            Text("Let's go for a ride!")
-                .displayTitle(17)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+            if showsTagline {
+                Text("Let's go for a ride!")
+                    .displayTitle(17)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
         }
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity)

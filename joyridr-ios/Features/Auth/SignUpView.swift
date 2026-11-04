@@ -7,20 +7,21 @@ struct SignUpView: View {
     @Environment(SessionStore.self) private var session
     @State private var firstName = ""
     @State private var lastName = ""
+    @State private var username = ""
     @State private var email = ""
     @State private var password = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
     @FocusState private var focusedField: Field?
 
-    private enum Field { case firstName, lastName, email, password }
+    private enum Field { case firstName, lastName, username, email, password }
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 14) {
-                AuthHeader()
-                    .padding(.top, 60)
-                    .padding(.bottom, 36)
+            VStack(spacing: 18) {
+                AuthHeader(showsTagline: false)
+                    .padding(.top, 28)
+                    .padding(.bottom, 20)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Create a new account")
@@ -43,7 +44,21 @@ struct SignUpView: View {
                         .textContentType(.familyName)
                         .focused($focusedField, equals: .lastName)
                         .submitLabel(.next)
+                        .onSubmit { focusedField = .username }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    PillTextField(placeholder: "Username", text: $username)
+                        .textContentType(.username)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .focused($focusedField, equals: .username)
+                        .submitLabel(.next)
                         .onSubmit { focusedField = .email }
+                    Text(Username.rules)
+                        .font(.caption)
+                        .foregroundStyle(username.isEmpty || Username.isValid(Username.normalize(username)) ? Theme.textSecondary : Theme.accentRed)
+                        .padding(.leading, 22)
                 }
 
                 PillTextField(placeholder: "Email", text: $email)
@@ -70,33 +85,34 @@ struct SignUpView: View {
                 FormError(message: errorMessage)
                     .padding(.horizontal, 12)
 
-                Button("Sign Up", action: signUp)
-                    .buttonStyle(.primary(isLoading: isLoading))
-                    .disabled(isLoading)
+                VStack(spacing: 10) {
+                    Button("Sign Up", action: signUp)
+                        .buttonStyle(.primary(isLoading: isLoading))
+                        .disabled(isLoading)
+
+                    // Right under the button it belongs to, instead of squeezed against the footer.
+                    Text("By signing up you agree to the Terms of Service and Privacy Policy.")
+                        .font(.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 12)
+                }
+                .padding(.top, 6)
 
                 Text("or")
                     .font(.subheadline.weight(.semibold))
-                    .padding(.vertical, 4)
 
                 SocialSignInRow(verb: "Sign up")
 
-                Text("By signing up you agree to the Terms of Service and Privacy Policy.")
-                    .font(.caption)
-                    .foregroundStyle(Theme.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 6)
+                // Part of the form rather than pinned to the bottom, where it covered the buttons above it.
+                footer
+                    .padding(.top, 4)
             }
             .padding(.horizontal, Theme.horizontalPadding)
-            .padding(.bottom, 20)
+            .padding(.bottom, 16)
             .animation(.default, value: errorMessage)
         }
         .scrollDismissesKeyboard(.interactively)
-        .safeAreaInset(edge: .bottom) {
-            // Hidden while typing, otherwise it rides up with the keyboard and covers the form.
-            if focusedField == nil {
-                footer
-            }
-        }
         .background { AuthBackground() }
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -117,9 +133,12 @@ struct SignUpView: View {
         let first = firstName.trimmingCharacters(in: .whitespaces)
         let last = lastName.trimmingCharacters(in: .whitespaces)
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
+        let cleanUsername = Username.normalize(username)
 
         if first.isEmpty || last.isEmpty {
             errorMessage = "Enter your first and last name."
+        } else if !Username.isValid(cleanUsername) {
+            errorMessage = "Usernames are \(Username.rules)"
         } else if !trimmedEmail.contains("@") {
             errorMessage = "Enter a valid email address."
         } else if password.count < 8 {
@@ -132,7 +151,7 @@ struct SignUpView: View {
                 defer { isLoading = false }
                 do {
                     try await session.register(RegisterRequest(
-                        email: trimmedEmail, password: password, firstName: first, lastName: last,
+                        email: trimmedEmail, username: cleanUsername, password: password, firstName: first, lastName: last,
                         phoneNumber: nil, role: role))
                 } catch {
                     errorMessage = error.localizedDescription

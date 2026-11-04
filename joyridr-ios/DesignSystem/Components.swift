@@ -5,6 +5,7 @@ import SwiftUI
 /// The profile button opens the profile sheet the same way.
 struct HomeHeader: View {
     @Environment(NotificationBadge.self) private var badge: NotificationBadge?
+    @Environment(SessionStore.self) private var session
     @State private var showNotifications = false
     @State private var showProfile = false
     @Namespace private var headerTransition
@@ -26,7 +27,7 @@ struct HomeHeader: View {
                     .accessibilityValue(badge.unreadCount > 0 ? "\(badge.unreadCount) unread" : "")
                     .matchedTransitionSource(id: "bell", in: headerTransition)
             }
-            CircleIconButton(systemImage: "person", accessibilityLabel: "Profile") { showProfile = true }
+            ProfileButton(avatarUrl: session.me?.user.avatarUrl) { showProfile = true }
                 .matchedTransitionSource(id: "profile", in: headerTransition)
         }
         .sheet(isPresented: $showNotifications, onDismiss: { Task { await badge?.refresh() } }) {
@@ -37,6 +38,35 @@ struct HomeHeader: View {
             ProfileView()
                 .navigationTransition(.zoom(sourceID: "profile", in: headerTransition))
         }
+    }
+}
+
+/// The header's profile button: your profile picture with a white ring, or the person icon when you haven't
+/// added one (it also shows while the picture is loading, or if it can't be loaded).
+struct ProfileButton: View {
+    let avatarUrl: String?
+    var size: CGFloat = 52
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            AsyncImage(url: AppConfig.url(for: avatarUrl)) { phase in
+                if let image = phase.image {
+                    image.resizable()
+                        .scaledToFill()
+                        .frame(width: size, height: size)
+                        .clipShape(Circle())
+                        .overlay { Circle().strokeBorder(.white, lineWidth: 2.5) }
+                } else {
+                    Image(systemName: "person")
+                        .font(.system(size: size * 0.4, weight: .medium))
+                        .foregroundStyle(.white)
+                        .frame(width: size, height: size)
+                }
+            }
+        }
+        .glassEffect(.regular.interactive(), in: Circle())
+        .accessibilityLabel("Profile")
     }
 }
 
