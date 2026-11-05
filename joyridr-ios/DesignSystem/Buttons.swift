@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Big red full-width button ("Log in", "Sign Up"). Shows a spinner instead of the label while loading.
+/// Big red full-width liquid glass button ("Log in", "Sign Up"). Shows a spinner instead of the label while loading.
 struct PrimaryButtonStyle: ButtonStyle {
     var isLoading = false
+    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
@@ -14,10 +15,13 @@ struct PrimaryButtonStyle: ButtonStyle {
         .font(.title3.weight(.semibold))
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, minHeight: Theme.fieldHeight)
-        .background(Theme.brandRed, in: Capsule())
-        .opacity(configuration.isPressed ? 0.8 : 1)
-        .scaleEffect(configuration.isPressed ? 0.98 : 1)
-        .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+        .contentShape(Capsule())
+        // Red liquid glass. `.interactive()` makes it react to the finger the way system buttons do:
+        // it swells and lights up under the touch, then springs back.
+        .glassEffect(.regular.tint(Theme.brandRed).interactive(), in: Capsule())
+        // Faded while disabled, so it's clear there's nothing to tap. Not while loading: the spinner says enough.
+        .opacity(isEnabled || isLoading ? 1 : 0.4)
+        .animation(.easeOut(duration: 0.2), value: isEnabled)
     }
 }
 
@@ -80,9 +84,14 @@ struct SocialButton: View {
             }
             .frame(maxWidth: .infinity, minHeight: 46)
             .foregroundStyle(provider == .google ? .black : .white)
-            .background(provider == .google ? Color.white : Color.clear, in: Capsule())
-            .overlay(Capsule().stroke(.white, lineWidth: provider == .apple ? 1 : 0))
+            .contentShape(Capsule())
+            .overlay {
+                // Apple's button stays a plain white outline.
+                if provider == .apple { Capsule().stroke(.white, lineWidth: 1) }
+            }
         }
+        // Google's is white liquid glass that reacts to touch like the big red button.
+        .glassEffect(provider == .google ? .regular.tint(.white).interactive() : .identity, in: Capsule())
     }
 }
 

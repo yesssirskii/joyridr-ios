@@ -19,13 +19,7 @@ struct InboxView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 30)
             }
-            .background {
-                ZStack(alignment: .top) {
-                    Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
-                }
-                .ignoresSafeArea()
-            }
+            .background { RedGlow().ignoresSafeArea() }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

@@ -3,8 +3,12 @@ import SwiftUI
 
 /// Account sheet opened from the profile button: who you are (tap the picture to change it), your username, and log out.
 struct ProfileView: View {
+    /// Closes the sheet and logs out once it's gone (see `HomeHeader`).
+    let onLogOut: () -> Void
+
     @Environment(SessionStore.self) private var session
     @Environment(\.dismiss) private var dismiss
+    
     @State private var model = ProfileModel()
     @State private var confirmLogout = false
     @State private var avatarItem: PhotosPickerItem?
@@ -90,9 +94,7 @@ struct ProfileView: View {
             // An alert rather than a confirmation dialog: centred, larger, and it dims the screen behind it.
             .alert("Log out of JOYRIDR?", isPresented: $confirmLogout) {
                 Button("Cancel", role: .cancel) {}
-                Button("Log out", role: .destructive) {
-                    Task { await session.logout() }
-                }
+                Button("Log out", role: .destructive, action: onLogOut)
             } message: {
                 Text("You'll need your email and password to log back in.")
             }

@@ -33,53 +33,63 @@ struct SignUpView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 12)
 
-                // The backend needs first and last name separately (it shows "Ivan K." to others).
-                HStack(spacing: 10) {
-                    PillTextField(placeholder: "First name", text: $firstName)
-                        .textContentType(.givenName)
-                        .focused($focusedField, equals: .firstName)
-                        .submitLabel(.next)
-                        .onSubmit { focusedField = .lastName }
-                    PillTextField(placeholder: "Last name", text: $lastName)
-                        .textContentType(.familyName)
-                        .focused($focusedField, equals: .lastName)
-                        .submitLabel(.next)
-                        .onSubmit { focusedField = .username }
-                }
+                VStack(alignment: .leading, spacing: 8) {
+                    // One box for every field, split by lines, like the login screen.
+                    FieldGroup {
+                        // The backend needs first and last name separately (it shows "Ivan K." to others).
+                        HStack(spacing: 0) {
+                            FormTextField(placeholder: "First name", text: $firstName)
+                                .textContentType(.givenName)
+                                .focused($focusedField, equals: .firstName)
+                                .submitLabel(.next)
+                                .onSubmit { focusedField = .lastName }
+                            FieldDivider(.vertical)
+                            FormTextField(placeholder: "Last name", text: $lastName)
+                                .textContentType(.familyName)
+                                .focused($focusedField, equals: .lastName)
+                                .submitLabel(.next)
+                                .onSubmit { focusedField = .username }
+                        }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    PillTextField(placeholder: "Username", text: $username)
-                        .textContentType(.username)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .focused($focusedField, equals: .username)
-                        .submitLabel(.next)
-                        .onSubmit { focusedField = .email }
-                    Text(Username.rules)
-                        .font(.caption)
-                        .foregroundStyle(username.isEmpty || Username.isValid(Username.normalize(username)) ? Theme.textSecondary : Theme.accentRed)
-                        .padding(.leading, 22)
-                }
+                        FieldDivider()
 
-                PillTextField(placeholder: "Email", text: $email)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($focusedField, equals: .email)
-                    .submitLabel(.next)
-                    .onSubmit { focusedField = .password }
+                        FormTextField(placeholder: "Username", text: $username)
+                            .textContentType(.username)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .focused($focusedField, equals: .username)
+                            .submitLabel(.next)
+                            .onSubmit { focusedField = .email }
 
-                VStack(alignment: .leading, spacing: 6) {
-                    PillTextField(placeholder: "Password", text: $password, isSecure: true)
-                        .textContentType(.newPassword)
-                        .focused($focusedField, equals: .password)
-                        .submitLabel(.go)
-                        .onSubmit(signUp)
-                    Text("At least 8 characters")
-                        .font(.caption)
-                        .foregroundStyle(password.isEmpty || password.count >= 8 ? Theme.textSecondary : Theme.accentRed)
-                        .padding(.leading, 22)
+                        FieldDivider()
+
+                        FormTextField(placeholder: "Email", text: $email)
+                            .textContentType(.emailAddress)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .focused($focusedField, equals: .email)
+                            .submitLabel(.next)
+                            .onSubmit { focusedField = .password }
+
+                        FieldDivider()
+
+                        FormTextField(placeholder: "Password", text: $password, isSecure: true)
+                            .textContentType(.newPassword)
+                            .focused($focusedField, equals: .password)
+                            .submitLabel(.go)
+                            .onSubmit(signUp)
+                    }
+
+                    // The rules sit under the box now; each turns red while its field breaks it.
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Username — \(Username.rules)")
+                            .foregroundStyle(username.isEmpty || Username.isValid(Username.normalize(username)) ? Theme.textSecondary : Theme.accentRed)
+                        Text("Password — at least 8 characters.")
+                            .foregroundStyle(password.isEmpty || password.count >= 8 ? Theme.textSecondary : Theme.accentRed)
+                    }
+                    .font(.caption)
+                    .padding(.leading, 22)
                 }
 
                 FormError(message: errorMessage)

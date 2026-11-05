@@ -25,20 +25,25 @@ struct LoginView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 12)
 
-                PillTextField(placeholder: "Email", text: $email)
-                    .textContentType(.username)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($focusedField, equals: .email)
-                    .submitLabel(.next)
-                    .onSubmit { focusedField = .password }
+                // One box for both, split by a line.
+                FieldGroup {
+                    FormTextField(placeholder: "Email", text: $email)
+                        .textContentType(.username)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .focused($focusedField, equals: .email)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .password }
 
-                PillTextField(placeholder: "Password", text: $password, isSecure: true)
-                    .textContentType(.password)
-                    .focused($focusedField, equals: .password)
-                    .submitLabel(.go)
-                    .onSubmit(logIn)
+                    FieldDivider()
+
+                    FormTextField(placeholder: "Password", text: $password, isSecure: true)
+                        .textContentType(.password)
+                        .focused($focusedField, equals: .password)
+                        .submitLabel(.go)
+                        .onSubmit(logIn)
+                }
 
                 Button("Forgot password?") { showForgotPassword = true }
                     .font(.footnote)
