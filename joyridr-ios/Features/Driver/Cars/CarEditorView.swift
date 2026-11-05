@@ -234,7 +234,8 @@ struct CarEditorView: View {
                 Task { if await model.save() { dismiss() } }
             }
             .buttonStyle(.primary(isLoading: model.isSaving))
-            .disabled(model.isSaving)
+            // Greyed out until something is edited; undoing the edit greys it out again.
+            .disabled(model.isSaving || !model.hasChanges)
 
             Text(model.isNew
                  ? "Our team reviews every car before JoyRiders can see it."

@@ -65,12 +65,15 @@ final class SessionStore {
         }
     }
 
+    /// Shows the login screen straight away, then tells the server to revoke the refresh token.
+    /// Waiting for the server first left the app frozen on the old screen for a moment.
     func logout() async {
-        if let refreshToken = tokens.current?.refreshToken {
-            await auth.logout(refreshToken: refreshToken)
-        }
+        let refreshToken = tokens.current?.refreshToken
         tokens.clear()
         state = .signedOut
+        if let refreshToken {
+            await auth.logout(refreshToken: refreshToken)
+        }
     }
 
     private func finishSignIn(_ response: AuthResponse) async throws {

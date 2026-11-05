@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Grey pill text field from the login/sign-up designs.
-/// The whole pill is tappable, not just the line of text in the middle.
-struct PillTextField: View {
+/// A text field with its show/hide button for passwords, but no background: `PillTextField` gives it
+/// a grey pill, and `FieldGroup` stacks several in one box. Its whole row is tappable, not just the
+/// line of text in the middle.
+struct FormTextField: View {
     let placeholder: String
     @Binding var text: String
     var isSecure = false
@@ -37,14 +38,68 @@ struct PillTextField: View {
         }
         .padding(.horizontal, 22)
         .frame(height: Theme.fieldHeight)
-        .background(Theme.field, in: Capsule())
-        // The text field itself is only one line tall, so taps on the rest of the pill focus it too.
-        .contentShape(Capsule())
-        .onTapGesture { isFocused = true }
+        // Taps above and below the line of text land on this background and focus the field. The tap
+        // gesture sits on the background, not around the field, so taps on the text itself go straight
+        // to the field without waiting for SwiftUI to rule out a tap gesture first.
+        .background {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture { isFocused = true }
+        }
     }
 
     private var prompt: Text {
         Text(placeholder).foregroundStyle(Theme.textSecondary)
+    }
+}
+
+/// Grey pill text field from the login/sign-up designs.
+struct PillTextField: View {
+    let placeholder: String
+    @Binding var text: String
+    var isSecure = false
+
+    var body: some View {
+        FormTextField(placeholder: placeholder, text: $text, isSecure: isSecure)
+            .background(Theme.field, in: Capsule())
+    }
+}
+
+/// Several fields in one liquid glass box, divided by thin lines, like email and password on the login
+/// screen. Put a `FieldDivider()` between the fields.
+struct FieldGroup<Content: View>: View {
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            content
+        }
+        // Plain glass. The shape is passed because the default, a capsule, would round a box this tall
+        // into a pill.
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: Theme.fieldHeight / 2))
+    }
+}
+
+/// The line between two fields in a `FieldGroup`, indented to line up with the text.
+/// `FieldDivider(.vertical)` splits two fields side by side, like first and last name.
+struct FieldDivider: View {
+    var axis: Axis = .horizontal
+
+    init(_ axis: Axis = .horizontal) {
+        self.axis = axis
+    }
+
+    var body: some View {
+        if axis == .horizontal {
+            Rectangle()
+                .fill(.white.opacity(0.12))
+                .frame(height: 1)
+                .padding(.horizontal, 22)
+        } else {
+            Rectangle()
+                .fill(.white.opacity(0.12))
+                .frame(width: 1, height: Theme.fieldHeight - 24)
+        }
     }
 }
 
@@ -67,8 +122,12 @@ struct FormError: View {
     @Previewable @State var email = ""
     @Previewable @State var password = "secret"
     VStack(spacing: 16) {
-        PillTextField(placeholder: "Email", text: $email)
-        PillTextField(placeholder: "Password", text: $password, isSecure: true)
+        FieldGroup {
+            FormTextField(placeholder: "Email", text: $email)
+            FieldDivider()
+            FormTextField(placeholder: "Password", text: $password, isSecure: true)
+        }
+        PillTextField(placeholder: "Username", text: $email)
         FormError(message: "Wrong email or password.")
     }
     .padding()

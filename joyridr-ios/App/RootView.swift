@@ -24,7 +24,11 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.state)
-        .task { await session.restore() }
+        .task {
+            async let warmup: Void = KeyboardWarmup.run()
+            await session.restore()
+            await warmup
+        }
     }
 }
 

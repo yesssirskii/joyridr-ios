@@ -8,6 +8,7 @@ struct HomeHeader: View {
     @Environment(SessionStore.self) private var session
     @State private var showNotifications = false
     @State private var showProfile = false
+    @State private var logOutAfterProfileCloses = false
     @Namespace private var headerTransition
 
     var body: some View {
@@ -34,9 +35,18 @@ struct HomeHeader: View {
             NotificationsView()
                 .navigationTransition(.zoom(sourceID: "bell", in: headerTransition))
         }
-        .sheet(isPresented: $showProfile) {
-            ProfileView()
-                .navigationTransition(.zoom(sourceID: "profile", in: headerTransition))
+        // Logging out closes the sheet first and only signs out once it has gone. Signing out while it was
+        // still up swapped the whole screen underneath it mid-animation, which stuttered.
+        .sheet(isPresented: $showProfile, onDismiss: {
+            guard logOutAfterProfileCloses else { return }
+            logOutAfterProfileCloses = false
+            Task { await session.logout() }
+        }) {
+            ProfileView(onLogOut: {
+                logOutAfterProfileCloses = true
+                showProfile = false
+            })
+            .navigationTransition(.zoom(sourceID: "profile", in: headerTransition))
         }
     }
 }

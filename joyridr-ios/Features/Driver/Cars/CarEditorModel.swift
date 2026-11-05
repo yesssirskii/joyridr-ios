@@ -40,6 +40,9 @@ final class CarEditorModel {
     private(set) var isDeleting = false
     var errorMessage: String?
 
+    /// The car's details as they were loaded (or last saved), to tell whether the driver changed anything.
+    private var savedValues: EditableValues?
+
     private let cars: CarsService
 
     init(car: CarDetail?, cars: CarsService = CarsService()) {
@@ -61,11 +64,19 @@ final class CarEditorModel {
         licensePlate = car.licensePlate ?? ""
         isActive = car.isActive
         photos = car.photos.sorted { $0.sortOrder < $1.sortOrder }
+        savedValues = currentValues
     }
 
     var isNew: Bool { car == nil }
     var photoCount: Int { photos.count + pendingPhotos.count }
     var canAddPhotos: Bool { photoCount + uploadingCount < Self.maxPhotos }
+
+    /// False while an existing car's details match what's saved, so "Save changes" has nothing to save.
+    /// Photos don't count: they're uploaded the moment they're picked. A new car can always be saved.
+    var hasChanges: Bool {
+        guard let savedValues else { return true }
+        return currentValues != savedValues
+    }
 
     // MARK: Photos
 
@@ -119,6 +130,7 @@ final class CarEditorModel {
         do {
             if let car {
                 self.car = try await cars.update(car.id, request)
+                savedValues = currentValues
                 return true
             }
             let created = try await cars.create(request)
@@ -158,6 +170,24 @@ final class CarEditorModel {
     }
 
     // MARK: Helpers
+
+    /// Every field the editor can change, side by side, so two sets can be compared with `!=`.
+    private struct EditableValues: Equatable {
+        let make, model, year, color: String
+        let category: CarCategory
+        let transmission: Transmission
+        let horsepower, zeroToHundred, topSpeed: String
+        let seats: Int
+        let pricePerHour, description, licensePlate: String
+        let isActive: Bool
+    }
+
+    private var currentValues: EditableValues {
+        EditableValues(
+            make: make, model: model, year: year, color: color, category: category, transmission: transmission,
+            horsepower: horsepower, zeroToHundred: zeroToHundred, topSpeed: topSpeed, seats: seats,
+            pricePerHour: pricePerHour, description: description, licensePlate: licensePlate, isActive: isActive)
+    }
 
     /// Checks the fields with the same limits as the backend, so mistakes show up right away.
     private func validatedRequest() -> UpsertCarRequest? {
