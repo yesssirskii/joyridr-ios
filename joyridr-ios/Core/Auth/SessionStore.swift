@@ -60,6 +60,11 @@ final class SessionStore {
         try await finishSignIn(auth.register(request))
     }
 
+    /// Sets the new password and logs in with it (every other device is logged out).
+    func resetPassword(_ request: ResetPasswordRequest) async throws {
+        try await finishSignIn(auth.resetPassword(request))
+    }
+
     /// Reloads the user and profile, e.g. after editing them.
     func reloadMe() async {
         if let me = try? await auth.me() {
