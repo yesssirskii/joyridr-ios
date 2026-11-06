@@ -109,11 +109,6 @@ struct SignUpView: View {
                 }
                 .padding(.top, 6)
 
-                Text("or")
-                    .font(.subheadline.weight(.semibold))
-
-                SocialSignInRow(verb: "Sign up")
-
                 // Part of the form rather than pinned to the bottom, where it covered the buttons above it.
                 footer
                     .padding(.top, 4)

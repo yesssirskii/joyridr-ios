@@ -66,43 +66,10 @@ struct CountBadge: View {
     }
 }
 
-/// "Log in with Google/Apple" pill. Not wired to the backend yet.
-struct SocialButton: View {
-    enum Provider { case google, apple }
-
-    let provider: Provider
-    let title: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: provider == .apple ? "apple.logo" : "g.circle.fill")
-                    .font(.title3)
-                Text(title)
-                    .font(.subheadline.weight(.medium))
-            }
-            .frame(maxWidth: .infinity, minHeight: 46)
-            .foregroundStyle(provider == .google ? .black : .white)
-            .contentShape(Capsule())
-            .overlay {
-                // Apple's button stays a plain white outline.
-                if provider == .apple { Capsule().stroke(.white, lineWidth: 1) }
-            }
-        }
-        // Google's is white liquid glass that reacts to touch like the big red button.
-        .glassEffect(provider == .google ? .regular.tint(.white).interactive() : .identity, in: Capsule())
-    }
-}
-
 #Preview {
     VStack(spacing: 16) {
         Button("Log in") {}.buttonStyle(.primary)
         Button("Log in") {}.buttonStyle(.primary(isLoading: true))
-        HStack {
-            SocialButton(provider: .google, title: "Log in with") {}
-            SocialButton(provider: .apple, title: "Log in with") {}
-        }
         HStack {
             CircleIconButton(systemImage: "person", accessibilityLabel: "Profile") {}
             CountBadge(count: 3)

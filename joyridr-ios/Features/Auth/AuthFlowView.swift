@@ -59,21 +59,3 @@ struct AuthBackground: View {
         .ignoresSafeArea()
     }
 }
-
-/// "Log in with Google/Apple" row. Shows a "coming soon" alert until the backend supports it.
-struct SocialSignInRow: View {
-    let verb: String
-    @State private var showComingSoon = false
-
-    var body: some View {
-        HStack(spacing: 14) {
-            SocialButton(provider: .google, title: "\(verb) with") { showComingSoon = true }
-            SocialButton(provider: .apple, title: "\(verb) with") { showComingSoon = true }
-        }
-        .alert("Coming soon", isPresented: $showComingSoon) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Google and Apple sign-in are on the way. Use your email for now.")
-        }
-    }
-}
