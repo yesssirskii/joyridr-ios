@@ -58,12 +58,6 @@ struct LoginView: View {
                 Button("Log in", action: logIn)
                     .buttonStyle(.primary(isLoading: isLoading))
                     .disabled(isLoading)
-
-                Text("or")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.vertical, 4)
-
-                SocialSignInRow(verb: "Log in")
             }
             .padding(.horizontal, Theme.horizontalPadding)
             .animation(.default, value: errorMessage)
