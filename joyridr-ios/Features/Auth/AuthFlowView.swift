@@ -1,23 +1,28 @@
 import SwiftUI
 
-/// Login → Choose role → Sign up, in one navigation stack.
+/// Login → Choose role → Sign up (or Login → Forgot password), in one navigation stack.
 struct AuthFlowView: View {
     enum Route: Hashable {
         case chooseRole
         case signUp(UserRole)
+        /// With whatever was already typed into the login screen's email field.
+        case forgotPassword(email: String)
     }
 
     @State private var path: [Route] = []
 
     var body: some View {
         NavigationStack(path: $path) {
-            LoginView(onSignUp: { path.append(.chooseRole) })
+            LoginView(onSignUp: { path.append(.chooseRole) },
+                      onForgotPassword: { path.append(.forgotPassword(email: $0)) })
                 .navigationDestination(for: Route.self) { route in
                     switch route {
                     case .chooseRole:
                         ChooseRoleView { role in path.append(.signUp(role)) }
                     case let .signUp(role):
                         SignUpView(role: role, onLogIn: { path.removeAll() })
+                    case let .forgotPassword(email):
+                        ForgotPasswordView(email: email)
                     }
                 }
         }

@@ -2,13 +2,14 @@ import SwiftUI
 
 struct LoginView: View {
     let onSignUp: () -> Void
+    /// Opens the reset screen with the email typed so far.
+    let onForgotPassword: (String) -> Void
 
     @Environment(SessionStore.self) private var session
     @State private var email = ""
     @State private var password = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var showForgotPassword = false
     @State private var notice: String?
     @FocusState private var focusedField: Field?
 
@@ -46,7 +47,7 @@ struct LoginView: View {
                         .onSubmit(logIn)
                 }
 
-                Button("Forgot password?") { showForgotPassword = true }
+                Button("Forgot password?") { onForgotPassword(email.trimmingCharacters(in: .whitespaces)) }
                     .font(.footnote)
                     .underline()
                     .foregroundStyle(Theme.textSecondary)
@@ -84,11 +85,6 @@ struct LoginView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(notice ?? "")
-        }
-        .alert("Coming soon", isPresented: $showForgotPassword) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Password reset isn't available yet.")
         }
     }
 
@@ -128,7 +124,7 @@ struct LoginView: View {
 
 #Preview {
     NavigationStack {
-        LoginView(onSignUp: {})
+        LoginView(onSignUp: {}, onForgotPassword: { _ in })
     }
     .environment(SessionStore())
     .preferredColorScheme(.dark)

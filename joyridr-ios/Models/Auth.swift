@@ -5,6 +5,16 @@ nonisolated struct LoginRequest: Encodable {
     let password: String
 }
 
+nonisolated struct ForgotPasswordRequest: Encodable {
+    let email: String
+}
+
+nonisolated struct ResetPasswordRequest: Encodable {
+    let email: String
+    let code: String
+    let newPassword: String
+}
+
 nonisolated struct RegisterRequest: Encodable {
     let email: String
     let username: String
