@@ -8,6 +8,10 @@ struct CarInfoSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var model = CarInfoModel()
+    @State private var reportTarget: ReportTarget?
+    @State private var confirmBlock = false
+    @State private var blockError: String?
+    @State private var blocked = false
 
     var body: some View {
         NavigationStack {
@@ -29,8 +33,40 @@ struct CarInfoSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     CloseButton { dismiss() }
                 }
+                if case let .loaded(_, driver) = model.state {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu("More", systemImage: "ellipsis") {
+                            Button("Report \(driver.driver.displayName)", systemImage: "flag") {
+                                reportTarget = .user(id: driver.driver.id, name: driver.driver.displayName)
+                            }
+                            Button("Block \(driver.driver.displayName)", systemImage: "hand.raised", role: .destructive) {
+                                confirmBlock = true
+                            }
+                        }
+                    }
+                }
+            }
+            .sheet(item: $reportTarget) { target in
+                ReportSheet(target: target) { _ in blocked = true }
+            }
+            .alert("Block this driver?", isPresented: $confirmBlock) {
+                Button("Cancel", role: .cancel) {}
+                Button("Block", role: .destructive, action: blockDriver)
+            } message: {
+                Text("You won't see their cars or be able to message or book them. You can unblock them from your profile.")
+            }
+            .alert("Driver blocked", isPresented: $blocked) {
+                Button("OK") { dismiss() }
+            } message: {
+                Text("You won't see their cars any more. Pull to refresh Explore if they're still showing.")
+            }
+            .alert("Couldn't block", isPresented: Binding(get: { blockError != nil }, set: { if !$0 { blockError = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(blockError ?? "")
             }
         }
+        .tint(.white)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .task { await model.load(carID: carID, driverID: driverID) }
@@ -71,7 +107,7 @@ struct CarInfoSheet: View {
                 SectionTitle(title: "Reviews")
                 VStack(spacing: 12) {
                     ForEach(driver.recentReviews.prefix(3)) { review in
-                        ReviewRow(review: review)
+                        ReviewRow(review: review) { reportTarget = .review(review) }
                     }
                 }
             }
@@ -132,6 +168,18 @@ struct CarInfoSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
     }
+
+    private func blockDriver() {
+        guard case let .loaded(_, driver) = model.state else { return }
+        Task {
+            do {
+                try await ModerationService().block(driver.driver.id)
+                blocked = true
+            } catch {
+                blockError = error.localizedDescription
+            }
+        }
+    }
 }
 
 /// Icon, value and label in a small grey tile ("830 hp"). Also used in the admin car review.
@@ -160,6 +208,7 @@ struct SpecTile: View {
 
 private struct ReviewRow: View {
     let review: Review
+    let onReport: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -171,6 +220,16 @@ private struct ReviewRow: View {
                 Text(review.createdAt.formatted(.dateTime.day().month(.abbreviated)))
                     .font(.caption)
                     .foregroundStyle(Theme.textSecondary)
+                Menu {
+                    Button("Report review", systemImage: "flag", action: onReport)
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 28, height: 22)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("More")
             }
             if let comment = review.comment, !comment.isEmpty {
                 Text(comment)

@@ -27,6 +27,10 @@ nonisolated struct Conversation: Codable, Hashable, Identifiable {
     let lastMessage: ChatMessage?
     let unreadCount: Int
     let createdAt: Date
+    /// False when either side blocked the other, or the other account was deleted or banned.
+    let canMessage: Bool
+    /// The logged-in user blocked the other person, so the chat can offer to unblock.
+    let blockedByMe: Bool
 
     /// When the conversation last changed, for sorting and the time in the inbox.
     var lastActivity: Date { lastMessage?.createdAt ?? createdAt }

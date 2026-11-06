@@ -1,7 +1,8 @@
 import PhotosUI
 import SwiftUI
 
-/// Account sheet opened from the profile button: who you are (tap the picture to change it), your username, and log out.
+/// Account sheet opened from the profile button: who you are (tap the picture to change it), your username,
+/// blocked people, log out and delete account.
 struct ProfileView: View {
     /// Closes the sheet and logs out once it's gone (see `HomeHeader`).
     let onLogOut: () -> Void
@@ -14,6 +15,8 @@ struct ProfileView: View {
     @State private var avatarItem: PhotosPickerItem?
     @State private var editingUsername = false
     @State private var newUsername = ""
+    @State private var confirmDelete = false
+    @State private var deletePassword = ""
 
     var body: some View {
         NavigationStack {
@@ -74,8 +77,39 @@ struct ProfileView: View {
                         }
                     }
 
+                    BookingSection("Privacy & safety") {
+                        NavigationLink {
+                            BlockedUsersView()
+                        } label: {
+                            HStack {
+                                Label("Blocked people", systemImage: "hand.raised")
+                                    .foregroundStyle(.white)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(Theme.textSecondary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     Button("Log out", systemImage: "rectangle.portrait.and.arrow.right") { confirmLogout = true }
                         .buttonStyle(.secondary)
+
+                    Button {
+                        deletePassword = ""
+                        confirmDelete = true
+                    } label: {
+                        if model.isDeletingAccount {
+                            ProgressView()
+                        } else {
+                            Text("Delete account")
+                        }
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Theme.accentRed)
+                    .frame(maxWidth: .infinity)
+                    .disabled(model.isDeletingAccount)
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
                 .padding(.top, 8)
@@ -97,6 +131,23 @@ struct ProfileView: View {
                 Button("Log out", role: .destructive, action: onLogOut)
             } message: {
                 Text("You'll need your email and password to log back in.")
+            }
+            .alert("Delete your account?", isPresented: $confirmDelete) {
+                SecureField("Password", text: $deletePassword)
+                    .textContentType(.password)
+                Button("Cancel", role: .cancel) {}
+                Button("Delete", role: .destructive) {
+                    let password = deletePassword
+                    deletePassword = ""
+                    Task {
+                        if await model.deleteAccount(password: password) {
+                            dismiss()
+                            session.accountDeleted()
+                        }
+                    }
+                }
+            } message: {
+                Text("This can't be undone. Your upcoming rides are cancelled under the usual rules, and your profile, photos, cars, messages and review texts are deleted. Records of past rides and payments are kept without your details, as accounting rules require.\n\nEnter your password to confirm.")
             }
             .alert("Change username", isPresented: $editingUsername) {
                 TextField("Username", text: $newUsername)

@@ -27,14 +27,22 @@ final class ConversationModel {
     /// The first page was full, so there may be older messages.
     private(set) var hasEarlier = false
     private(set) var isLoadingEarlier = false
+    /// False when either side blocked the other, or the other account is gone. The input bar is replaced by a note.
+    private(set) var canMessage = true
+    private(set) var blockedByMe = false
+    private(set) var isChangingBlock = false
+    var errorMessage: String?
     var draft = ""
 
     private let chat: ChatService
+    private let moderation = ModerationService()
 
     /// Open an existing conversation (from the inbox).
     init(conversation: Conversation, chat: ChatService = ChatService()) {
         otherUser = conversation.otherUser
         conversationID = conversation.id
+        canMessage = conversation.canMessage
+        blockedByMe = conversation.blockedByMe
         self.chat = chat
     }
 
@@ -45,18 +53,20 @@ final class ConversationModel {
     }
 
     var canSend: Bool {
-        conversationID != nil && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        conversationID != nil && canMessage && !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     func load() async {
         do {
-            let id: UUID
-            if let conversationID {
-                id = conversationID
+            // Fetched fresh even when opened from the inbox, so a block since then shows up.
+            let conversation = if let conversationID {
+                try await chat.conversation(conversationID)
             } else {
-                id = try await chat.start(with: otherUser.id).id
-                conversationID = id
+                try await chat.start(with: otherUser.id)
             }
+            let id = conversation.id
+            conversationID = id
+            apply(conversation)
             let latest = try await chat.messages(in: id, limit: Self.pageSize)
             messages = latest
             hasEarlier = latest.count == Self.pageSize
@@ -106,6 +116,42 @@ final class ConversationModel {
         pending.removeAll { $0.id == message.id }
     }
 
+    func block() async {
+        await changeBlock { try await $0.block(self.otherUser.id) }
+    }
+
+    func unblock() async {
+        await changeBlock { try await $0.unblock(self.otherUser.id) }
+    }
+
+    /// After blocking from the report sheet.
+    func didBlock() async {
+        await refreshConversation()
+    }
+
+    private func changeBlock(_ call: (ModerationService) async throws -> Void) async {
+        guard !isChangingBlock else { return }
+        isChangingBlock = true
+        errorMessage = nil
+        defer { isChangingBlock = false }
+        do {
+            try await call(moderation)
+            await refreshConversation()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func refreshConversation() async {
+        guard let conversationID, let fresh = try? await chat.conversation(conversationID) else { return }
+        apply(fresh)
+    }
+
+    private func apply(_ conversation: Conversation) {
+        canMessage = conversation.canMessage
+        blockedByMe = conversation.blockedByMe
+    }
+
     // MARK: Private
 
     private func deliver(_ message: PendingMessage) async {
@@ -115,6 +161,12 @@ final class ConversationModel {
             pending.removeAll { $0.id == message.id }
             append([sent])
         } catch {
+            if (error as? APIError)?.code == "blocked" {
+                // Blocked since the chat was opened: drop the message and show why instead.
+                pending.removeAll { $0.id == message.id }
+                await refreshConversation()
+                return
+            }
             if let index = pending.firstIndex(where: { $0.id == message.id }) {
                 pending[index].failed = true
             }

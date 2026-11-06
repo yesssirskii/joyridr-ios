@@ -9,6 +9,11 @@ struct ProfileService {
         try await api.put("/api/me", body: request)
     }
 
+    /// Deletes the account for good. Fails with "wrong_password" or "ride_in_progress".
+    func deleteAccount(password: String) async throws {
+        try await api.post("/api/me/delete", body: DeleteAccountRequest(password: password))
+    }
+
     /// Replaces the profile picture (the old one is deleted on the server).
     func uploadAvatar(jpeg: Data) async throws -> User {
         try await api.upload("/api/me/avatar", data: jpeg, fileName: "avatar.jpg", mimeType: "image/jpeg")
