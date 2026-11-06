@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum RiderTab: Hashable {
-    case explore, myRides, reviews
+    case explore, myRides, reviews, reports
 }
 
 /// Switches the rider's tab. Call it like a function: `selectRiderTab(.myRides)`.
@@ -37,6 +37,9 @@ struct RiderHomeView: View {
             if session.me?.user.role == .admin {
                 Tab("Reviews", systemImage: "checkmark.seal.fill", value: .reviews) {
                     CarReviewsView()
+                }
+                Tab("Reports", systemImage: "flag.fill", value: .reports) {
+                    ReportsView()
                 }
             }
         }

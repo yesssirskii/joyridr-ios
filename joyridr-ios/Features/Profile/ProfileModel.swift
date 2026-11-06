@@ -9,6 +9,7 @@ import SwiftUI
 final class ProfileModel {
     private(set) var isUploadingAvatar = false
     private(set) var isSavingUsername = false
+    private(set) var isDeletingAccount = false
     var errorMessage: String?
 
     private let profile: ProfileService
@@ -48,6 +49,24 @@ final class ProfileModel {
         defer { isSavingUsername = false }
         do {
             _ = try await profile.update(UpdateMeRequest(user, username: username))
+            return true
+        } catch {
+            errorMessage = error.localizedDescription
+            return false
+        }
+    }
+
+    /// Returns true once the account is gone; the caller then shows a confirmation and signs out.
+    func deleteAccount(password: String) async -> Bool {
+        guard !password.isEmpty else {
+            errorMessage = "Enter your password to delete your account."
+            return false
+        }
+        errorMessage = nil
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+        do {
+            try await profile.deleteAccount(password: password)
             return true
         } catch {
             errorMessage = error.localizedDescription

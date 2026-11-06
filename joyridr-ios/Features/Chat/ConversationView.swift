@@ -4,6 +4,8 @@ import SwiftUI
 struct ConversationView: View {
     @State private var model: ConversationModel
     @State private var scrollPosition = ScrollPosition(edge: .bottom)
+    @State private var reportTarget: ReportTarget?
+    @State private var confirmBlock = false
     @FocusState private var inputFocused: Bool
 
     init(conversation: Conversation) {
@@ -34,8 +36,43 @@ struct ConversationView: View {
                     }
                     .accessibilityElement(children: .combine)
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu("More", systemImage: "ellipsis") {
+                        Button("Report \(model.otherUser.firstName)", systemImage: "flag") {
+                            reportTarget = .user(id: model.otherUser.id, name: model.otherUser.displayName)
+                        }
+                        if model.blockedByMe {
+                            Button("Unblock \(model.otherUser.firstName)", systemImage: "hand.raised.slash") {
+                                Task { await model.unblock() }
+                            }
+                        } else {
+                            Button("Block \(model.otherUser.firstName)", systemImage: "hand.raised", role: .destructive) {
+                                confirmBlock = true
+                            }
+                        }
+                    }
+                    .tint(.white)
+                    .disabled(model.state != .loaded)
+                }
             }
-            .safeAreaInset(edge: .bottom) { inputBar }
+            .safeAreaInset(edge: .bottom) {
+                if model.canMessage { inputBar } else { blockedBar }
+            }
+            .sheet(item: $reportTarget) { target in
+                ReportSheet(target: target) { _ in Task { await model.didBlock() } }
+            }
+            .alert("Block \(model.otherUser.firstName)?", isPresented: $confirmBlock) {
+                Button("Cancel", role: .cancel) {}
+                Button("Block", role: .destructive) { Task { await model.block() } }
+            } message: {
+                Text("You won't be able to message or book each other. You can unblock them later from this chat or your profile.")
+            }
+            .alert("Something went wrong", isPresented: Binding(
+                get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(model.errorMessage ?? "")
+            }
             .task {
                 await model.load()
                 await model.pollWhileVisible()
@@ -93,6 +130,14 @@ struct ConversationView: View {
                     }
                     MessageBubble(text: message.body, isMine: message.isMine, time: message.createdAt)
                         .id(message.id)
+                        .contextMenu {
+                            Button("Copy", systemImage: "doc.on.doc") { UIPasteboard.general.string = message.body }
+                            if !message.isMine {
+                                Button("Report message", systemImage: "flag") {
+                                    reportTarget = .message(message, authorID: model.otherUser.id, authorName: model.otherUser.displayName)
+                                }
+                            }
+                        }
                 }
 
                 ForEach(model.pending) { message in
@@ -169,6 +214,27 @@ struct ConversationView: View {
         .padding(.horizontal, 10)
         .padding(.bottom, 6)
         .animation(.snappy, value: model.canSend)
+    }
+
+    /// Takes the input bar's place when messaging isn't possible.
+    private var blockedBar: some View {
+        VStack(spacing: 8) {
+            Text(model.blockedByMe
+                 ? "You blocked \(model.otherUser.firstName)."
+                 : "You can't reply to this conversation.")
+                .font(.subheadline)
+                .foregroundStyle(Theme.textSecondary)
+            if model.blockedByMe {
+                Button("Unblock") { Task { await model.unblock() } }
+                    .buttonStyle(ChipStyle(isSelected: false))
+                    .disabled(model.isChangingBlock)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
+        .padding(.horizontal, 10)
+        .padding(.bottom, 6)
     }
 
     private func scrollToBottom() {

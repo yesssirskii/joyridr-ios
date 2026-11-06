@@ -13,6 +13,8 @@ final class SessionStore {
     }
 
     private(set) var state: State = .loading
+    /// A message for the login screen to show once, e.g. after the account was deleted.
+    var signedOutNotice: String?
 
     private let api: APIClient
     private let auth: AuthService
@@ -67,6 +69,14 @@ final class SessionStore {
 
     /// Shows the login screen straight away, then tells the server to revoke the refresh token.
     /// Waiting for the server first left the app frozen on the old screen for a moment.
+    /// After the account was deleted on the server: back to login, with a confirmation there.
+    /// The tokens are already revoked, so there's nothing to tell the server.
+    func accountDeleted() {
+        tokens.clear()
+        signedOutNotice = "Your account and personal data were deleted. Thanks for riding with JOYRIDR."
+        state = .signedOut
+    }
+
     func logout() async {
         let refreshToken = tokens.current?.refreshToken
         tokens.clear()

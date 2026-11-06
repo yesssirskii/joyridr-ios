@@ -9,6 +9,7 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showForgotPassword = false
+    @State private var notice: String?
     @FocusState private var focusedField: Field?
 
     private enum Field { case email, password }
@@ -71,6 +72,19 @@ struct LoginView: View {
         }
         .background { AuthBackground() }
         .toolbar(.hidden, for: .navigationBar)
+        .task {
+            // E.g. "account deleted". Shown once the profile sheet has finished closing: an alert
+            // presented while it's still on screen gets dropped.
+            guard let message = session.signedOutNotice else { return }
+            session.signedOutNotice = nil
+            try? await Task.sleep(for: .milliseconds(600))
+            notice = message
+        }
+        .alert("Account deleted", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(notice ?? "")
+        }
         .alert("Coming soon", isPresented: $showForgotPassword) {
             Button("OK", role: .cancel) {}
         } message: {
