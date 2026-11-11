@@ -93,6 +93,13 @@ struct ProfileView: View {
                         .buttonStyle(.plain)
                     }
 
+                    BookingSection("Legal") {
+                        VStack(alignment: .leading, spacing: 14) {
+                            LegalLinkRow(title: "Terms of Use", systemImage: "doc.text", url: AppConfig.termsURL)
+                            LegalLinkRow(title: "Privacy Policy", systemImage: "lock.shield", url: AppConfig.privacyURL)
+                        }
+                    }
+
                     Button("Log out", systemImage: "rectangle.portrait.and.arrow.right") { confirmLogout = true }
                         .buttonStyle(.secondary)
 
@@ -212,5 +219,26 @@ struct LabeledValue: View {
         }
         .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// A row that opens one of the legal pages in Safari, styled like the "Blocked people" row.
+private struct LegalLinkRow: View {
+    let title: String
+    let systemImage: String
+    let url: URL
+
+    var body: some View {
+        Link(destination: url) {
+            HStack {
+                Label(title, systemImage: systemImage)
+                    .foregroundStyle(.white)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
