@@ -24,6 +24,11 @@ enum AppConfig {
         #endif
     }()
 
+    /// The public website, which hosts the legal pages below. Change it here if the domain changes.
+    static let websiteURL = URL(string: "https://joyridr.org")!
+    static let termsURL = websiteURL.appending(path: "terms")
+    static let privacyURL = websiteURL.appending(path: "privacy")
+
     /// Turns a server path like "/uploads/cars/1.jpg" into a full URL.
     static func url(for path: String?) -> URL? {
         guard let path, !path.isEmpty else { return nil }

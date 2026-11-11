@@ -10,6 +10,7 @@ struct SignUpView: View {
     @State private var username = ""
     @State private var email = ""
     @State private var password = ""
+    @State private var agreedToTerms = false
     @State private var isLoading = false
     @State private var errorMessage: String?
     @FocusState private var focusedField: Field?
@@ -96,16 +97,15 @@ struct SignUpView: View {
                     .padding(.horizontal, 12)
 
                 VStack(spacing: 10) {
+                    // Apple wants users to agree to the terms (no tolerance for abusive content) before they
+                    // can chat or post reviews, so this is a box to tick, not just a line of text.
+                    termsAgreement
+                        .padding(.horizontal, 12)
+                        .padding(.bottom, 4)
+
                     Button("Sign Up", action: signUp)
                         .buttonStyle(.primary(isLoading: isLoading))
                         .disabled(isLoading)
-
-                    // Right under the button it belongs to, instead of squeezed against the footer.
-                    Text("By signing up you agree to the Terms of Service and Privacy Policy.")
-                        .font(.caption)
-                        .foregroundStyle(Theme.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 12)
                 }
                 .padding(.top, 6)
 
@@ -121,6 +121,46 @@ struct SignUpView: View {
         .background { AuthBackground() }
         .navigationBarTitleDisplayMode(.inline)
     }
+
+    /// The tick box toggles on its own; the text holds the links, so tapping them opens the page instead.
+    private var termsAgreement: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Button {
+                agreedToTerms.toggle()
+                if agreedToTerms, errorMessage == Self.termsError { errorMessage = nil }
+            } label: {
+                Image(systemName: agreedToTerms ? "checkmark.square.fill" : "square")
+                    .font(.title3)
+                    .foregroundStyle(agreedToTerms ? Theme.accentRed : Theme.textSecondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("I agree to the Terms of Use and Privacy Policy")
+            .accessibilityValue(agreedToTerms ? "Agreed" : "Not agreed")
+
+            Text(Self.termsText)
+                .font(.caption)
+                .foregroundStyle(Theme.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private static let termsError = "Please agree to the Terms of Use and Privacy Policy."
+
+    /// Built from Markdown so the two names become links. (Putting the URLs straight into `Text("…")`
+    /// doesn't work: SwiftUI reads the Markdown before it fills in the values.)
+    private static let termsText: AttributedString = {
+        let markdown = "I agree to the [Terms of Use](\(AppConfig.termsURL.absoluteString)) and "
+            + "[Privacy Policy](\(AppConfig.privacyURL.absoluteString)), including no tolerance for abusive content."
+        guard var text = try? AttributedString(markdown: markdown) else {
+            return AttributedString("I agree to the Terms of Use and Privacy Policy, including no tolerance for abusive content.")
+        }
+        // Underlined and white, so the links stand out from the grey text around them.
+        for run in text.runs where run.link != nil {
+            text[run.range].underlineStyle = .single
+            text[run.range].foregroundColor = .white
+        }
+        return text
+    }()
 
     private var footer: some View {
         HStack(spacing: 4) {
@@ -148,6 +188,8 @@ struct SignUpView: View {
             errorMessage = "Enter a valid email address."
         } else if password.count < 8 {
             errorMessage = "Your password needs at least 8 characters."
+        } else if !agreedToTerms {
+            errorMessage = Self.termsError
         } else {
             focusedField = nil
             errorMessage = nil
