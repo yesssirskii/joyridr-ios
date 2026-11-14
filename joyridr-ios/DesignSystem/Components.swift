@@ -209,6 +209,8 @@ struct ComingSoonView: View {
 /// Little coloured label for a ride's status.
 struct StatusChip: View {
     let status: RideStatus
+    /// Shows "Timed out" instead of "Cancelled" for a ride the backend closed (`Ride.isTimedOut`).
+    var isTimedOut = false
 
     var body: some View {
         Text(title)
@@ -227,7 +229,7 @@ struct StatusChip: View {
         case .inProgress: "In progress"
         case .completed: "Completed"
         case .declined: "Declined"
-        case .cancelled: "Cancelled"
+        case .cancelled: isTimedOut ? "Timed out" : "Cancelled"
         case .expired: "Expired"
         }
     }

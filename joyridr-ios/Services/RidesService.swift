@@ -3,6 +3,8 @@ import Foundation
 struct RidesService {
     enum View: String {
         case upcoming, past, requests
+        /// Confirmed rides that were never started and got closed and refunded, from the last 7 days.
+        case timedOut
     }
 
     var api: APIClient = .shared

@@ -183,6 +183,8 @@ struct DriverRideDetailView: View {
                         .opacity(canStart ? 1 : 0.5)
                     Text(canStart
                          ? "Tap when \(model.riderFirstName) is in the car."
+                         : context.date >= ride.endsAt
+                         ? "The booked time is over, so this ride can't be started. \(model.riderFirstName) gets a full refund."
                          : "You can start from \(model.startAvailableAt.formatted(startFormat)).")
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
@@ -355,6 +357,7 @@ private struct DriverRideBanner: View {
         case .inProgress: "Ride in progress"
         case .completed: "Ride completed"
         case .declined: "You declined this ride"
+        case .cancelled where ride.isTimedOut: "Ride not started"
         case .cancelled: ride.cancelledByMe == true ? "You cancelled this ride" : "\(riderFirstName) cancelled"
         case .expired: "Request expired"
         }
@@ -378,6 +381,8 @@ private struct DriverRideBanner: View {
         case .declined:
             let reason = ride.declineReason.flatMap { $0.isEmpty ? nil : "“\($0)” " } ?? ""
             return "\(reason)\(riderFirstName) wasn't charged."
+        case .cancelled where ride.isTimedOut:
+            return "You didn't start this ride before its booked time ended, so \(riderFirstName) got a full refund."
         case .cancelled:
             let money: String = switch ride.payment?.status {
             case .refunded: "\(riderFirstName) got a full refund."

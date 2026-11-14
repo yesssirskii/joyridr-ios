@@ -18,7 +18,7 @@ struct RideRow: View {
                     Text(ride.driver.displayName)
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
-                    StatusChip(status: ride.status)
+                    StatusChip(status: ride.status, isTimedOut: ride.isTimedOut)
                 }
                 Text("\(ride.startsAt.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))), \(ride.startsAt.formatted(date: .omitted, time: .shortened)) · \(durationLabel(ride.durationMinutes)) · \(ride.price.price(ride.currency))")
                     .font(.footnote)

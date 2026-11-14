@@ -34,8 +34,9 @@ final class DriverRideModel {
         ride.startsAt.addingTimeInterval(-30 * 60)
     }
 
+    /// After the booked end the backend won't start it any more: it closes the ride and refunds the rider.
     func canStart(at now: Date) -> Bool {
-        ride.status == .confirmed && now >= startAvailableAt
+        ride.status == .confirmed && now >= startAvailableAt && now < ride.endsAt
     }
 
     /// Picks up changes made elsewhere, e.g. the rider cancelling while this sheet is open.

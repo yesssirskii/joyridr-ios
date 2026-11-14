@@ -27,6 +27,23 @@ struct MyRidesView: View {
                     GlowCard {
                         rideList
                     }
+
+                    if model.view == .upcoming && !model.timedOut.isEmpty {
+                        SectionTitle(title: "Timed-out rides", subtitle: "Never started, so you got a full refund")
+                        GlowCard {
+                            LazyVStack(spacing: 6) {
+                                ForEach(model.timedOut) { ride in
+                                    Button {
+                                        selectedRide = ride
+                                    } label: {
+                                        RideRow(ride: ride)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .matchedTransitionSource(id: ride.id, in: rideTransition)
+                                }
+                            }
+                        }
+                    }
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
                 .padding(.top, 8)

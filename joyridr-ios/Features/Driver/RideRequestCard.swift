@@ -117,7 +117,7 @@ struct UpcomingRideRow: View {
                     .foregroundStyle(Theme.textSecondary)
             }
             Spacer()
-            StatusChip(status: ride.status)
+            StatusChip(status: ride.status, isTimedOut: ride.isTimedOut)
         }
         .accessibilityElement(children: .combine)
     }
