@@ -11,6 +11,8 @@ final class RequestsModel {
 
     private(set) var requests: [Ride] = []
     private(set) var upcoming: [Ride] = []
+    /// Confirmed rides the driver never started, from the last 7 days (the rider was refunded).
+    private(set) var timedOut: [Ride] = []
     private(set) var state: LoadState = .idle
     private(set) var unreadMessages = 0
     /// Rides with a confirm/decline in flight, so their buttons show a spinner.
@@ -32,12 +34,15 @@ final class RequestsModel {
     func load() async {
         if requests.isEmpty && upcoming.isEmpty { state = .loading }
         do {
-            // Both requests run at the same time.
+            // All three requests run at the same time.
             async let pending = rides.list(.requests)
             async let scheduled = rides.list(.upcoming)
+            // Extra: if this one fails, the rest of the screen still shows.
+            async let missed = try? rides.list(.timedOut)
             requests = try await pending
             // "upcoming" also contains requests; those are already shown above.
             upcoming = try await scheduled.filter { $0.status == .confirmed || $0.status == .inProgress }
+            timedOut = await missed ?? timedOut
             state = .loaded
         } catch {
             state = .failed(error.localizedDescription)

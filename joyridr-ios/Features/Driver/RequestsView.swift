@@ -41,6 +41,24 @@ struct RequestsView: View {
                             }
                         }
                     }
+
+                    if !model.timedOut.isEmpty {
+                        SectionTitle(title: "Timed-out rides", subtitle: "Not started in time, so the rider got a full refund")
+                        GlowCard {
+                            VStack(spacing: 14) {
+                                ForEach(model.timedOut) { ride in
+                                    Button {
+                                        selectedRide = ride
+                                    } label: {
+                                        UpcomingRideRow(ride: ride)
+                                            .contentShape(.rect)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .matchedTransitionSource(id: ride.id, in: rideTransition)
+                                }
+                            }
+                        }
+                    }
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
                 .padding(.top, 8)

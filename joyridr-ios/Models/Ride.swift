@@ -62,13 +62,18 @@ nonisolated struct Ride: Codable, Hashable, Identifiable {
     let confirmedAt: Date?
     let declineReason: String?
     let cancelledAt: Date?
-    /// True if the logged-in user cancelled it, false if the other person did, nil if not cancelled.
+    /// True if the logged-in user cancelled it, false if the other person did. Nil if it wasn't cancelled,
+    /// or if the backend closed it on its own (see `isTimedOut`).
     let cancelledByMe: Bool?
     let cancellationReason: String?
     let completedAt: Date?
     let payment: RidePayment?
     /// Completed and not reviewed by the logged-in user yet.
     let canReview: Bool
+
+    /// Confirmed but never started, so the backend closed it once its time was over and refunded the rider.
+    /// Nobody cancelled it, which is how it's told apart from a normal cancellation.
+    var isTimedOut: Bool { status == .cancelled && cancelledByMe == nil }
 }
 
 nonisolated struct UnreadCount: Decodable {

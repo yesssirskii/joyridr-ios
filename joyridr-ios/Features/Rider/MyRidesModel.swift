@@ -25,11 +25,21 @@ final class MyRidesModel {
 
     var currentRides: [Ride] { ridesByView[view] ?? [] }
 
+    /// Shown in their own section under Upcoming, so a ride that never happened doesn't just vanish.
+    private(set) var timedOut: [Ride] = []
+
     func load() async {
         let view = view
         if ridesByView[view] == nil { state = .loading }
         do {
-            ridesByView[view] = try await rides.list(view)
+            if view == .upcoming {
+                // Both requests run at the same time. The timed-out list is extra: if it fails, Upcoming still shows.
+                async let timedOutRides = try? rides.list(.timedOut)
+                ridesByView[view] = try await rides.list(view)
+                timedOut = await timedOutRides ?? timedOut
+            } else {
+                ridesByView[view] = try await rides.list(view)
+            }
             if view == self.view { state = .loaded }
         } catch {
             if Task.isCancelled { return }

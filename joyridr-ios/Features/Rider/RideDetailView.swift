@@ -240,6 +240,7 @@ private struct RideStatusBanner: View {
         case .inProgress: "Ride in progress"
         case .completed: "Ride completed"
         case .declined: "Declined"
+        case .cancelled where ride.isTimedOut: "Ride didn't happen"
         case .cancelled: ride.cancelledByMe == true ? "You cancelled this ride" : "\(driverFirstName) cancelled"
         case .expired: "Request expired"
         }
@@ -263,6 +264,8 @@ private struct RideStatusBanner: View {
         case .declined:
             let reason = ride.declineReason.flatMap { $0.isEmpty ? nil : "“\($0)” " } ?? ""
             return "\(reason)\(driverFirstName) couldn't take this ride. You haven't been charged."
+        case .cancelled where ride.isTimedOut:
+            return "\(driverFirstName) never started this ride, so it was closed once its time ended. You got a full refund."
         case .cancelled:
             let refund: String = switch ride.payment?.status {
             case .refunded: "You got a full refund."
