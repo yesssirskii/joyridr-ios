@@ -13,6 +13,15 @@ final class ExploreModel {
 
         var id: Self { self }
 
+        var title: String {
+            switch self {
+            case .distance: t("explore.sort.distance")
+            case .popularity: t("explore.sort.popularity")
+            case .rating: t("explore.sort.rating")
+            case .price: t("explore.sort.price")
+            }
+        }
+
         var systemImage: String {
             switch self {
             case .distance: "location"
@@ -36,7 +45,7 @@ final class ExploreModel {
 
     private(set) var cars: [NearbyCar] = []
     private(set) var state: LoadState = .idle
-    private(set) var locationName = "Locating…"
+    private(set) var locationName = t("explore.locating")
     private(set) var unreadMessages = 0
     var sort: SortOption = .distance {
         didSet { cars = sorted(cars) }
@@ -69,7 +78,7 @@ final class ExploreModel {
         switch await LocationProvider.currentLocation() {
         case .denied:
             cars = []
-            locationName = "Location off"
+            locationName = t("explore.location_off_short")
             state = .locationOff
         case .unavailable:
             state = .locationUnavailable
@@ -88,7 +97,7 @@ final class ExploreModel {
     private func updateLocationName(for coordinate: CLLocationCoordinate2D) async {
         let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         if let namedLocation, namedLocation.distance(from: location) < 1_000 { return }
-        locationName = await LocationProvider.place(at: coordinate)?.city ?? "Near you"
+        locationName = await LocationProvider.place(at: coordinate)?.city ?? t("explore.near_you")
         namedLocation = location
     }
 

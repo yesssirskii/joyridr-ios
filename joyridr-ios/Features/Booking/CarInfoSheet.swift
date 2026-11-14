@@ -21,13 +21,13 @@ struct CarInfoSheet: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 240)
                 case let .failed(message):
-                    ContentUnavailableView("Couldn't load details", systemImage: "exclamationmark.triangle", description: Text(message))
+                    ContentUnavailableView(t("booking.car_info.load_failed"), systemImage: "exclamationmark.triangle", description: Text(message))
                 case let .loaded(car, driver):
                     content(car: car, driver: driver)
                 }
             }
             .background { RedGlow().ignoresSafeArea() }
-            .navigationTitle("Details")
+            .navigationTitle(t("booking.car_info.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -35,11 +35,11 @@ struct CarInfoSheet: View {
                 }
                 if case let .loaded(_, driver) = model.state {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Menu("More", systemImage: "ellipsis") {
-                            Button("Report \(driver.driver.displayName)", systemImage: "flag") {
+                        Menu(t("common.more"), systemImage: "ellipsis") {
+                            Button(t("moderation.report_name", ["name": driver.driver.displayName]), systemImage: "flag") {
                                 reportTarget = .user(id: driver.driver.id, name: driver.driver.displayName)
                             }
-                            Button("Block \(driver.driver.displayName)", systemImage: "hand.raised", role: .destructive) {
+                            Button(t("moderation.block_name", ["name": driver.driver.displayName]), systemImage: "hand.raised", role: .destructive) {
                                 confirmBlock = true
                             }
                         }
@@ -49,19 +49,19 @@ struct CarInfoSheet: View {
             .sheet(item: $reportTarget) { target in
                 ReportSheet(target: target) { _ in blocked = true }
             }
-            .alert("Block this driver?", isPresented: $confirmBlock) {
-                Button("Cancel", role: .cancel) {}
-                Button("Block", role: .destructive, action: blockDriver)
+            .alert(t("booking.car_info.block_title"), isPresented: $confirmBlock) {
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("moderation.block"), role: .destructive, action: blockDriver)
             } message: {
-                Text("You won't see their cars or be able to message or book them. You can unblock them from your profile.")
+                Text(t("booking.car_info.block_message"))
             }
-            .alert("Driver blocked", isPresented: $blocked) {
-                Button("OK") { dismiss() }
+            .alert(t("booking.car_info.blocked_title"), isPresented: $blocked) {
+                Button(t("common.ok")) { dismiss() }
             } message: {
-                Text("You won't see their cars any more. Pull to refresh Explore if they're still showing.")
+                Text(t("booking.car_info.blocked_message"))
             }
-            .alert("Couldn't block", isPresented: Binding(get: { blockError != nil }, set: { if !$0 { blockError = nil } })) {
-                Button("OK", role: .cancel) {}
+            .alert(t("moderation.block_failed"), isPresented: Binding(get: { blockError != nil }, set: { if !$0 { blockError = nil } })) {
+                Button(t("common.ok"), role: .cancel) {}
             } message: {
                 Text(blockError ?? "")
             }
@@ -85,13 +85,13 @@ struct CarInfoSheet: View {
             }
 
             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
-                SpecTile(systemImage: "bolt.fill", value: "\(car.horsepower)", label: "hp")
+                SpecTile(systemImage: "bolt.fill", value: "\(car.horsepower)", label: t("cars.spec.hp"))
                 SpecTile(systemImage: "gauge.with.dots.needle.67percent",
-                         value: car.zeroToHundredSeconds.map { "\($0.formatted()) s" } ?? "—", label: "0–100 km/h")
-                SpecTile(systemImage: "speedometer", value: car.topSpeedKmh.map { "\($0)" } ?? "—", label: "km/h top")
-                SpecTile(systemImage: "person.2.fill", value: "\(car.passengerSeats)", label: car.passengerSeats == 1 ? "seat" : "seats")
-                SpecTile(systemImage: "gearshift.layout.sixspeed", value: car.transmission.title, label: "gearbox")
-                SpecTile(systemImage: "eurosign", value: car.pricePerHour.price(car.currency), label: "per hour")
+                         value: car.zeroToHundredSeconds.map { "\($0.formatted(.number.locale(Localizer.shared.locale))) s" } ?? "—", label: t("cars.spec.zero_to_hundred"))
+                SpecTile(systemImage: "speedometer", value: car.topSpeedKmh.map { "\($0)" } ?? "—", label: t("cars.spec.top_speed"))
+                SpecTile(systemImage: "person.2.fill", value: "\(car.passengerSeats)", label: t("cars.spec.seats", count: car.passengerSeats))
+                SpecTile(systemImage: "gearshift.layout.sixspeed", value: car.transmission.title, label: t("cars.spec.gearbox"))
+                SpecTile(systemImage: "eurosign", value: car.pricePerHour.price(car.currency), label: t("cars.spec.per_hour"))
             }
 
             if let description = car.description, !description.isEmpty {
@@ -100,11 +100,11 @@ struct CarInfoSheet: View {
                     .foregroundStyle(Theme.textPrimary.opacity(0.9))
             }
 
-            SectionTitle(title: "Driver")
+            SectionTitle(title: t("booking.car_info.driver"))
             driverCard(driver)
 
             if !driver.recentReviews.isEmpty {
-                SectionTitle(title: "Reviews")
+                SectionTitle(title: t("reviews.title"))
                 VStack(spacing: 12) {
                     ForEach(driver.recentReviews.prefix(3)) { review in
                         ReviewRow(review: review) { reportTarget = .review(review) }
@@ -147,13 +147,13 @@ struct CarInfoSheet: View {
                         if profile.driver.isVerified {
                             Image(systemName: "checkmark.seal.fill")
                                 .foregroundStyle(Theme.accentRed)
-                                .accessibilityLabel("Verified driver")
+                                .accessibilityLabel(t("booking.car_info.verified"))
                         }
                     }
-                    Text("\(profile.driver.ratingText) · \(profile.completedRides) rides")
+                    Text("\(profile.driver.ratingText) · \(t("rides.count", count: profile.completedRides))")
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
-                    Text([profile.driver.city, "Member since \(profile.memberSince.formatted(.dateTime.month(.abbreviated).year()))"]
+                    Text([profile.driver.city, t("profile.member_since_date", ["date": profile.memberSince.localized(.dateTime.month(.abbreviated).year())])]
                         .compactMap { $0 }.joined(separator: " · "))
                         .font(.footnote)
                         .foregroundStyle(Theme.textSecondary)
@@ -215,13 +215,13 @@ private struct ReviewRow: View {
             HStack {
                 Text(String(repeating: "★", count: review.rating) + String(repeating: "☆", count: 5 - review.rating))
                     .foregroundStyle(Theme.accentRed)
-                    .accessibilityLabel("\(review.rating) out of 5 stars")
+                    .accessibilityLabel(t("reviews.out_of_five", ["rating": review.rating]))
                 Spacer()
-                Text(review.createdAt.formatted(.dateTime.day().month(.abbreviated)))
+                Text(review.createdAt.localized(.dateTime.day().month(.abbreviated)))
                     .font(.caption)
                     .foregroundStyle(Theme.textSecondary)
                 Menu {
-                    Button("Report review", systemImage: "flag", action: onReport)
+                    Button(t("moderation.report_review"), systemImage: "flag", action: onReport)
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.caption.weight(.bold))
@@ -229,7 +229,7 @@ private struct ReviewRow: View {
                         .frame(width: 28, height: 22)
                         .contentShape(Rectangle())
                 }
-                .accessibilityLabel("More")
+                .accessibilityLabel(t("common.more"))
             }
             if let comment = review.comment, !comment.isEmpty {
                 Text(comment)

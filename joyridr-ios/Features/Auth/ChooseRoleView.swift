@@ -7,20 +7,20 @@ struct ChooseRoleView: View {
     var body: some View {
         VStack(spacing: 18) {
             Spacer()
-            Text("Choose your destiny")
+            Text(t("auth.role.title"))
                 .displayTitle(22)
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
                 .padding(.bottom, 30)
 
-            RoleOption(title: "JoyRider", caption: "You'll book drivers to take you for a ride.") {
+            RoleOption(title: "JoyRider", caption: t("auth.role.rider_caption")) {
                 onChoose(.joyRider)
             }
 
-            Text("or")
+            Text(t("auth.role.or"))
                 .displayTitle(16)
 
-            RoleOption(title: "JoyDriver", caption: "JoyRiders choose you to take them for a ride.") {
+            RoleOption(title: "JoyDriver", caption: t("auth.role.driver_caption")) {
                 onChoose(.joyDriver)
             }
             Spacer()

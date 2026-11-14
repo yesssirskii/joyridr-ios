@@ -10,7 +10,7 @@ struct InboxView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    SectionTitle(title: "Messages", subtitle: subtitle)
+                    SectionTitle(title: t("chat.messages"), subtitle: subtitle)
                     GlowCard {
                         content
                     }
@@ -39,7 +39,7 @@ struct InboxView: View {
     }
 
     private var subtitle: String {
-        session.me?.user.role == .joyDriver ? "Chats with your JoyRiders" : "Chats with drivers"
+        session.me?.user.role == .joyDriver ? t("chat.inbox_subtitle_driver") : t("chat.inbox_subtitle_rider")
     }
 
     @ViewBuilder
@@ -50,21 +50,21 @@ struct InboxView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load messages", systemImage: "exclamationmark.triangle")
+                Label(t("chat.inbox_load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.conversations.isEmpty:
             ContentUnavailableView(
-                "No messages yet",
+                t("chat.inbox_empty"),
                 systemImage: "bubble.left.and.bubble.right",
                 description: Text(session.me?.user.role == .joyDriver
-                    ? "When a JoyRider messages you, it shows up here."
-                    : "Message a driver from one of your rides and the chat shows up here."))
+                    ? t("chat.inbox_empty_driver")
+                    : t("chat.inbox_empty_rider")))
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.conversations) { conversation in
@@ -93,7 +93,7 @@ private struct ConversationRow: View {
                     Text(conversation.otherUser.displayName)
                         .font(.headline)
                         .foregroundStyle(.white)
-                    Text(conversation.otherUser.isDriver ? "Driver" : "Rider")
+                    Text(conversation.otherUser.isDriver ? t("booking.car_info.driver") : t("chat.rider"))
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                     Spacer(minLength: 8)
@@ -118,14 +118,14 @@ private struct ConversationRow: View {
     }
 
     private var preview: String {
-        guard let message = conversation.lastMessage else { return "Say hi 👋" }
-        return message.isMine ? "You: \(message.body)" : message.body
+        guard let message = conversation.lastMessage else { return t("chat.say_hi") }
+        return message.isMine ? t("chat.you_prefix", ["text": message.body]) : message.body
     }
 
     private var timeText: String {
         let date = conversation.lastActivity
-        if Calendar.current.isDateInToday(date) { return date.formatted(date: .omitted, time: .shortened) }
-        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
-        return date.formatted(.dateTime.day().month(.abbreviated))
+        if Calendar.current.isDateInToday(date) { return date.localized(date: .omitted, time: .shortened) }
+        if Calendar.current.isDateInYesterday(date) { return t("common.yesterday") }
+        return date.localized(.dateTime.day().month(.abbreviated))
     }
 }

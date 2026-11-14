@@ -55,7 +55,7 @@ nonisolated struct Page<Item: Decodable>: Decodable {
 nonisolated enum Transmission: String, Codable, Hashable, CaseIterable {
     case manual, automatic
 
-    var title: String { self == .manual ? "Manual" : "Automatic" }
+    var title: String { self == .manual ? t("cars.transmission.manual") : t("cars.transmission.automatic") }
 }
 
 nonisolated struct CarPhoto: Codable, Hashable, Identifiable {
@@ -125,9 +125,9 @@ nonisolated struct UpsertCarRequest: Encodable {
 extension CarCategory {
     var title: String {
         switch self {
-        case .sportsCar: "Sports car"
-        case .supercar: "Supercar"
-        case .hypercar: "Hypercar"
+        case .sportsCar: t("cars.category.sports_car")
+        case .supercar: t("cars.category.supercar")
+        case .hypercar: t("cars.category.hypercar")
         }
     }
 }
@@ -138,6 +138,6 @@ extension DriverSummary {
 
     /// "★ 4.9 (12)", or "New" when there are no reviews yet.
     var ratingText: String {
-        ratingCount == 0 ? "New" : "★ \(ratingAverage.formatted(.number.precision(.fractionLength(1)))) (\(ratingCount))"
+        ratingCount == 0 ? t("reviews.new") : "★ \(ratingAverage.formatted(.number.precision(.fractionLength(1)).locale(Localizer.shared.locale))) (\(ratingCount))"
     }
 }

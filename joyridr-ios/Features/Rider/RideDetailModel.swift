@@ -31,11 +31,11 @@ final class RideDetailModel {
     var cancelConsequence: String {
         switch ride.status {
         case .awaitingPayment, .requested:
-            "\(driverFirstName) hasn't confirmed yet, so you won't be charged."
+            t("ride.rider.cancel_unconfirmed", ["driver": driverFirstName])
         case .confirmed:
             ride.startsAt.timeIntervalSinceNow >= 24 * 3600
-                ? "It's more than 24 hours before the ride, so you'll get a full refund."
-                : "It's less than 24 hours before the ride, so you won't get a refund."
+                ? t("ride.rider.cancel_refund")
+                : t("ride.rider.cancel_no_refund")
         default:
             ""
         }

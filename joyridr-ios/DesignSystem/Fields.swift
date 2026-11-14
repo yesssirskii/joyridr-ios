@@ -33,7 +33,7 @@ struct FormTextField: View {
                     Image(systemName: isRevealed ? "eye.slash" : "eye")
                         .foregroundStyle(Theme.textSecondary)
                 }
-                .accessibilityLabel(isRevealed ? "Hide password" : "Show password")
+                .accessibilityLabel(isRevealed ? t("auth.hide_password") : t("auth.show_password"))
             }
         }
         .padding(.horizontal, 22)

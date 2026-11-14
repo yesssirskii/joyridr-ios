@@ -28,17 +28,17 @@ struct RiderHomeView: View {
 
     var body: some View {
         TabView(selection: $tab) {
-            Tab("Explore", systemImage: "magnifyingglass", value: .explore) {
+            Tab(t("tabs.explore"), systemImage: "magnifyingglass", value: .explore) {
                 ExploreView()
             }
-            Tab("My rides", systemImage: "car.fill", value: .myRides) {
+            Tab(t("tabs.my_rides"), systemImage: "car.fill", value: .myRides) {
                 MyRidesView()
             }
             if session.me?.user.role == .admin {
-                Tab("Reviews", systemImage: "checkmark.seal.fill", value: .reviews) {
+                Tab(t("tabs.car_reviews"), systemImage: "checkmark.seal.fill", value: .reviews) {
                     CarReviewsView()
                 }
-                Tab("Reports", systemImage: "flag.fill", value: .reports) {
+                Tab(t("tabs.reports"), systemImage: "flag.fill", value: .reports) {
                     ReportsView()
                 }
             }

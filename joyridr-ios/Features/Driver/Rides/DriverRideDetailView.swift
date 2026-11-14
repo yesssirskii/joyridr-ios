@@ -30,28 +30,28 @@ struct DriverRideDetailView: View {
                     DriverRideBanner(ride: ride, riderFirstName: model.riderFirstName,
                                      startAvailableAt: model.startAvailableAt)
 
-                    BookingSection("Ride details") {
+                    BookingSection(t("ride.details")) {
                         VStack(alignment: .leading, spacing: 14) {
-                            LabeledValue(label: "Car", value: ride.car.name)
-                            LabeledValue(label: "When", value: whenText)
-                            LabeledValue(label: "Duration", value: durationLabel(ride.durationMinutes))
+                            LabeledValue(label: t("booking.sent.car"), value: ride.car.name)
+                            LabeledValue(label: t("ride.when"), value: whenText)
+                            LabeledValue(label: t("ride.duration"), value: durationLabel(ride.durationMinutes))
                             meetingPoint
                             if let phone = ride.rider.phoneNumber {
                                 HStack {
-                                    LabeledValue(label: "\(model.riderFirstName)'s phone", value: phone)
+                                    LabeledValue(label: t("ride.phone_of", ["name": model.riderFirstName]), value: phone)
                                     Spacer()
-                                    smallAction("Call", systemImage: "phone.fill") {
+                                    smallAction(t("ride.call"), systemImage: "phone.fill") {
                                         if let url = URL(string: "tel:\(phone.filter { !$0.isWhitespace })") { openURL(url) }
                                     }
                                 }
                             }
                             if let note = ride.riderNote, !note.isEmpty {
-                                LabeledValue(label: "\(model.riderFirstName)'s note", value: "“\(note)”")
+                                LabeledValue(label: t("ride.driver.note_of", ["name": model.riderFirstName]), value: "“\(note)”")
                             }
                         }
                     }
 
-                    BookingSection("Payment") {
+                    BookingSection(t("ride.payment")) {
                         HStack(alignment: .firstTextBaseline) {
                             LabeledValue(label: paymentText, value: ride.price.price(ride.currency))
                             Spacer()
@@ -59,7 +59,7 @@ struct DriverRideDetailView: View {
                     }
 
                     if ride.canReview || model.reviewSent {
-                        BookingSection("Rate \(model.riderFirstName)") {
+                        BookingSection(t("ride.driver.rate_rider", ["name": model.riderFirstName])) {
                             reviewForm
                         }
                     }
@@ -77,7 +77,7 @@ struct DriverRideDetailView: View {
                             if model.busyAction == .cancel {
                                 ProgressView().tint(.white)
                             } else {
-                                Text("Cancel ride").foregroundStyle(Theme.accentRed)
+                                Text(t("ride.cancel")).foregroundStyle(Theme.accentRed)
                             }
                         }
                         .buttonStyle(.secondary)
@@ -98,12 +98,12 @@ struct DriverRideDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(ride.status == .requested ? "Ride request" : "Ride").displayTitle(18)
+                    Text(ride.status == .requested ? t("ride.driver.title_request") : t("ride.driver.title")).displayTitle(18)
                 }
                 // The keyboard covers "Send review", so give it a way out.
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { commentFocused = false }
+                    Button(t("common.done")) { commentFocused = false }
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     CloseButton { dismiss() }
@@ -115,30 +115,30 @@ struct DriverRideDetailView: View {
             .animation(.snappy, value: model.errorMessage)
         }
         .task { await model.refresh() }
-        .alert("Decline this ride?", isPresented: $showDecline) {
-            TextField("Reason (optional)", text: $reason)
-            Button("Decline ride", role: .destructive) {
+        .alert(t("requests.decline_title"), isPresented: $showDecline) {
+            TextField(t("ride.driver.reason"), text: $reason)
+            Button(t("requests.decline_ride"), role: .destructive) {
                 Task { await model.decline(reason: reason) }
             }
-            Button("Keep request", role: .cancel) {}
+            Button(t("ride.driver.keep_request"), role: .cancel) {}
         } message: {
-            Text("\(model.riderFirstName) won't be charged and will see your reason.")
+            Text(t("ride.driver.decline_message", ["name": model.riderFirstName]))
         }
-        .alert("Cancel this ride?", isPresented: $showCancel) {
-            TextField("Reason (optional)", text: $reason)
-            Button("Cancel ride", role: .destructive) {
+        .alert(t("ride.cancel_confirm_title"), isPresented: $showCancel) {
+            TextField(t("ride.driver.reason"), text: $reason)
+            Button(t("ride.cancel"), role: .destructive) {
                 Task { await model.cancel(reason: reason) }
             }
-            Button("Keep ride", role: .cancel) {}
+            Button(t("ride.keep"), role: .cancel) {}
         } message: {
-            Text("\(model.riderFirstName) gets a full refund and will see your reason.")
+            Text(t("ride.driver.cancel_message", ["name": model.riderFirstName]))
         }
-        .confirmationDialog("Finish this ride?", isPresented: $confirmComplete, titleVisibility: .visible) {
-            Button("Complete ride") {
+        .confirmationDialog(t("ride.driver.finish_title"), isPresented: $confirmComplete, titleVisibility: .visible) {
+            Button(t("ride.driver.complete")) {
                 Task { await model.complete() }
             }
         } message: {
-            Text("Do this once \(model.riderFirstName) is out of the car.")
+            Text(t("ride.driver.finish_message", ["name": model.riderFirstName]))
         }
         .sheet(isPresented: $showChat) {
             ConversationSheet(otherUser: ChatParticipant(
@@ -161,37 +161,37 @@ struct DriverRideDetailView: View {
                 switch ride.status {
                 case .requested:
                     HStack(spacing: 12) {
-                        Button("Decline") {
+                        Button(t("requests.decline")) {
                             reason = ""
                             showDecline = true
                         }
                         .buttonStyle(.secondary)
-                        Button("Confirm") { Task { await model.confirm() } }
+                        Button(t("requests.confirm")) { Task { await model.confirm() } }
                             .buttonStyle(.primary(isLoading: model.busyAction == .confirm))
                     }
                     if let respondBy = ride.respondBy {
                         // A date with style: .relative counts down by itself.
-                        Text("\(Image(systemName: "hourglass")) Respond within \(respondBy, style: .relative)")
+                        Text("\(Image(systemName: "hourglass")) \(t("requests.respond_within")) \(respondBy, style: .relative)")
                             .font(.footnote.weight(.semibold))
                             .foregroundStyle(Theme.accentRed)
                     }
                 case .confirmed:
                     let canStart = model.canStart(at: context.date)
-                    Button("Start ride") { Task { await model.start() } }
+                    Button(t("ride.driver.start")) { Task { await model.start() } }
                         .buttonStyle(.primary(isLoading: model.busyAction == .start))
                         .disabled(!canStart)
                         .opacity(canStart ? 1 : 0.5)
                     Text(canStart
-                         ? "Tap when \(model.riderFirstName) is in the car."
+                         ? t("ride.driver.start_hint", ["name": model.riderFirstName])
                          : context.date >= ride.endsAt
-                         ? "The booked time is over, so this ride can't be started. \(model.riderFirstName) gets a full refund."
-                         : "You can start from \(model.startAvailableAt.formatted(startFormat)).")
+                         ? t("ride.driver.start_too_late", ["name": model.riderFirstName])
+                         : t("ride.driver.start_from", ["time": model.startAvailableAt.localized(startFormat)]))
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                 default:
-                    Button("Complete ride") { confirmComplete = true }
+                    Button(t("ride.driver.complete")) { confirmComplete = true }
                         .buttonStyle(.primary(isLoading: model.busyAction == .complete))
-                    Text("Ends at \(ride.endsAt.formatted(date: .omitted, time: .shortened)).")
+                    Text(t("ride.driver.ends_at", ["time": ride.endsAt.localized(date: .omitted, time: .shortened)]))
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -218,10 +218,10 @@ struct DriverRideDetailView: View {
         let point = ride.meetingPoint
         let address = point.address.flatMap { $0.isEmpty ? nil : $0 }
         HStack {
-            LabeledValue(label: "Meeting point", value: address.map { "\(point.type.title): \($0)" } ?? meetingFallback)
+            LabeledValue(label: t("ride.meeting_point"), value: address.map { "\(point.type.title): \($0)" } ?? meetingFallback)
             Spacer()
             if let latitude = point.latitude, let longitude = point.longitude {
-                smallAction("Maps", systemImage: "map.fill") {
+                smallAction(t("ride.maps"), systemImage: "map.fill") {
                     if let url = URL(string: "https://maps.apple.com/?daddr=\(latitude),\(longitude)") { openURL(url) }
                 }
             }
@@ -233,9 +233,9 @@ struct DriverRideDetailView: View {
         let title = ride.meetingPoint.type.title
         switch ride.meetingPoint.type {
         case .riderComesToDriver where ride.status == .requested || ride.status == .awaitingPayment:
-            return "\(title). Your address is shared once you confirm."
+            return t("ride.driver.address_after_confirm", ["title": title])
         case .agreedLocation:
-            return "\(title). Not decided yet, sort it out in chat."
+            return t("ride.driver.meeting_undecided", ["title": title])
         default:
             return title
         }
@@ -244,21 +244,21 @@ struct DriverRideDetailView: View {
     @ViewBuilder
     private var reviewForm: some View {
         if model.reviewSent {
-            Label("Thanks! Your review was sent.", systemImage: "checkmark.circle.fill")
+            Label(t("reviews.sent"), systemImage: "checkmark.circle.fill")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Theme.available)
         } else {
             VStack(alignment: .leading, spacing: 14) {
                 StarRatingPicker(rating: $model.rating)
                 TextField("", text: $model.comment,
-                          prompt: Text("How was \(model.riderFirstName) as a passenger?").foregroundStyle(Theme.textSecondary),
+                          prompt: Text(t("reviews.prompt_rider", ["name": model.riderFirstName])).foregroundStyle(Theme.textSecondary),
                           axis: .vertical)
                     .lineLimit(2...4)
                     .focused($commentFocused)
                     // Return sends the review (a vertical TextField would otherwise add a new line).
                     .submitLabel(.send)
                     .onSubmit { Task { await model.submitReview() } }
-                Button("Send review") { Task { await model.submitReview() } }
+                Button(t("reviews.send")) { Task { await model.submitReview() } }
                     .buttonStyle(.primary(isLoading: model.isSubmittingReview))
                     .disabled(model.rating == 0 || model.isSubmittingReview)
                     .opacity(model.rating == 0 ? 0.5 : 1)
@@ -277,20 +277,20 @@ struct DriverRideDetailView: View {
     // MARK: Text
 
     private var whenText: String {
-        "\(ride.startsAt.formatted(.dateTime.weekday(.wide).day().month(.wide))), \(ride.startsAt.formatted(date: .omitted, time: .shortened))–\(ride.endsAt.formatted(date: .omitted, time: .shortened))"
+        "\(ride.startsAt.localized(.dateTime.weekday(.wide).day().month(.wide))), \(ride.startsAt.localized(date: .omitted, time: .shortened))–\(ride.endsAt.localized(date: .omitted, time: .shortened))"
     }
 
     private var paymentText: String {
         let rider = model.riderFirstName
-        guard let payment = ride.payment else { return "Price" }
+        guard let payment = ride.payment else { return t("ride.price") }
         switch payment.status {
-        case .pending: return "Price · \(rider) is still paying"
-        case .authorized: return "Price · held on \(rider)'s card, charged when you confirm"
-        case .captured: return "Price · paid"
-        case .voided: return "Price · released, \(rider) wasn't charged"
-        case .refunded: return "Price · refunded to \(rider)"
-        case .partiallyRefunded: return "Price · \(payment.refundedAmount.price(payment.currency)) refunded"
-        case .failed: return "Price · payment failed"
+        case .pending: return t("ride.driver.payment_status.pending", ["name": rider])
+        case .authorized: return t("ride.driver.payment_status.authorized", ["name": rider])
+        case .captured: return t("ride.payment_status.captured")
+        case .voided: return t("ride.driver.payment_status.voided", ["name": rider])
+        case .refunded: return t("ride.driver.payment_status.refunded", ["name": rider])
+        case .partiallyRefunded: return t("ride.payment_status.partially_refunded", ["amount": payment.refundedAmount.price(payment.currency)])
+        case .failed: return t("ride.payment_status.failed")
         }
     }
 }
@@ -314,7 +314,7 @@ private struct RiderCard: View {
             }
             Spacer(minLength: 8)
             CircleIconButton(systemImage: "bubble.left", size: 40,
-                             accessibilityLabel: "Message \(ride.rider.displayName)", action: onMessage)
+                             accessibilityLabel: t("chat.message_name", ["name": ride.rider.displayName]), action: onMessage)
         }
         .padding(14)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))
@@ -325,9 +325,9 @@ private struct RiderCard: View {
 extension RideParticipant {
     /// "★ 4.8 · 12 reviews", or "New rider" before the first review.
     var ratingText: String {
-        guard ratingCount > 0 else { return "New rider" }
-        let rating = ratingAverage.formatted(.number.precision(.fractionLength(1)))
-        return "★ \(rating) · \(ratingCount) \(ratingCount == 1 ? "review" : "reviews")"
+        guard ratingCount > 0 else { return t("reviews.new_rider") }
+        let rating = ratingAverage.formatted(.number.locale(Localizer.shared.locale).precision(.fractionLength(1)).locale(Localizer.shared.locale))
+        return "★ \(rating) · \(t("reviews.count", count: ratingCount))"
     }
 }
 
@@ -344,56 +344,56 @@ private struct DriverRideBanner: View {
     /// "today", "tomorrow" or the weekday ("Saturday").
     private var dayText: String {
         let calendar = Calendar.current
-        if calendar.isDateInToday(ride.startsAt) { return "today" }
-        if calendar.isDateInTomorrow(ride.startsAt) { return "tomorrow" }
-        return ride.startsAt.formatted(.dateTime.weekday(.wide))
+        if calendar.isDateInToday(ride.startsAt) { return t("common.today") }
+        if calendar.isDateInTomorrow(ride.startsAt) { return t("common.tomorrow") }
+        return ride.startsAt.localized(.dateTime.weekday(.wide))
     }
 
     private var title: String {
         switch ride.status {
-        case .awaitingPayment: "Payment in progress"
-        case .requested: "New ride request"
-        case .confirmed: "Confirmed"
-        case .inProgress: "Ride in progress"
-        case .completed: "Ride completed"
-        case .declined: "You declined this ride"
-        case .cancelled where ride.isTimedOut: "Ride not started"
-        case .cancelled: ride.cancelledByMe == true ? "You cancelled this ride" : "\(riderFirstName) cancelled"
-        case .expired: "Request expired"
+        case .awaitingPayment: t("ride.driver.banner.awaiting_payment")
+        case .requested: t("ride.driver.banner.requested")
+        case .confirmed: t("ride.status.confirmed")
+        case .inProgress: t("ride.banner.in_progress")
+        case .completed: t("ride.banner.completed")
+        case .declined: t("ride.driver.banner.declined")
+        case .cancelled where ride.isTimedOut: t("ride.driver.banner.timed_out")
+        case .cancelled: ride.cancelledByMe == true ? t("ride.banner.you_cancelled") : t("ride.banner.other_cancelled", ["name": riderFirstName])
+        case .expired: t("ride.banner.expired")
         }
     }
 
     private var message: String {
         switch ride.status {
         case .awaitingPayment:
-            return "\(riderFirstName) is finishing payment. The request shows up once it's done."
+            return t("ride.driver.message.awaiting_payment", ["name": riderFirstName])
         case .requested:
             if let respondBy = ride.respondBy {
-                return "Confirm by \(respondBy.formatted(.dateTime.weekday(.abbreviated).hour().minute())) or the request expires. \(riderFirstName) is charged when you confirm."
+                return t("ride.driver.message.requested_until", ["time": respondBy.localized(.dateTime.weekday(.abbreviated).hour().minute()), "name": riderFirstName])
             }
-            return "\(riderFirstName) is charged when you confirm."
+            return t("ride.driver.message.requested", ["name": riderFirstName])
         case .confirmed:
-            return "Meet \(riderFirstName) \(dayText) at \(ride.startsAt.formatted(date: .omitted, time: .shortened)). You can start the ride from \(startAvailableAt.formatted(date: .omitted, time: .shortened))."
+            return t("ride.driver.message.confirmed", ["name": riderFirstName, "day": dayText, "time": ride.startsAt.localized(date: .omitted, time: .shortened), "start": startAvailableAt.localized(date: .omitted, time: .shortened)])
         case .inProgress:
-            return "Enjoy the drive! It ends at \(ride.endsAt.formatted(date: .omitted, time: .shortened))."
+            return t("ride.driver.message.in_progress", ["time": ride.endsAt.localized(date: .omitted, time: .shortened)])
         case .completed:
-            return ride.canReview ? "Nice one. Let other drivers know how \(riderFirstName) was." : "Nice one!"
+            return ride.canReview ? t("ride.driver.message.completed_review", ["name": riderFirstName]) : t("ride.driver.message.completed")
         case .declined:
             let reason = ride.declineReason.flatMap { $0.isEmpty ? nil : "“\($0)” " } ?? ""
-            return "\(reason)\(riderFirstName) wasn't charged."
+            return reason + t("ride.driver.message.not_charged", ["name": riderFirstName])
         case .cancelled where ride.isTimedOut:
-            return "You didn't start this ride before its booked time ended, so \(riderFirstName) got a full refund."
+            return t("ride.driver.message.timed_out", ["name": riderFirstName])
         case .cancelled:
             let money: String = switch ride.payment?.status {
-            case .refunded: "\(riderFirstName) got a full refund."
-            case .voided: "\(riderFirstName) wasn't charged."
-            case .captured: "It was a late cancellation, so you still get paid."
+            case .refunded: t("ride.driver.message.refunded", ["name": riderFirstName])
+            case .voided: t("ride.driver.message.not_charged", ["name": riderFirstName])
+            case .captured: t("ride.driver.message.late_cancel")
             default: ""
             }
             let reason = ride.cancellationReason.flatMap { $0.isEmpty ? nil : "“\($0)” " } ?? ""
             return "\(reason)\(money)"
         case .expired:
-            return "You didn't respond in time. \(riderFirstName) wasn't charged."
+            return t("ride.driver.message.expired", ["name": riderFirstName])
         }
     }
 }

@@ -19,24 +19,24 @@ struct ExploreView: View {
 
                     HStack(spacing: 14) {
                         Menu {
-                            Picker("Search radius", selection: $model.radiusKm) {
+                            Picker(t("explore.radius"), selection: $model.radiusKm) {
                                 ForEach(ExploreModel.radiusOptions, id: \.self) { Text("\($0) km") }
                             }
                         } label: {
                             FilterPill(systemImage: "map", title: model.locationLabel)
                         }
                         Menu {
-                            Picker("Sort by", selection: $model.sort) {
+                            Picker(t("explore.sort_by"), selection: $model.sort) {
                                 ForEach(ExploreModel.SortOption.allCases) { option in
-                                    Label(option.rawValue, systemImage: option.systemImage).tag(option)
+                                    Label(option.title, systemImage: option.systemImage).tag(option)
                                 }
                             }
                         } label: {
-                            FilterPill(systemImage: model.sort.systemImage, title: model.sort.rawValue, fillsWidth: false)
+                            FilterPill(systemImage: model.sort.systemImage, title: model.sort.title, fillsWidth: false)
                         }
                     }
 
-                    SectionTitle(title: "Available drivers", subtitle: "Choose your next ride")
+                    SectionTitle(title: t("explore.title"), subtitle: t("explore.subtitle"))
 
                     GlowCard {
                         carList
@@ -91,21 +91,21 @@ struct ExploreView: View {
             .redacted(reason: .placeholder)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load cars", systemImage: "exclamationmark.triangle")
+                Label(t("explore.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .locationOff:
             ContentUnavailableView {
-                Label("Location is off", systemImage: "location.slash")
+                Label(t("explore.location_off"), systemImage: "location.slash")
             } description: {
-                Text("JOYRIDR needs your location to find cars near you.")
+                Text(t("explore.location_off_message"))
             } actions: {
-                Button("Open Settings") {
+                Button(t("common.open_settings")) {
                     if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
                 }
                 .buttonStyle(.primary)
@@ -113,19 +113,19 @@ struct ExploreView: View {
             }
         case .locationUnavailable:
             ContentUnavailableView {
-                Label("Can't find your location", systemImage: "location.magnifyingglass")
+                Label(t("explore.location_unavailable"), systemImage: "location.magnifyingglass")
             } description: {
-                Text("Check that you have a signal, then try again.")
+                Text(t("explore.location_unavailable_message"))
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.cars.isEmpty:
             ContentUnavailableView(
-                "No cars nearby",
+                t("explore.empty"),
                 systemImage: "car.side",
-                description: Text("Try a bigger search radius."))
+                description: Text(t("explore.empty_message")))
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.cars) { item in

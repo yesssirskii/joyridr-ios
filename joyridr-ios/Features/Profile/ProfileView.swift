@@ -28,7 +28,7 @@ struct ProfileView: View {
                                 avatar(me.user)
                             }
                             .disabled(model.isUploadingAvatar)
-                            .accessibilityLabel("Change profile picture")
+                            .accessibilityLabel(t("profile.change_picture"))
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(me.user.fullName)
                                     .font(.title3.weight(.semibold))
@@ -46,30 +46,30 @@ struct ProfileView: View {
 
                         FormError(message: model.errorMessage)
 
-                        BookingSection("Account") {
+                        BookingSection(t("profile.account")) {
                             VStack(alignment: .leading, spacing: 14) {
                                 HStack {
-                                    LabeledValue(label: "Username", value: "@\(me.user.username)")
+                                    LabeledValue(label: t("auth.username"), value: "@\(me.user.username)")
                                     Spacer()
-                                    Button("Change") {
+                                    Button(t("profile.change")) {
                                         newUsername = me.user.username
                                         editingUsername = true
                                     }
                                     .buttonStyle(ChipStyle(isSelected: false))
                                     .disabled(model.isSavingUsername)
                                 }
-                                LabeledValue(label: "Email", value: me.user.email)
-                                LabeledValue(label: "Phone", value: me.user.phoneNumber ?? "Not added yet")
-                                LabeledValue(label: "Member since", value: me.user.createdAt.formatted(.dateTime.month(.wide).year()))
+                                LabeledValue(label: t("auth.email"), value: me.user.email)
+                                LabeledValue(label: t("profile.phone"), value: me.user.phoneNumber ?? t("profile.not_added"))
+                                LabeledValue(label: t("profile.member_since"), value: me.user.createdAt.localized(.dateTime.month(.wide).year()))
                             }
                         }
 
                         if let driver = me.driverProfile {
-                            BookingSection("Driver") {
+                            BookingSection(t("booking.car_info.driver")) {
                                 VStack(alignment: .leading, spacing: 14) {
-                                    LabeledValue(label: "Verification", value: driver.isVerified ? "Verified ✓" : "Not verified yet")
-                                    LabeledValue(label: "Rating", value: driver.ratingCount == 0 ? "No reviews yet" : "★ \(driver.ratingAverage.formatted(.number.precision(.fractionLength(1)))) (\(driver.ratingCount))")
-                                    LabeledValue(label: "Completed rides", value: "\(driver.completedRides)")
+                                    LabeledValue(label: t("profile.verification"), value: driver.isVerified ? t("profile.verified") + " ✓" : t("profile.not_verified"))
+                                    LabeledValue(label: t("explore.sort.rating"), value: driver.ratingCount == 0 ? t("profile.no_reviews") : "★ \(driver.ratingAverage.formatted(.number.locale(Localizer.shared.locale).precision(.fractionLength(1)).locale(Localizer.shared.locale))) (\(driver.ratingCount))")
+                                    LabeledValue(label: t("profile.completed_rides"), value: "\(driver.completedRides)")
                                 }
                             }
 
@@ -77,12 +77,12 @@ struct ProfileView: View {
                         }
                     }
 
-                    BookingSection("Privacy & safety") {
+                    BookingSection(t("profile.privacy_safety")) {
                         NavigationLink {
                             BlockedUsersView()
                         } label: {
                             HStack {
-                                Label("Blocked people", systemImage: "hand.raised")
+                                Label(t("moderation.blocked_title"), systemImage: "hand.raised")
                                     .foregroundStyle(.white)
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -93,14 +93,27 @@ struct ProfileView: View {
                         .buttonStyle(.plain)
                     }
 
-                    BookingSection("Legal") {
+                    BookingSection(t("profile.language")) {
+                        // Switches the whole app at once; the choice is remembered (see Localizer).
+                        Picker(t("profile.language"), selection: Binding(
+                            get: { Localizer.shared.language },
+                            set: { Localizer.shared.language = $0 })
+                        ) {
+                            ForEach(AppLanguage.allCases) { language in
+                                Text(language.nativeName).tag(language)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    BookingSection(t("profile.legal")) {
                         VStack(alignment: .leading, spacing: 14) {
-                            LegalLinkRow(title: "Terms of Use", systemImage: "doc.text", url: AppConfig.termsURL)
-                            LegalLinkRow(title: "Privacy Policy", systemImage: "lock.shield", url: AppConfig.privacyURL)
+                            LegalLinkRow(title: t("profile.terms"), systemImage: "doc.text", url: AppConfig.termsURL)
+                            LegalLinkRow(title: t("profile.privacy"), systemImage: "lock.shield", url: AppConfig.privacyURL)
                         }
                     }
 
-                    Button("Log out", systemImage: "rectangle.portrait.and.arrow.right") { confirmLogout = true }
+                    Button(t("profile.log_out"), systemImage: "rectangle.portrait.and.arrow.right") { confirmLogout = true }
                         .buttonStyle(.secondary)
 
                     Button {
@@ -110,7 +123,7 @@ struct ProfileView: View {
                         if model.isDeletingAccount {
                             ProgressView()
                         } else {
-                            Text("Delete account")
+                            Text(t("profile.delete_account"))
                         }
                     }
                     .font(.subheadline.weight(.semibold))
@@ -129,21 +142,21 @@ struct ProfileView: View {
                     CloseButton { dismiss() }
                 }
                 ToolbarItem(placement: .principal) {
-                    Text("Profile").displayTitle(18)
+                    Text(t("profile.title")).displayTitle(18)
                 }
             }
             // An alert rather than a confirmation dialog: centred, larger, and it dims the screen behind it.
-            .alert("Log out of JOYRIDR?", isPresented: $confirmLogout) {
-                Button("Cancel", role: .cancel) {}
-                Button("Log out", role: .destructive, action: onLogOut)
+            .alert(t("profile.log_out_title"), isPresented: $confirmLogout) {
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("profile.log_out"), role: .destructive, action: onLogOut)
             } message: {
-                Text("You'll need your email and password to log back in.")
+                Text(t("profile.log_out_message"))
             }
-            .alert("Delete your account?", isPresented: $confirmDelete) {
-                SecureField("Password", text: $deletePassword)
+            .alert(t("profile.delete_title"), isPresented: $confirmDelete) {
+                SecureField(t("auth.password"), text: $deletePassword)
                     .textContentType(.password)
-                Button("Cancel", role: .cancel) {}
-                Button("Delete", role: .destructive) {
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("common.delete"), role: .destructive) {
                     let password = deletePassword
                     deletePassword = ""
                     Task {
@@ -154,14 +167,14 @@ struct ProfileView: View {
                     }
                 }
             } message: {
-                Text("This can't be undone. Your upcoming rides are cancelled under the usual rules, and your profile, photos, cars, messages and review texts are deleted. Records of past rides and payments are kept without your details, as accounting rules require.\n\nEnter your password to confirm.")
+                Text(t("profile.delete_message"))
             }
-            .alert("Change username", isPresented: $editingUsername) {
-                TextField("Username", text: $newUsername)
+            .alert(t("profile.change_username"), isPresented: $editingUsername) {
+                TextField(t("auth.username"), text: $newUsername)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                Button("Cancel", role: .cancel) {}
-                Button("Save") {
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("common.save")) {
                     guard let user = session.me?.user else { return }
                     Task { if await model.changeUsername(to: newUsername, for: user) { await session.reloadMe() } }
                 }

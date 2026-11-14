@@ -86,7 +86,7 @@ final class CarEditorModel {
             guard let data = try? await item.loadTransferable(type: Data.self),
                   // At most 2000 px; the backend allows 10 MB per photo.
                   let (jpeg, preview) = JPEGImage.prepare(data, maxSide: 2000) else {
-                errorMessage = "One of the photos couldn't be read."
+                errorMessage = t("cars.editor.error_photo_read")
                 continue
             }
             if let car {
@@ -146,7 +146,7 @@ final class CarEditorModel {
             pendingPhotos = []
             if failed > 0 {
                 // The car exists now, so the sheet switches to editing it and the driver can retry.
-                errorMessage = "Your car was added, but \(failed) photo\(failed == 1 ? "" : "s") couldn't be uploaded. Try adding \(failed == 1 ? "it" : "them") again."
+                errorMessage = t("cars.editor.error_photo_upload", count: failed)
                 return false
             }
             return true
@@ -196,20 +196,20 @@ final class CarEditorModel {
         let trimmedColor = color.trimmingCharacters(in: .whitespaces)
         let maxYear = Calendar.current.component(.year, from: .now) + 1
 
-        guard !trimmedMake.isEmpty, !trimmedModel.isEmpty else { return fail("Enter the make and model, e.g. Porsche 911 GT3.") }
-        guard let yearValue = Int(year), (1950...maxYear).contains(yearValue) else { return fail("Enter a year between 1950 and \(maxYear).") }
-        guard !trimmedColor.isEmpty else { return fail("Enter the car's colour.") }
-        guard let hp = Int(horsepower), (1...3000).contains(hp) else { return fail("Enter the horsepower (1–3000).") }
+        guard !trimmedMake.isEmpty, !trimmedModel.isEmpty else { return fail(t("cars.editor.error_make")) }
+        guard let yearValue = Int(year), (1950...maxYear).contains(yearValue) else { return fail(t("cars.editor.error_year", ["max": maxYear])) }
+        guard !trimmedColor.isEmpty else { return fail(t("cars.editor.error_colour")) }
+        guard let hp = Int(horsepower), (1...3000).contains(hp) else { return fail(t("cars.editor.error_power")) }
 
         let acceleration = Self.decimal(zeroToHundred)
         if !zeroToHundred.trimmingCharacters(in: .whitespaces).isEmpty {
-            guard let acceleration, acceleration >= 1, acceleration <= 30 else { return fail("0–100 km/h should be between 1 and 30 seconds.") }
+            guard let acceleration, acceleration >= 1, acceleration <= 30 else { return fail(t("cars.editor.error_acceleration")) }
         }
         let speed = Int(topSpeed)
         if !topSpeed.trimmingCharacters(in: .whitespaces).isEmpty {
-            guard let speed, (50...600).contains(speed) else { return fail("Top speed should be between 50 and 600 km/h.") }
+            guard let speed, (50...600).contains(speed) else { return fail(t("cars.editor.error_top_speed")) }
         }
-        guard let price = Self.decimal(pricePerHour), price >= 1, price <= 100_000 else { return fail("Enter a price per hour, e.g. 180.") }
+        guard let price = Self.decimal(pricePerHour), price >= 1, price <= 100_000 else { return fail(t("cars.editor.error_price")) }
 
         let trimmedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPlate = licensePlate.trimmingCharacters(in: .whitespaces)

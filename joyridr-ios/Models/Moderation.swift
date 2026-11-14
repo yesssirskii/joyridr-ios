@@ -7,11 +7,11 @@ nonisolated enum ReportReason: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .spam: "Spam"
-        case .harassment: "Harassment or bullying"
-        case .inappropriate: "Inappropriate or offensive"
-        case .scam: "Scam or paying outside the app"
-        case .other: "Something else"
+        case .spam: t("moderation.reason.spam")
+        case .harassment: t("moderation.reason.harassment")
+        case .inappropriate: t("moderation.reason.inappropriate")
+        case .scam: t("moderation.reason.scam")
+        case .other: t("moderation.reason.other")
         }
     }
 }
@@ -21,9 +21,9 @@ nonisolated enum ReportKind: String, Codable, Hashable {
 
     var title: String {
         switch self {
-        case .user: "Person"
-        case .message: "Chat message"
-        case .review: "Review"
+        case .user: t("moderation.kind.user")
+        case .message: t("moderation.kind.message")
+        case .review: t("moderation.kind.review")
         }
     }
 }

@@ -16,20 +16,20 @@ struct MyRidesView: View {
 
                     // Same pills as the radius and sort buttons in Explore; the selected one glows.
                     HStack(spacing: 14) {
-                        viewPill(.upcoming, title: "Upcoming", systemImage: "calendar")
-                        viewPill(.past, title: "Past", systemImage: "clock.arrow.circlepath")
+                        viewPill(.upcoming, title: t("my_rides.upcoming"), systemImage: "calendar")
+                        viewPill(.past, title: t("my_rides.past"), systemImage: "clock.arrow.circlepath")
                     }
 
                     SectionTitle(
-                        title: model.view == .upcoming ? "Upcoming rides" : "Past rides",
-                        subtitle: model.view == .upcoming ? "Requested and confirmed" : "Completed, cancelled and declined")
+                        title: model.view == .upcoming ? t("my_rides.upcoming_title") : t("my_rides.past_title"),
+                        subtitle: model.view == .upcoming ? t("my_rides.upcoming_subtitle") : t("my_rides.past_subtitle"))
 
                     GlowCard {
                         rideList
                     }
 
                     if model.view == .upcoming && !model.timedOut.isEmpty {
-                        SectionTitle(title: "Timed-out rides", subtitle: "Never started, so you got a full refund")
+                        SectionTitle(title: t("my_rides.timed_out_title"), subtitle: t("my_rides.timed_out_subtitle_rider"))
                         GlowCard {
                             LazyVStack(spacing: 6) {
                                 ForEach(model.timedOut) { ride in
@@ -93,28 +93,28 @@ struct MyRidesView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load your rides", systemImage: "exclamationmark.triangle")
+                Label(t("my_rides.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.currentRides.isEmpty:
             if model.view == .upcoming {
                 ContentUnavailableView {
-                    Label("No upcoming rides", systemImage: "car.side")
+                    Label(t("my_rides.upcoming_empty"), systemImage: "car.side")
                 } description: {
-                    Text("Book a ride and it'll show up here.")
+                    Text(t("my_rides.upcoming_empty_message"))
                 } actions: {
-                    Button("Find a car") { selectRiderTab(.explore) }
+                    Button(t("my_rides.find_car")) { selectRiderTab(.explore) }
                         .buttonStyle(.primary)
                         .frame(width: 180)
                 }
             } else {
-                ContentUnavailableView("No past rides yet", systemImage: "clock.arrow.circlepath",
-                                       description: Text("Finished, cancelled and declined rides show up here."))
+                ContentUnavailableView(t("my_rides.past_empty"), systemImage: "clock.arrow.circlepath",
+                                       description: Text(t("my_rides.past_empty_message")))
             }
         case .loaded:
             LazyVStack(spacing: 6) {

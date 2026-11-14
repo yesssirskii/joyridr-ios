@@ -24,11 +24,7 @@ final class CarReviewsModel {
 
     /// "3 cars waiting" / "Nothing to review"
     var summary: String {
-        switch cars.count {
-        case 0: "Nothing to review"
-        case 1: "1 car waiting"
-        default: "\(cars.count) cars waiting"
-        }
+        cars.isEmpty ? t("admin.cars.nothing") : t("admin.cars.waiting", count: cars.count)
     }
 
     func load() async {

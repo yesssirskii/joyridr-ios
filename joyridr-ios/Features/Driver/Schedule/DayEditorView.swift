@@ -21,10 +21,10 @@ struct DayEditorView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
-                    BookingSection("Hours") {
+                    BookingSection(t("schedule.hours")) {
                         VStack(alignment: .leading, spacing: 14) {
                             if day.windows.isEmpty {
-                                Label("Day off: riders can't book you on \(day.title)s.", systemImage: "moon.zzz.fill")
+                                Label(t("schedule.day_off_hint", ["day": day.title]), systemImage: "moon.zzz.fill")
                                     .font(.subheadline)
                                     .foregroundStyle(Theme.textSecondary)
                             }
@@ -36,49 +36,49 @@ struct DayEditorView: View {
                             Button {
                                 addWindow()
                             } label: {
-                                Label(day.windows.isEmpty ? "Add hours" : "Add another block", systemImage: "plus.circle.fill")
+                                Label(day.windows.isEmpty ? t("schedule.add_hours") : t("schedule.add_block"), systemImage: "plus.circle.fill")
                             }
                             .buttonStyle(ChipStyle(isSelected: false))
                             .disabled(!canAddWindow)
 
-                            Text("Times are in \(timeZoneCity) time, in 30-minute steps. Split your day into blocks for breaks.")
+                            Text(t("schedule.times_note", ["city": timeZoneCity]))
                                 .font(.caption)
                                 .foregroundStyle(Theme.textSecondary)
                         }
                     }
 
-                    BookingSection("Quick presets") {
+                    BookingSection(t("schedule.presets")) {
                         ScrollView(.horizontal) {
                             HStack(spacing: 8) {
-                                preset("All day", [(8 * 60, 22 * 60)])
-                                preset("9 to 5", [(9 * 60, 17 * 60)])
-                                preset("Afternoon", [(13 * 60, 20 * 60)])
-                                preset("Evening", [(17 * 60, 22 * 60)])
-                                preset("Day off", [])
+                                preset(t("schedule.preset.all_day"), [(8 * 60, 22 * 60)])
+                                preset(t("schedule.preset.nine_to_five"), [(9 * 60, 17 * 60)])
+                                preset(t("schedule.preset.afternoon"), [(13 * 60, 20 * 60)])
+                                preset(t("schedule.preset.evening"), [(17 * 60, 22 * 60)])
+                                preset(t("schedule.day_off"), [])
                             }
                         }
                         .scrollIndicators(.hidden)
                     }
 
-                    BookingSection("Also apply to") {
+                    BookingSection(t("schedule.also_apply")) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 6) {
                                 ForEach(ScheduleModel.dayKeys, id: \.self) { key in
                                     let isThisDay = key == day.key
-                                    Button(String(key.prefix(2)).capitalized) {
+                                    Button(ScheduleModel.dayInitials(key)) {
                                         if alsoApplyTo.contains(key) { alsoApplyTo.remove(key) } else { alsoApplyTo.insert(key) }
                                     }
                                     .buttonStyle(ChipStyle(isSelected: isThisDay || alsoApplyTo.contains(key), fillsWidth: true))
                                     .disabled(isThisDay)
-                                    .accessibilityLabel(key.capitalized)
+                                    .accessibilityLabel(ScheduleModel.dayName(key))
                                 }
                             }
                             ScrollView(.horizontal) {
                                 HStack(spacing: 8) {
-                                    Button("Weekdays") { select(Array(ScheduleModel.dayKeys.prefix(5))) }
-                                    Button("Weekend") { select(["saturday", "sunday"]) }
-                                    Button("Every day") { select(ScheduleModel.dayKeys) }
-                                    Button("Clear") { alsoApplyTo = [] }
+                                    Button(t("schedule.weekdays")) { select(Array(ScheduleModel.dayKeys.prefix(5))) }
+                                    Button(t("schedule.weekend")) { select(["saturday", "sunday"]) }
+                                    Button(t("schedule.every_day")) { select(ScheduleModel.dayKeys) }
+                                    Button(t("schedule.clear")) { alsoApplyTo = [] }
                                 }
                                 .buttonStyle(ChipStyle(isSelected: false))
                             }
@@ -112,7 +112,7 @@ struct DayEditorView: View {
             Button(saveTitle) { Task { await save() } }
                 .buttonStyle(.primary(isLoading: isSaving))
                 .disabled(isSaving)
-            Text("Rides you already have aren't affected.")
+            Text(t("schedule.existing_rides"))
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -123,7 +123,7 @@ struct DayEditorView: View {
     }
 
     private var saveTitle: String {
-        alsoApplyTo.isEmpty ? "Save \(day.title)" : "Save \(alsoApplyTo.count + 1) days"
+        alsoApplyTo.isEmpty ? t("schedule.save_day", ["day": day.title]) : t("schedule.save_days", count: alsoApplyTo.count + 1)
     }
 
     /// There's room for another block if the day isn't full up to 23:30.
@@ -173,11 +173,11 @@ private struct WindowRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            TimeMenu(label: "From", minutes: $window.start)
+            TimeMenu(label: t("schedule.from"), minutes: $window.start)
             Image(systemName: "arrow.right")
                 .font(.footnote.weight(.bold))
                 .foregroundStyle(Theme.textSecondary)
-            TimeMenu(label: "To", minutes: $window.end)
+            TimeMenu(label: t("schedule.to"), minutes: $window.end)
             Spacer(minLength: 0)
             Button(action: onRemove) {
                 Image(systemName: "minus.circle.fill")
@@ -185,7 +185,7 @@ private struct WindowRow: View {
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(.white, Theme.accentRed)
             }
-            .accessibilityLabel("Remove \(window.label)")
+            .accessibilityLabel(t("schedule.remove_block", ["block": window.label]))
         }
     }
 }

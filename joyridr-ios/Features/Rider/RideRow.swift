@@ -20,7 +20,7 @@ struct RideRow: View {
                         .foregroundStyle(Theme.textSecondary)
                     StatusChip(status: ride.status, isTimedOut: ride.isTimedOut)
                 }
-                Text("\(ride.startsAt.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))), \(ride.startsAt.formatted(date: .omitted, time: .shortened)) · \(durationLabel(ride.durationMinutes)) · \(ride.price.price(ride.currency))")
+                Text("\(ride.startsAt.localized(.dateTime.weekday(.abbreviated).day().month(.abbreviated))), \(ride.startsAt.localized(date: .omitted, time: .shortened)) · \(durationLabel(ride.durationMinutes)) · \(ride.price.price(ride.currency))")
                     .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)

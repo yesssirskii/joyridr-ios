@@ -29,7 +29,7 @@ struct ConversationView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Text(model.otherUser.displayName)
                                 .font(.headline)
-                            Text(model.otherUser.isDriver ? "Driver" : "Rider")
+                            Text(model.otherUser.isDriver ? t("booking.car_info.driver") : t("chat.rider"))
                                 .font(.caption)
                                 .foregroundStyle(Theme.textSecondary)
                         }
@@ -37,16 +37,16 @@ struct ConversationView: View {
                     .accessibilityElement(children: .combine)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Menu("More", systemImage: "ellipsis") {
-                        Button("Report \(model.otherUser.firstName)", systemImage: "flag") {
+                    Menu(t("common.more"), systemImage: "ellipsis") {
+                        Button(t("moderation.report_name", ["name": model.otherUser.firstName]), systemImage: "flag") {
                             reportTarget = .user(id: model.otherUser.id, name: model.otherUser.displayName)
                         }
                         if model.blockedByMe {
-                            Button("Unblock \(model.otherUser.firstName)", systemImage: "hand.raised.slash") {
+                            Button(t("moderation.unblock_name", ["name": model.otherUser.firstName]), systemImage: "hand.raised.slash") {
                                 Task { await model.unblock() }
                             }
                         } else {
-                            Button("Block \(model.otherUser.firstName)", systemImage: "hand.raised", role: .destructive) {
+                            Button(t("moderation.block_name", ["name": model.otherUser.firstName]), systemImage: "hand.raised", role: .destructive) {
                                 confirmBlock = true
                             }
                         }
@@ -61,15 +61,15 @@ struct ConversationView: View {
             .sheet(item: $reportTarget) { target in
                 ReportSheet(target: target) { _ in Task { await model.didBlock() } }
             }
-            .alert("Block \(model.otherUser.firstName)?", isPresented: $confirmBlock) {
-                Button("Cancel", role: .cancel) {}
-                Button("Block", role: .destructive) { Task { await model.block() } }
+            .alert(t("moderation.block_question", ["name": model.otherUser.firstName]), isPresented: $confirmBlock) {
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("moderation.block"), role: .destructive) { Task { await model.block() } }
             } message: {
-                Text("You won't be able to message or book each other. You can unblock them later from this chat or your profile.")
+                Text(t("chat.block_message"))
             }
-            .alert("Something went wrong", isPresented: Binding(
+            .alert(t("common.something_wrong"), isPresented: Binding(
                 get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
-                Button("OK", role: .cancel) {}
+                Button(t("common.ok"), role: .cancel) {}
             } message: {
                 Text(model.errorMessage ?? "")
             }
@@ -90,11 +90,11 @@ struct ConversationView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't open the chat", systemImage: "exclamationmark.triangle")
+                Label(t("chat.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
@@ -113,7 +113,7 @@ struct ConversationView: View {
                         if model.isLoadingEarlier {
                             ProgressView()
                         } else {
-                            Text("Load earlier messages")
+                            Text(t("chat.load_earlier"))
                         }
                     }
                     .buttonStyle(ChipStyle(isSelected: false))
@@ -131,9 +131,9 @@ struct ConversationView: View {
                     MessageBubble(text: message.body, isMine: message.isMine, time: message.createdAt)
                         .id(message.id)
                         .contextMenu {
-                            Button("Copy", systemImage: "doc.on.doc") { UIPasteboard.general.string = message.body }
+                            Button(t("chat.copy"), systemImage: "doc.on.doc") { UIPasteboard.general.string = message.body }
                             if !message.isMine {
-                                Button("Report message", systemImage: "flag") {
+                                Button(t("moderation.report_message"), systemImage: "flag") {
                                     reportTarget = .message(message, authorID: model.otherUser.id, authorName: model.otherUser.displayName)
                                 }
                             }
@@ -148,8 +148,8 @@ struct ConversationView: View {
                         }
                         .contextMenu {
                             if message.failed {
-                                Button("Try again", systemImage: "arrow.clockwise") { Task { await model.retry(message) } }
-                                Button("Delete", systemImage: "trash", role: .destructive) { model.discard(message) }
+                                Button(t("common.try_again"), systemImage: "arrow.clockwise") { Task { await model.retry(message) } }
+                                Button(t("common.delete"), systemImage: "trash", role: .destructive) { model.discard(message) }
                             }
                         }
                 }
@@ -167,11 +167,11 @@ struct ConversationView: View {
             Image(systemName: "hand.wave.fill")
                 .font(.largeTitle)
                 .foregroundStyle(Theme.accentRed)
-            Text("Start the conversation")
+            Text(t("chat.start_title"))
                 .font(.headline)
             Text(model.otherUser.isDriver
-                 ? "Ask \(model.otherUser.firstName) about the car, the route or where to meet."
-                 : "Say hi to \(model.otherUser.firstName) and sort out the details of the ride.")
+                 ? t("chat.start_with_driver", ["name": model.otherUser.firstName])
+                 : t("chat.start_with_rider", ["name": model.otherUser.firstName]))
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -183,7 +183,7 @@ struct ConversationView: View {
     private var inputBar: some View {
         HStack(alignment: .bottom, spacing: 10) {
             TextField("", text: $model.draft,
-                      prompt: Text("Message \(model.otherUser.firstName)").foregroundStyle(Theme.textSecondary),
+                      prompt: Text(t("chat.message_name", ["name": model.otherUser.firstName])).foregroundStyle(Theme.textSecondary),
                       axis: .vertical)
                 .lineLimit(1...5)
                 .focused($inputFocused)
@@ -206,7 +206,7 @@ struct ConversationView: View {
                     .background(model.canSend ? Theme.brandRed : Theme.card, in: Circle())
             }
             .disabled(!model.canSend)
-            .accessibilityLabel("Send")
+            .accessibilityLabel(t("chat.send"))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -220,12 +220,12 @@ struct ConversationView: View {
     private var blockedBar: some View {
         VStack(spacing: 8) {
             Text(model.blockedByMe
-                 ? "You blocked \(model.otherUser.firstName)."
-                 : "You can't reply to this conversation.")
+                 ? t("chat.you_blocked", ["name": model.otherUser.firstName])
+                 : t("chat.cannot_reply"))
                 .font(.subheadline)
                 .foregroundStyle(Theme.textSecondary)
             if model.blockedByMe {
-                Button("Unblock") { Task { await model.unblock() } }
+                Button(t("moderation.unblock")) { Task { await model.unblock() } }
                     .buttonStyle(ChipStyle(isSelected: false))
                     .disabled(model.isChangingBlock)
             }
@@ -277,16 +277,16 @@ private struct MessageBubble: View {
         switch status {
         case .sent:
             if let time {
-                Text(time.formatted(date: .omitted, time: .shortened))
+                Text(time.localized(date: .omitted, time: .shortened))
                     .font(.caption2)
                     .foregroundStyle(Theme.textSecondary)
             }
         case .sending:
-            Text("Sending…")
+            Text(t("chat.sending"))
                 .font(.caption2)
                 .foregroundStyle(Theme.textSecondary)
         case .failed:
-            Label("Not sent. Tap to retry", systemImage: "exclamationmark.circle.fill")
+            Label(t("chat.not_sent"), systemImage: "exclamationmark.circle.fill")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(Theme.accentRed)
         }
@@ -309,9 +309,9 @@ private struct DayHeader: View {
     }
 
     private var title: String {
-        if Calendar.current.isDateInToday(date) { return "Today" }
-        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
-        return date.formatted(.dateTime.weekday(.wide).day().month(.wide))
+        if Calendar.current.isDateInToday(date) { return t("common.today_title") }
+        if Calendar.current.isDateInYesterday(date) { return t("common.yesterday") }
+        return date.localized(.dateTime.weekday(.wide).day().month(.wide))
     }
 }
 

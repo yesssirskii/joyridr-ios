@@ -7,13 +7,13 @@ struct DriverHomeView: View {
 
     var body: some View {
         TabView {
-            Tab("Requests", systemImage: "tray.full.fill") {
+            Tab(t("tabs.requests"), systemImage: "tray.full.fill") {
                 RequestsView()
             }
-            Tab("My cars", systemImage: "car.2.fill") {
+            Tab(t("tabs.my_cars"), systemImage: "car.2.fill") {
                 MyCarsView()
             }
-            Tab("Schedule", systemImage: "calendar") {
+            Tab(t("tabs.schedule"), systemImage: "calendar") {
                 ScheduleView()
             }
         }

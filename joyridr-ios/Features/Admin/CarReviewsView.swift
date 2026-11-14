@@ -13,7 +13,7 @@ struct CarReviewsView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     HomeHeader()
 
-                    SectionTitle(title: "Car reviews", subtitle: model.summary)
+                    SectionTitle(title: t("admin.cars.list_title"), subtitle: model.summary)
 
                     GlowCard {
                         carList
@@ -49,17 +49,17 @@ struct CarReviewsView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load the review queue", systemImage: "exclamationmark.triangle")
+                Label(t("admin.cars.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.cars.isEmpty:
-            ContentUnavailableView("All caught up", systemImage: "checkmark.seal",
-                                   description: Text("New cars from drivers show up here for review."))
+            ContentUnavailableView(t("admin.caught_up"), systemImage: "checkmark.seal",
+                                   description: Text(t("admin.cars.empty_message")))
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.cars) { car in
@@ -94,7 +94,7 @@ struct CarReviewRow: View {
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
-                Text("by \(car.driver.displayName) · \(car.pricePerHour.price(car.currency))/h")
+                Text(t("admin.cars.by", ["name": car.driver.displayName, "price": t("explore.price_per_hour", ["price": car.pricePerHour.price(car.currency)])]))
                     .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)

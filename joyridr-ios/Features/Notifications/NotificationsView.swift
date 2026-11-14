@@ -22,7 +22,7 @@ struct NotificationsView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    SectionTitle(title: "Notifications", subtitle: subtitle)
+                    SectionTitle(title: t("notifications.title"), subtitle: subtitle)
                     GlowCard {
                         content
                     }
@@ -36,7 +36,7 @@ struct NotificationsView: View {
             .toolbar {
                 if model.hasUnread {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Mark all read", systemImage: "checkmark.circle") {
+                        Button(t("notifications.mark_all_read"), systemImage: "checkmark.circle") {
                             Task {
                                 await model.markAllRead()
                                 await badge?.refresh()
@@ -51,11 +51,11 @@ struct NotificationsView: View {
             .refreshable { await model.load() }
             .task { await model.load() }
             .animation(.snappy, value: model.items)
-            .alert("Something went wrong", isPresented: Binding(
+            .alert(t("common.something_wrong"), isPresented: Binding(
                 get: { model.errorMessage != nil },
                 set: { if !$0 { model.errorMessage = nil } })
             ) {
-                Button("OK", role: .cancel) {}
+                Button(t("common.ok"), role: .cancel) {}
             } message: {
                 Text(model.errorMessage ?? "")
             }
@@ -80,7 +80,7 @@ struct NotificationsView: View {
     private var subtitle: String {
         guard model.state == .loaded else { return " " }
         let unread = model.items.filter { !$0.isRead }.count
-        return unread == 0 ? "You're all caught up" : "\(unread) unread"
+        return unread == 0 ? t("notifications.caught_up") : t("common.unread", count: unread)
     }
 
     @ViewBuilder
@@ -91,21 +91,21 @@ struct NotificationsView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load notifications", systemImage: "exclamationmark.triangle")
+                Label(t("notifications.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.items.isEmpty:
             ContentUnavailableView(
-                "No notifications yet",
+                t("notifications.empty"),
                 systemImage: "bell",
                 description: Text(isDriver
-                    ? "New ride requests, cancellations and reviews show up here."
-                    : "Updates about your rides show up here, like when a driver confirms."))
+                    ? t("notifications.empty_driver")
+                    : t("notifications.empty_rider")))
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.items) { notification in
@@ -180,14 +180,14 @@ private struct NotificationRow: View {
         .padding(.vertical, 8)
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
-        .accessibilityValue(notification.isRead ? "" : "Unread")
+        .accessibilityValue(notification.isRead ? "" : t("notifications.unread"))
     }
 
     private var timeText: String {
         let date = notification.createdAt
-        if Calendar.current.isDateInToday(date) { return date.formatted(date: .omitted, time: .shortened) }
-        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
-        return date.formatted(.dateTime.day().month(.abbreviated))
+        if Calendar.current.isDateInToday(date) { return date.localized(date: .omitted, time: .shortened) }
+        if Calendar.current.isDateInYesterday(date) { return t("common.yesterday") }
+        return date.localized(.dateTime.day().month(.abbreviated))
     }
 }
 

@@ -31,23 +31,23 @@ struct MyCarsView: View {
                         Button {
                             editor = .new
                         } label: {
-                            FilterPill(systemImage: "plus.circle.fill", title: "Add car")
+                            FilterPill(systemImage: "plus.circle.fill", title: t("cars.add"))
                         }
                         .buttonStyle(.plain)
                         .matchedTransitionSource(id: EditorTarget.new.id, in: carTransition)
 
                         Menu {
-                            Picker("Show", selection: $model.filter) {
+                            Picker(t("cars.show"), selection: $model.filter) {
                                 ForEach(MyCarsModel.Filter.allCases) { filter in
-                                    Label(filter.rawValue, systemImage: filter.systemImage).tag(filter)
+                                    Label(filter.title, systemImage: filter.systemImage).tag(filter)
                                 }
                             }
                         } label: {
-                            FilterPill(systemImage: model.filter.systemImage, title: model.filter.rawValue, fillsWidth: false)
+                            FilterPill(systemImage: model.filter.systemImage, title: model.filter.title, fillsWidth: false)
                         }
                     }
 
-                    SectionTitle(title: "My cars", subtitle: model.summary)
+                    SectionTitle(title: t("tabs.my_cars"), subtitle: model.summary)
 
                     GlowCard {
                         carList
@@ -90,27 +90,27 @@ struct MyCarsView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load your cars", systemImage: "exclamationmark.triangle")
+                Label(t("cars.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.cars.isEmpty:
             ContentUnavailableView {
-                Label("Your garage is empty", systemImage: "car.side")
+                Label(t("cars.empty"), systemImage: "car.side")
             } description: {
-                Text("Add your sports car or supercar. Our team reviews every car before JoyRiders can book it.")
+                Text(t("cars.empty_message"))
             } actions: {
-                Button("Add a car") { editor = .new }
+                Button(t("cars.add")) { editor = .new }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.visibleCars.isEmpty:
-            ContentUnavailableView("No \(model.filter.rawValue.lowercased()) cars", systemImage: model.filter.systemImage,
-                                   description: Text("Pick another filter to see the rest of your garage."))
+            ContentUnavailableView(t("cars.filter_empty"), systemImage: model.filter.systemImage,
+                                   description: Text(t("cars.filter_empty_message")))
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.visibleCars) { car in
@@ -155,7 +155,7 @@ struct DriverCarRow: View {
                         .lineLimit(1)
                     CarStatusChip(car: car)
                 }
-                Text("\(car.pricePerHour.price(car.currency))/h · \(car.horsepower) hp · \(car.passengerSeats) \(car.passengerSeats == 1 ? "seat" : "seats")")
+                Text("\(t("explore.price_per_hour", ["price": car.pricePerHour.price(car.currency)])) · \(car.horsepower) \(t("cars.spec.hp")) · \(car.passengerSeats) \(t("cars.spec.seats", count: car.passengerSeats))")
                     .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
@@ -190,9 +190,9 @@ struct CarStatusChip: View {
 
     private var title: String {
         switch car.status {
-        case .pendingReview: "In review"
-        case .rejected: "Rejected"
-        case .approved: car.isActive ? "Live" : "Hidden"
+        case .pendingReview: t("cars.filter.in_review")
+        case .rejected: t("cars.filter.rejected")
+        case .approved: car.isActive ? t("cars.filter.live") : t("cars.filter.hidden")
         }
     }
 
