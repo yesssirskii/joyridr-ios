@@ -8,7 +8,7 @@ nonisolated enum UserRole: String, Codable, Hashable {
         switch self {
         case .joyRider: "JoyRider"
         case .joyDriver: "JoyDriver"
-        case .admin: "Admin"
+        case .admin: t("roles.admin")
         }
     }
 }
@@ -30,7 +30,7 @@ nonisolated struct User: Codable, Hashable, Identifiable {
 
 /// The backend's username rules, so the app can say what's wrong before sending.
 nonisolated enum Username {
-    static let rules = "3–20 characters: letters, numbers, dots and underscores."
+    static var rules: String { t("auth.username_rules") }
 
     /// "@Ivan.Kovac " -> "ivan.kovac", the form the backend stores.
     static func normalize(_ text: String) -> String {

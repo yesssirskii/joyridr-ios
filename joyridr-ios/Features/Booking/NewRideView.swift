@@ -33,11 +33,11 @@ struct NewRideView: View {
                         CloseButton { dismiss() }
                     }
                     ToolbarItem(placement: .principal) {
-                        Text("New ride").displayTitle(18)
+                        Text(t("booking.new.title")).displayTitle(18)
                     }
                     ToolbarItemGroup(placement: .keyboard) {
                         Spacer()
-                        Button("Done") {
+                        Button(t("common.done")) {
                             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                         }
                     }
@@ -57,7 +57,7 @@ struct NewRideView: View {
             VStack(alignment: .leading, spacing: 26) {
                 carSummary
 
-                BookingSection("Choose date & time") {
+                BookingSection(t("booking.new.date_time")) {
                     VStack(alignment: .leading, spacing: 18) {
                         dayStrip
                         durationPicker
@@ -65,12 +65,12 @@ struct NewRideView: View {
                     }
                 }
 
-                BookingSection("Meeting point") {
+                BookingSection(t("ride.meeting_point")) {
                     meetingPointOptions
                 }
 
-                BookingSection("Note to driver") {
-                    TextField("", text: $model.note, prompt: Text("Anything \(model.car.driver.firstName) should know?").foregroundStyle(Theme.textSecondary), axis: .vertical)
+                BookingSection(t("booking.new.note")) {
+                    TextField("", text: $model.note, prompt: Text(t("booking.new.note_prompt", ["driver": model.car.driver.firstName])).foregroundStyle(Theme.textSecondary), axis: .vertical)
                         .lineLimit(2...4)
                 }
             }
@@ -150,12 +150,12 @@ struct NewRideView: View {
                 Text(message)
                     .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
-                Button("Try again") { Task { await model.loadSlots() } }
+                Button(t("common.try_again")) { Task { await model.loadSlots() } }
                     .buttonStyle(ChipStyle(isSelected: false))
             }
             .frame(maxWidth: .infinity)
         case .loaded where model.slots.isEmpty:
-            Text("No free times on this day. Try another day or a shorter ride.")
+            Text(t("booking.new.no_slots"))
                 .font(.footnote)
                 .foregroundStyle(Theme.textSecondary)
                 .frame(maxWidth: .infinity, minHeight: 44)
@@ -198,7 +198,7 @@ struct NewRideView: View {
 
             if model.meetingPoint != .riderComesToDriver {
                 TextField("", text: $model.address, prompt: Text(model.meetingPoint == .driverComesToRider
-                    ? "Address or landmark (optional)" : "Suggested spot (optional)").foregroundStyle(Theme.textSecondary))
+                    ? t("booking.new.address_prompt") : t("booking.new.spot_prompt")).foregroundStyle(Theme.textSecondary))
                     .textContentType(.fullStreetAddress)
                     .padding(.horizontal, 16)
                     .frame(height: 46)
@@ -226,14 +226,14 @@ struct NewRideView: View {
 
             FormError(message: model.errorMessage)
 
-            Button(model.selectedSlot == nil ? "Pick a time" : "Request ride · \(model.totalPrice.price(model.car.car.currency))") {
+            Button(model.selectedSlot == nil ? t("booking.new.pick_time") : t("booking.new.request", ["price": model.totalPrice.price(model.car.car.currency)])) {
                 Task { await model.requestRide() }
             }
             .buttonStyle(.primary(isLoading: model.isSubmitting))
             .disabled(!model.canSubmit)
             .opacity(model.selectedSlot == nil ? 0.5 : 1)
 
-            Text("You're only charged once \(model.car.driver.firstName) confirms. Free cancellation up to 24 h before the ride.")
+            Text(t("booking.new.charge_note", ["driver": model.car.driver.firstName]))
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)

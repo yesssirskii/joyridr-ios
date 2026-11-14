@@ -22,11 +22,7 @@ final class ReportsModel {
     }
 
     var summary: String {
-        switch reports.count {
-        case 0: "Nothing reported"
-        case 1: "1 open report"
-        default: "\(reports.count) open reports"
-        }
+        reports.isEmpty ? t("admin.reports.nothing") : t("admin.reports.open", count: reports.count)
     }
 
     func load() async {

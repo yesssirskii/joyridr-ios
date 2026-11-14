@@ -78,7 +78,7 @@ final class SessionStore {
     /// The tokens are already revoked, so there's nothing to tell the server.
     func accountDeleted() {
         tokens.clear()
-        signedOutNotice = "Your account and personal data were deleted. Thanks for riding with JOYRIDR."
+        signedOutNotice = t("auth.account_deleted_notice")
         state = .signedOut
     }
 

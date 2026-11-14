@@ -26,16 +26,22 @@ final class ScheduleModel {
         var windows: [Window]
 
         var id: String { key }
-        var title: String { key.prefix(1).uppercased() + key.dropFirst() }
-        var short: String { String(key.prefix(3)).uppercased() }
+        var title: String { ScheduleModel.dayName(key) }
+        var short: String { t("days.short.\(key)") }
         var totalMinutes: Int { windows.reduce(0) { $0 + $1.minutes } }
         var summary: String {
-            windows.isEmpty ? "Day off" : windows.sorted { $0.start < $1.start }.map(\.label).joined(separator: " · ")
+            windows.isEmpty ? t("schedule.day_off") : windows.sorted { $0.start < $1.start }.map(\.label).joined(separator: " · ")
         }
     }
 
     /// Monday first, like a Croatian calendar.
     static let dayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    /// "Monday" / "Ponedjeljak" for "monday".
+    static func dayName(_ key: String) -> String { t("days.name.\(key)") }
+
+    /// "Mo" / "Po", for the small day chips.
+    static func dayInitials(_ key: String) -> String { t("days.initials.\(key)") }
+
     /// Start/end times the backend accepts: every 30 minutes, 00:00–23:30.
     static let slots = Array(stride(from: 0, through: 23 * 60 + 30, by: 30))
 
@@ -61,7 +67,7 @@ final class ScheduleModel {
     /// "52 h a week"
     var weeklyTotal: String {
         let minutes = days.reduce(0) { $0 + $1.totalMinutes }
-        return minutes == 0 ? "No hours set yet" : "\(Self.hours(minutes)) a week"
+        return minutes == 0 ? t("schedule.no_hours") : t("schedule.per_week", ["hours": Self.hours(minutes)])
     }
 
     /// "Zagreb" from "Europe/Zagreb".
@@ -164,17 +170,17 @@ final class ScheduleModel {
 
     /// 90 → "1.5 h", 600 → "10 h"
     static func hours(_ minutes: Int) -> String {
-        "\((Double(minutes) / 60).formatted(.number.precision(.fractionLength(0...1)))) h"
+        t("common.hours_short", ["value": (Double(minutes) / 60).formatted(.number.locale(Localizer.shared.locale).precision(.fractionLength(0...1)).locale(Localizer.shared.locale))])
     }
 
     /// Checks one day's windows the way the backend does. Returns a message, or nil when they're fine.
     static func validate(_ windows: [Window]) -> String? {
         let sorted = windows.sorted { $0.start < $1.start }
         if sorted.contains(where: { $0.end <= $0.start }) {
-            return "Each block has to end after it starts."
+            return t("schedule.error_order")
         }
         for (previous, next) in zip(sorted, sorted.dropFirst()) where next.start < previous.end {
-            return "\(previous.label) and \(next.label) overlap."
+            return t("schedule.error_overlap", ["first": previous.label, "second": next.label])
         }
         return nil
     }

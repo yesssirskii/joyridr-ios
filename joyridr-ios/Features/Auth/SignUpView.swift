@@ -25,9 +25,9 @@ struct SignUpView: View {
                     .padding(.bottom, 20)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Create a new account")
+                    Text(t("auth.signup.title"))
                         .font(.headline)
-                    Text("as a \(role.title)")
+                    Text(t("auth.signup.as_role", ["role": role.title]))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -39,13 +39,13 @@ struct SignUpView: View {
                     FieldGroup {
                         // The backend needs first and last name separately (it shows "Ivan K." to others).
                         HStack(spacing: 0) {
-                            FormTextField(placeholder: "First name", text: $firstName)
+                            FormTextField(placeholder: t("auth.signup.first_name"), text: $firstName)
                                 .textContentType(.givenName)
                                 .focused($focusedField, equals: .firstName)
                                 .submitLabel(.next)
                                 .onSubmit { focusedField = .lastName }
                             FieldDivider(.vertical)
-                            FormTextField(placeholder: "Last name", text: $lastName)
+                            FormTextField(placeholder: t("auth.signup.last_name"), text: $lastName)
                                 .textContentType(.familyName)
                                 .focused($focusedField, equals: .lastName)
                                 .submitLabel(.next)
@@ -54,7 +54,7 @@ struct SignUpView: View {
 
                         FieldDivider()
 
-                        FormTextField(placeholder: "Username", text: $username)
+                        FormTextField(placeholder: t("auth.username"), text: $username)
                             .textContentType(.username)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
@@ -64,7 +64,7 @@ struct SignUpView: View {
 
                         FieldDivider()
 
-                        FormTextField(placeholder: "Email", text: $email)
+                        FormTextField(placeholder: t("auth.email"), text: $email)
                             .textContentType(.emailAddress)
                             .keyboardType(.emailAddress)
                             .textInputAutocapitalization(.never)
@@ -75,7 +75,7 @@ struct SignUpView: View {
 
                         FieldDivider()
 
-                        FormTextField(placeholder: "Password", text: $password, isSecure: true)
+                        FormTextField(placeholder: t("auth.password"), text: $password, isSecure: true)
                             .textContentType(.newPassword)
                             .focused($focusedField, equals: .password)
                             .submitLabel(.go)
@@ -84,9 +84,9 @@ struct SignUpView: View {
 
                     // The rules sit under the box now; each turns red while its field breaks it.
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Username — \(Username.rules)")
+                        Text(t("auth.signup.username_hint", ["rules": Username.rules]))
                             .foregroundStyle(username.isEmpty || Username.isValid(Username.normalize(username)) ? Theme.textSecondary : Theme.accentRed)
-                        Text("Password — at least 8 characters.")
+                        Text(t("auth.password_rule"))
                             .foregroundStyle(password.isEmpty || password.count >= 8 ? Theme.textSecondary : Theme.accentRed)
                     }
                     .font(.caption)
@@ -103,7 +103,7 @@ struct SignUpView: View {
                         .padding(.horizontal, 12)
                         .padding(.bottom, 4)
 
-                    Button("Sign Up", action: signUp)
+                    Button(t("auth.signup.button"), action: signUp)
                         .buttonStyle(.primary(isLoading: isLoading))
                         .disabled(isLoading)
                 }
@@ -134,8 +134,8 @@ struct SignUpView: View {
                     .foregroundStyle(agreedToTerms ? Theme.accentRed : Theme.textSecondary)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("I agree to the Terms of Use and Privacy Policy")
-            .accessibilityValue(agreedToTerms ? "Agreed" : "Not agreed")
+            .accessibilityLabel(t("auth.signup.terms_accessibility"))
+            .accessibilityValue(agreedToTerms ? t("auth.signup.agreed") : t("auth.signup.not_agreed"))
 
             Text(Self.termsText)
                 .font(.caption)
@@ -144,15 +144,15 @@ struct SignUpView: View {
         }
     }
 
-    private static let termsError = "Please agree to the Terms of Use and Privacy Policy."
+    private static var termsError: String { t("auth.signup.terms_error") }
 
-    /// Built from Markdown so the two names become links. (Putting the URLs straight into `Text("…")`
-    /// doesn't work: SwiftUI reads the Markdown before it fills in the values.)
-    private static let termsText: AttributedString = {
-        let markdown = "I agree to the [Terms of Use](\(AppConfig.termsURL.absoluteString)) and "
-            + "[Privacy Policy](\(AppConfig.privacyURL.absoluteString)), including no tolerance for abusive content."
+    /// Built from Markdown so the two names become links. The translation holds the Markdown, with
+    /// `{{terms}}` and `{{privacy}}` where the URLs go. Computed, so it follows a language change.
+    private static var termsText: AttributedString {
+        let markdown = t("auth.signup.terms_markdown", ["terms": AppConfig.termsURL.absoluteString,
+                                                        "privacy": AppConfig.privacyURL.absoluteString])
         guard var text = try? AttributedString(markdown: markdown) else {
-            return AttributedString("I agree to the Terms of Use and Privacy Policy, including no tolerance for abusive content.")
+            return AttributedString(t("auth.signup.terms_plain"))
         }
         // Underlined and white, so the links stand out from the grey text around them.
         for run in text.runs where run.link != nil {
@@ -160,13 +160,13 @@ struct SignUpView: View {
             text[run.range].foregroundColor = .white
         }
         return text
-    }()
+    }
 
     private var footer: some View {
         HStack(spacing: 4) {
-            Text("Already have an account?")
+            Text(t("auth.signup.have_account"))
                 .foregroundStyle(Theme.textSecondary)
-            Button("Log in.", action: onLogIn)
+            Button(t("auth.signup.log_in_link"), action: onLogIn)
                 .underline()
         }
         .font(.subheadline)
@@ -181,13 +181,13 @@ struct SignUpView: View {
         let cleanUsername = Username.normalize(username)
 
         if first.isEmpty || last.isEmpty {
-            errorMessage = "Enter your first and last name."
+            errorMessage = t("auth.signup.error_name")
         } else if !Username.isValid(cleanUsername) {
-            errorMessage = "Usernames are \(Username.rules)"
+            errorMessage = t("auth.username_error", ["rules": Username.rules])
         } else if !trimmedEmail.contains("@") {
-            errorMessage = "Enter a valid email address."
+            errorMessage = t("auth.signup.error_email")
         } else if password.count < 8 {
-            errorMessage = "Your password needs at least 8 characters."
+            errorMessage = t("auth.signup.error_password")
         } else if !agreedToTerms {
             errorMessage = Self.termsError
         } else {

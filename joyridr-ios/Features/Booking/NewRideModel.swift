@@ -81,7 +81,7 @@ final class NewRideModel {
     func format(_ date: Date, _ style: Date.FormatStyle) -> String {
         var style = style
         style.timeZone = timeZone
-        return date.formatted(style)
+        return date.localized(style)
     }
 
     // MARK: Loading
@@ -131,10 +131,10 @@ final class NewRideModel {
                 latitude = coordinate.latitude
                 longitude = coordinate.longitude
             case .denied:
-                errorMessage = "Allow location access so \(car.driver.firstName) knows where to pick you up, or choose another meeting option."
+                errorMessage = t("booking.new.error_location_denied", ["driver": car.driver.firstName])
                 return
             case .unavailable:
-                errorMessage = "Couldn't find your location. Try again, or choose another meeting option."
+                errorMessage = t("booking.new.error_location_unavailable")
                 return
             }
         }
@@ -180,22 +180,24 @@ extension MeetingPointType {
     /// How the option is worded for the rider.
     func riderTitle(driver: String) -> String {
         switch self {
-        case .driverComesToRider: "Pick me up"
-        case .riderComesToDriver: "I'll go to \(driver)"
-        case .agreedLocation: "We'll agree on a spot"
+        case .driverComesToRider: t("meeting.rider.pick_me_up")
+        case .riderComesToDriver: t("meeting.rider.go_to_driver", ["driver": driver])
+        case .agreedLocation: t("meeting.rider.agree")
         }
     }
 
     func riderSubtitle(driver: String) -> String {
         switch self {
-        case .driverComesToRider: "\(driver) comes to your current location."
-        case .riderComesToDriver: "The address is shared once \(driver) confirms."
-        case .agreedLocation: "Suggest a place now, or sort it out in chat."
+        case .driverComesToRider: t("meeting.rider.pick_me_up_detail", ["driver": driver])
+        case .riderComesToDriver: t("meeting.rider.go_to_driver_detail", ["driver": driver])
+        case .agreedLocation: t("meeting.rider.agree_detail")
         }
     }
 }
 
 /// "30 min", "1 h", "1.5 h"…
 func durationLabel(_ minutes: Int) -> String {
-    minutes < 60 ? "\(minutes) min" : "\((Double(minutes) / 60).formatted(.number.precision(.fractionLength(0...1)))) h"
+    minutes < 60
+        ? t("common.minutes_short", ["value": minutes])
+        : t("common.hours_short", ["value": (Double(minutes) / 60).formatted(.number.locale(Localizer.shared.locale).precision(.fractionLength(0...1)).locale(Localizer.shared.locale))])
 }

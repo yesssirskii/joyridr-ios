@@ -17,24 +17,24 @@ struct TimeOffEditorView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
-                    BookingSection("When") {
+                    BookingSection(t("ride.when")) {
                         VStack(spacing: 0) {
-                            Toggle("All day", isOn: $allDay)
+                            Toggle(t("schedule.preset.all_day"), isOn: $allDay)
                                 .tint(Theme.accentRed)
                                 .padding(.vertical, 8)
                             Divider().overlay(.white.opacity(0.1))
-                            DatePicker(allDay ? "First day" : "Starts", selection: $start, in: Date.now...,
+                            DatePicker(allDay ? t("schedule.first_day") : t("schedule.starts"), selection: $start, in: Date.now...,
                                        displayedComponents: allDay ? .date : [.date, .hourAndMinute])
                                 .padding(.vertical, 8)
                             Divider().overlay(.white.opacity(0.1))
-                            DatePicker(allDay ? "Last day" : "Ends", selection: $end, in: start...,
+                            DatePicker(allDay ? t("schedule.last_day") : t("schedule.ends"), selection: $end, in: start...,
                                        displayedComponents: allDay ? .date : [.date, .hourAndMinute])
                                 .padding(.vertical, 8)
                         }
                     }
 
-                    BookingSection("Reason") {
-                        TextField("", text: $reason, prompt: Text("Holiday, car in service… (optional)").foregroundStyle(Theme.textSecondary))
+                    BookingSection(t("schedule.reason")) {
+                        TextField("", text: $reason, prompt: Text(t("schedule.reason_prompt")).foregroundStyle(Theme.textSecondary))
                             .submitLabel(.done)
                     }
 
@@ -55,7 +55,7 @@ struct TimeOffEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Time off").displayTitle(18)
+                    Text(t("schedule.time_off")).displayTitle(18)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     CloseButton { dismiss() }
@@ -72,7 +72,7 @@ struct TimeOffEditorView: View {
     private var bottomBar: some View {
         VStack(spacing: 10) {
             FormError(message: errorMessage)
-            Button("Add time off") { Task { await save() } }
+            Button(t("schedule.add_time_off")) { Task { await save() } }
                 .buttonStyle(.primary(isLoading: isSaving))
                 .disabled(isSaving)
         }
@@ -94,14 +94,14 @@ struct TimeOffEditorView: View {
     private var summary: String {
         let days = Calendar.current.dateComponents([.day], from: period.start, to: period.end).day ?? 0
         return allDay
-            ? "You'll be unavailable for \(days) day\(days == 1 ? "" : "s"). If you already have rides then, cancel or decline them first."
-            : "If you already have rides in this period, cancel or decline them first."
+            ? t("schedule.unavailable_days", count: days)
+            : t("schedule.unavailable_period")
     }
 
     private func save() async {
         let (from, to) = period
         guard to > from else {
-            errorMessage = "Time off has to end after it starts."
+            errorMessage = t("schedule.error_time_off_order")
             return
         }
         errorMessage = nil

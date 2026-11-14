@@ -18,6 +18,16 @@ final class MyCarsModel {
 
         var id: Self { self }
 
+        var title: String {
+            switch self {
+            case .all: t("cars.filter.all")
+            case .live: t("cars.filter.live")
+            case .inReview: t("cars.filter.in_review")
+            case .rejected: t("cars.filter.rejected")
+            case .hidden: t("cars.filter.hidden")
+            }
+        }
+
         var systemImage: String {
             switch self {
             case .all: "car.2.fill"
@@ -56,9 +66,9 @@ final class MyCarsModel {
 
     /// "3 cars · 2 live"
     var summary: String {
-        guard !cars.isEmpty else { return "Add your first car" }
+        guard !cars.isEmpty else { return t("cars.add_first") }
         let live = cars.filter(\.isLive).count
-        return "\(cars.count) \(cars.count == 1 ? "car" : "cars") · \(live) live"
+        return t("cars.summary", count: cars.count, ["live": live])
     }
 
     func load() async {

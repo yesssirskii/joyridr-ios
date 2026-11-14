@@ -24,6 +24,8 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.state)
+        // Dates, times and system controls (pickers, relative times) follow the app's language.
+        .environment(\.locale, Localizer.shared.locale)
         .task {
             async let warmup: Void = KeyboardWarmup.run()
             await session.restore()
@@ -53,11 +55,11 @@ private struct OfflineView: View {
 
     var body: some View {
         ContentUnavailableView {
-            Label("No connection", systemImage: "wifi.exclamationmark")
+            Label(t("app.offline.title"), systemImage: "wifi.exclamationmark")
         } description: {
             Text(message)
         } actions: {
-            Button("Try again", action: retry)
+            Button(t("common.try_again"), action: retry)
                 .buttonStyle(.primary)
                 .frame(width: 200)
         }

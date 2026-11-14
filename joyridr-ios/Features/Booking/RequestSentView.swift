@@ -20,7 +20,7 @@ struct RequestSentView: View {
                     .padding(26)
                     .glassEffect(.regular, in: Circle())
 
-                Text("Request sent!")
+                Text(t("booking.sent.title"))
                     .displayTitle(26)
 
                 Text(waitingText)
@@ -30,19 +30,19 @@ struct RequestSentView: View {
 
                 GlowCard {
                     VStack(alignment: .leading, spacing: 12) {
-                        LabeledValue(label: "Car", value: "\(ride.car.name) with \(ride.driver.displayName)")
-                        LabeledValue(label: "When", value: whenText)
-                        LabeledValue(label: "Meeting point", value: meetingText)
-                        LabeledValue(label: "Price", value: ride.price.price(ride.currency))
+                        LabeledValue(label: t("booking.sent.car"), value: t("booking.sent.car_with", ["car": ride.car.name, "driver": ride.driver.displayName]))
+                        LabeledValue(label: t("ride.when"), value: whenText)
+                        LabeledValue(label: t("ride.meeting_point"), value: meetingText)
+                        LabeledValue(label: t("ride.price"), value: ride.price.price(ride.currency))
                     }
                 }
 
                 Spacer()
                 VStack(spacing: 12) {
-                    Button("Done", action: onDone)
+                    Button(t("common.done"), action: onDone)
                         .buttonStyle(.primary)
                     if let onViewRides {
-                        Button("See it in My rides", action: onViewRides)
+                        Button(t("booking.sent.see_rides"), action: onViewRides)
                             .buttonStyle(.secondary)
                     }
                 }
@@ -55,12 +55,12 @@ struct RequestSentView: View {
     private func format(_ date: Date, _ style: Date.FormatStyle) -> String {
         var style = style
         style.timeZone = timeZone
-        return date.formatted(style)
+        return date.localized(style)
     }
 
     private var waitingText: String {
-        guard let respondBy = ride.respondBy else { return "We'll let you know when the driver responds." }
-        return "\(ride.driver.displayName) has until \(format(respondBy, .dateTime.weekday(.abbreviated).hour().minute())) to confirm. You won't be charged until then."
+        guard let respondBy = ride.respondBy else { return t("booking.sent.waiting_unknown") }
+        return t("ride.rider.waiting_until", ["driver": ride.driver.displayName, "time": format(respondBy, .dateTime.weekday(.abbreviated).hour().minute())])
     }
 
     private var whenText: String {

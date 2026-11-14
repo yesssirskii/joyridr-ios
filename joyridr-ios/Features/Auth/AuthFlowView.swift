@@ -42,7 +42,7 @@ struct AuthHeader: View {
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
             if showsTagline {
-                Text("Let's go for a ride!")
+                Text(t("auth.tagline"))
                     .displayTitle(17)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)

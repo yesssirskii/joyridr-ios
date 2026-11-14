@@ -28,23 +28,23 @@ struct CarReviewDetailView: View {
                     }
 
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 10) {
-                        SpecTile(systemImage: "bolt.fill", value: "\(car.horsepower)", label: "hp")
+                        SpecTile(systemImage: "bolt.fill", value: "\(car.horsepower)", label: t("cars.spec.hp"))
                         SpecTile(systemImage: "gauge.with.dots.needle.67percent",
-                                 value: car.zeroToHundredSeconds.map { "\($0.formatted()) s" } ?? "—", label: "0–100 km/h")
-                        SpecTile(systemImage: "speedometer", value: car.topSpeedKmh.map { "\($0)" } ?? "—", label: "km/h top")
-                        SpecTile(systemImage: "person.2.fill", value: "\(car.passengerSeats)", label: car.passengerSeats == 1 ? "seat" : "seats")
-                        SpecTile(systemImage: "gearshift.layout.sixspeed", value: car.transmission.title, label: "gearbox")
-                        SpecTile(systemImage: "eurosign", value: car.pricePerHour.price(car.currency), label: "per hour")
+                                 value: car.zeroToHundredSeconds.map { "\($0.formatted(.number.locale(Localizer.shared.locale))) s" } ?? "—", label: t("cars.spec.zero_to_hundred"))
+                        SpecTile(systemImage: "speedometer", value: car.topSpeedKmh.map { "\($0)" } ?? "—", label: t("cars.spec.top_speed"))
+                        SpecTile(systemImage: "person.2.fill", value: "\(car.passengerSeats)", label: t("cars.spec.seats", count: car.passengerSeats))
+                        SpecTile(systemImage: "gearshift.layout.sixspeed", value: car.transmission.title, label: t("cars.spec.gearbox"))
+                        SpecTile(systemImage: "eurosign", value: car.pricePerHour.price(car.currency), label: t("cars.spec.per_hour"))
                     }
 
-                    BookingSection("Listing") {
+                    BookingSection(t("admin.cars.listing")) {
                         VStack(alignment: .leading, spacing: 14) {
-                            LabeledValue(label: "License plate", value: car.licensePlate ?? "Not added")
-                            LabeledValue(label: "Description", value: car.description.flatMap { $0.isEmpty ? nil : $0 } ?? "No description")
+                            LabeledValue(label: t("cars.editor.plate"), value: car.licensePlate ?? t("admin.cars.not_added"))
+                            LabeledValue(label: t("admin.cars.description"), value: car.description.flatMap { $0.isEmpty ? nil : $0 } ?? t("admin.cars.no_description"))
                         }
                     }
 
-                    BookingSection("Driver") {
+                    BookingSection(t("booking.car_info.driver")) {
                         HStack(spacing: 14) {
                             RemoteImage(path: car.driver.avatarUrl, placeholder: "person.fill")
                                 .frame(width: 48, height: 48)
@@ -52,7 +52,7 @@ struct CarReviewDetailView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(car.driver.displayName)
                                     .font(.headline)
-                                Text([car.driver.city, car.driver.isVerified ? "Verified" : "Not verified yet"]
+                                Text([car.driver.city, car.driver.isVerified ? t("profile.verified") : t("profile.not_verified")]
                                     .compactMap(\.self).joined(separator: " · "))
                                     .font(.subheadline)
                                     .foregroundStyle(car.driver.isVerified ? Theme.textSecondary : .orange)
@@ -70,7 +70,7 @@ struct CarReviewDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Car review").displayTitle(18)
+                    Text(t("admin.cars.title")).displayTitle(18)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     CloseButton { dismiss() }
@@ -79,14 +79,14 @@ struct CarReviewDetailView: View {
             .animation(.snappy, value: model.errorMessage)
         }
         .onAppear { model.errorMessage = nil }
-        .alert("Reject this car?", isPresented: $showReject) {
-            TextField("Reason (optional)", text: $reason)
-            Button("Reject car", role: .destructive) {
+        .alert(t("admin.cars.reject_title"), isPresented: $showReject) {
+            TextField(t("ride.driver.reason"), text: $reason)
+            Button(t("admin.cars.reject_car"), role: .destructive) {
                 Task { if await model.reject(car, reason: reason) { dismiss() } }
             }
-            Button("Keep reviewing", role: .cancel) {}
+            Button(t("admin.cars.keep_reviewing"), role: .cancel) {}
         } message: {
-            Text("\(car.driver.firstName) will see your reason and can update the car.")
+            Text(t("admin.cars.reject_message", ["name": car.driver.firstName]))
         }
     }
 
@@ -112,20 +112,20 @@ struct CarReviewDetailView: View {
         VStack(spacing: 10) {
             FormError(message: model.errorMessage)
             HStack(spacing: 12) {
-                Button("Reject") {
+                Button(t("admin.cars.reject")) {
                     reason = ""
                     showReject = true
                 }
                 .buttonStyle(.secondary)
-                Button("Approve") {
+                Button(t("admin.cars.approve")) {
                     Task { if await model.approve(car) { dismiss() } }
                 }
                 .buttonStyle(.primary(isLoading: isBusy))
             }
             .disabled(model.busyID != nil)
             Text(car.isActive
-                 ? "Riders can book it as soon as you approve it."
-                 : "The driver has hidden this car, so it stays out of Explore until they show it.")
+                 ? t("admin.cars.approve_note")
+                 : t("admin.cars.hidden_note"))
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
         }

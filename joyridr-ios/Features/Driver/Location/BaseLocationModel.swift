@@ -28,10 +28,10 @@ final class BaseLocationModel {
 
         switch result {
         case .denied:
-            errorMessage = "Location is off for JOYRIDR. Turn it on in Settings, then try again."
+            errorMessage = t("base_location.error_denied")
             return false
         case .unavailable:
-            errorMessage = "Couldn't find your location. Check that you have a signal, then try again."
+            errorMessage = t("base_location.error_unavailable")
             return false
         case let .found(coordinate):
             let place = await LocationProvider.place(at: coordinate)

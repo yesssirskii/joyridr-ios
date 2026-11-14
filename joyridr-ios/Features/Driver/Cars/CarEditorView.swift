@@ -22,25 +22,25 @@ struct CarEditorView: View {
                         CarStatusBanner(car: car)
                     }
 
-                    BookingSection("Photos") { photoStrip }
+                    BookingSection(t("cars.editor.photos")) { photoStrip }
 
-                    BookingSection("Car") {
+                    BookingSection(t("booking.sent.car")) {
                         VStack(spacing: 0) {
-                            EditorField("Make", text: $model.make, prompt: "Porsche")
+                            EditorField(t("cars.editor.make"), text: $model.make, prompt: "Porsche")
                                 .textInputAutocapitalization(.words)
                             EditorDivider()
-                            EditorField("Model", text: $model.model, prompt: "911 GT3")
+                            EditorField(t("cars.editor.model"), text: $model.model, prompt: "911 GT3")
                                 .textInputAutocapitalization(.words)
                             EditorDivider()
-                            EditorField("Year", text: $model.year, prompt: "2023")
+                            EditorField(t("cars.editor.year"), text: $model.year, prompt: "2023")
                                 .keyboardType(.numberPad)
                             EditorDivider()
-                            EditorField("Colour", text: $model.color, prompt: "Shark Blue")
+                            EditorField(t("cars.editor.colour"), text: $model.color, prompt: t("cars.editor.colour_prompt"))
                                 .textInputAutocapitalization(.words)
                             EditorDivider()
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("Category").font(.subheadline).foregroundStyle(Theme.textSecondary)
-                                Picker("Category", selection: $model.category) {
+                                Text(t("cars.editor.category")).font(.subheadline).foregroundStyle(Theme.textSecondary)
+                                Picker(t("cars.editor.category"), selection: $model.category) {
                                     ForEach(CarCategory.allCases, id: \.self) { Text($0.title).tag($0) }
                                 }
                                 .pickerStyle(.segmented)
@@ -48,8 +48,8 @@ struct CarEditorView: View {
                             .padding(.vertical, 12)
                             EditorDivider()
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("Gearbox").font(.subheadline).foregroundStyle(Theme.textSecondary)
-                                Picker("Gearbox", selection: $model.transmission) {
+                                Text(t("cars.editor.gearbox")).font(.subheadline).foregroundStyle(Theme.textSecondary)
+                                Picker(t("cars.editor.gearbox"), selection: $model.transmission) {
                                     ForEach(Transmission.allCases, id: \.self) { Text($0.title).tag($0) }
                                 }
                                 .pickerStyle(.segmented)
@@ -58,27 +58,27 @@ struct CarEditorView: View {
                         }
                     }
 
-                    BookingSection("Performance") {
+                    BookingSection(t("cars.editor.performance")) {
                         VStack(spacing: 0) {
-                            EditorField("Power", text: $model.horsepower, prompt: "510", suffix: "hp")
+                            EditorField(t("cars.editor.power"), text: $model.horsepower, prompt: "510", suffix: t("cars.spec.hp"))
                                 .keyboardType(.numberPad)
                             EditorDivider()
                             EditorField("0–100 km/h", text: $model.zeroToHundred, prompt: "3.4", suffix: "s")
                                 .keyboardType(.decimalPad)
                             EditorDivider()
-                            EditorField("Top speed", text: $model.topSpeed, prompt: "318", suffix: "km/h")
+                            EditorField(t("cars.editor.top_speed"), text: $model.topSpeed, prompt: "318", suffix: "km/h")
                                 .keyboardType(.numberPad)
                         }
                     }
 
-                    BookingSection("Ride") {
+                    BookingSection(t("ride.driver.title")) {
                         VStack(spacing: 0) {
-                            EditorField("Price", text: $model.pricePerHour, prompt: "180", suffix: "€/h")
+                            EditorField(t("ride.price"), text: $model.pricePerHour, prompt: "180", suffix: "€/h")
                                 .keyboardType(.decimalPad)
                             EditorDivider()
                             Stepper(value: $model.seats, in: 1...8) {
                                 HStack {
-                                    Text("Seats for riders").foregroundStyle(Theme.textSecondary)
+                                    Text(t("cars.editor.seats")).foregroundStyle(Theme.textSecondary)
                                     Spacer()
                                     Text("\(model.seats)").monospacedDigit()
                                 }
@@ -87,28 +87,28 @@ struct CarEditorView: View {
                         }
                     }
 
-                    BookingSection("About") {
+                    BookingSection(t("cars.editor.about")) {
                         VStack(alignment: .leading, spacing: 0) {
                             TextField("", text: $model.description,
-                                      prompt: Text("What makes this car special? Mods, sound, where you like to drive…").foregroundStyle(Theme.textSecondary),
+                                      prompt: Text(t("cars.editor.about_prompt")).foregroundStyle(Theme.textSecondary),
                                       axis: .vertical)
                                 .lineLimit(3...6)
                                 .padding(.vertical, 10)
                             EditorDivider()
-                            EditorField("Licence plate", text: $model.licensePlate, prompt: "ZG-1234-AB")
+                            EditorField(t("cars.editor.plate"), text: $model.licensePlate, prompt: "ZG-1234-AB")
                                 .textInputAutocapitalization(.characters)
-                            Text("Only you can see the licence plate.")
+                            Text(t("cars.editor.plate_note"))
                                 .font(.caption)
                                 .foregroundStyle(Theme.textSecondary)
                                 .padding(.bottom, 4)
                         }
                     }
 
-                    BookingSection("Visibility") {
+                    BookingSection(t("cars.editor.visibility")) {
                         Toggle(isOn: $model.isActive) {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("Show to JoyRiders")
-                                Text(model.isActive ? "Riders can find and book this car once it's approved." : "Hidden from search. Existing rides aren't affected.")
+                                Text(t("cars.editor.show"))
+                                Text(model.isActive ? t("cars.editor.show_on") : t("cars.editor.show_off"))
                                     .font(.footnote)
                                     .foregroundStyle(Theme.textSecondary)
                             }
@@ -123,7 +123,7 @@ struct CarEditorView: View {
                             if model.isDeleting {
                                 ProgressView().tint(.white)
                             } else {
-                                Text("Delete car").foregroundStyle(Theme.accentRed)
+                                Text(t("cars.editor.delete")).foregroundStyle(Theme.accentRed)
                             }
                         }
                         .buttonStyle(.secondary)
@@ -143,14 +143,14 @@ struct CarEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(model.isNew ? "New car" : "Edit car").displayTitle(18)
+                    Text(model.isNew ? t("cars.editor.new_title") : t("cars.editor.edit_title")).displayTitle(18)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     CloseButton { dismiss() }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
-                    Button("Done") { hideKeyboard() }
+                    Button(t("common.done")) { hideKeyboard() }
                 }
             }
             .animation(.snappy, value: model.photoCount)
@@ -163,12 +163,12 @@ struct CarEditorView: View {
                 pickerItems = []
             }
         }
-        .confirmationDialog("Delete this car?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete car", role: .destructive) {
+        .confirmationDialog(t("cars.editor.delete_title"), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(t("cars.editor.delete"), role: .destructive) {
                 Task { if await model.delete() { dismiss() } }
             }
         } message: {
-            Text("JoyRiders won't see it anymore. Past rides stay in your history.")
+            Text(t("cars.editor.delete_message"))
         }
     }
 
@@ -204,7 +204,7 @@ struct CarEditorView: View {
                             VStack(spacing: 6) {
                                 Image(systemName: "plus")
                                     .font(.title2.weight(.semibold))
-                                Text("Add")
+                                Text(t("cars.editor.add_photo"))
                                     .font(.caption.weight(.semibold))
                             }
                             .foregroundStyle(.white)
@@ -218,8 +218,8 @@ struct CarEditorView: View {
             .scrollIndicators(.hidden)
 
             Text(model.photoCount == 0
-                 ? "Add a few good photos. The first one is the cover in Explore."
-                 : "\(model.photoCount) of \(CarEditorModel.maxPhotos) · the first photo is the cover.")
+                 ? t("cars.editor.photos_hint_empty")
+                 : t("cars.editor.photos_hint", ["count": model.photoCount, "max": CarEditorModel.maxPhotos]))
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
         }
@@ -230,7 +230,7 @@ struct CarEditorView: View {
     private var bottomBar: some View {
         VStack(spacing: 10) {
             FormError(message: model.errorMessage)
-            Button(model.isNew ? "Add car" : "Save changes") {
+            Button(model.isNew ? t("cars.add") : t("cars.editor.save")) {
                 Task { if await model.save() { dismiss() } }
             }
             .buttonStyle(.primary(isLoading: model.isSaving))
@@ -238,8 +238,8 @@ struct CarEditorView: View {
             .disabled(model.isSaving || !model.hasChanges)
 
             Text(model.isNew
-                 ? "Our team reviews every car before JoyRiders can see it."
-                 : "Changing make, model, year or category sends the car back for review.")
+                 ? t("cars.editor.review_note_new")
+                 : t("cars.editor.review_note_edit"))
                 .font(.caption)
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
@@ -304,7 +304,7 @@ private struct PhotoTile<Content: View>: View {
             .clipShape(RoundedRectangle(cornerRadius: 18))
             .overlay(alignment: .bottomLeading) {
                 if isCover {
-                    Text("Cover")
+                    Text(t("cars.editor.cover"))
                         .font(.caption2.weight(.bold))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
@@ -320,7 +320,7 @@ private struct PhotoTile<Content: View>: View {
                         .foregroundStyle(.white, .black.opacity(0.6))
                 }
                 .padding(4)
-                .accessibilityLabel("Remove photo")
+                .accessibilityLabel(t("cars.editor.remove_photo"))
             }
     }
 }
@@ -368,21 +368,21 @@ private struct CarStatusBanner: View {
 
     private var title: String {
         switch car.status {
-        case .pendingReview: "Waiting for review"
-        case .rejected: "Not approved"
-        case .approved: car.isActive ? "Live" : "Hidden"
+        case .pendingReview: t("cars.status.waiting")
+        case .rejected: t("cars.status.not_approved")
+        case .approved: car.isActive ? t("cars.status.live") : t("cars.status.hidden")
         }
     }
 
     private var message: String {
         switch car.status {
         case .pendingReview:
-            return "Our team checks every car before JoyRiders can see it."
+            return t("cars.status.waiting_message")
         case .rejected:
             let reason = car.rejectionReason.flatMap { $0.isEmpty ? nil : "“\($0)” " } ?? ""
-            return "\(reason)Changing the make, model, year or category sends it for review again."
+            return reason + t("cars.status.rejected_message")
         case .approved:
-            return car.isActive ? "JoyRiders near you can find and book this car." : "Turn on “Show to JoyRiders” to list it again."
+            return car.isActive ? t("cars.status.live_message") : t("cars.status.hidden_message")
         }
     }
 }

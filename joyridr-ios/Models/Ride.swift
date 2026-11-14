@@ -9,9 +9,9 @@ nonisolated enum MeetingPointType: String, Codable, Hashable, CaseIterable {
 
     var title: String {
         switch self {
-        case .driverComesToRider: "Pick up the rider"
-        case .riderComesToDriver: "Rider comes to you"
-        case .agreedLocation: "Agree on a spot"
+        case .driverComesToRider: t("meeting.type.driver_comes")
+        case .riderComesToDriver: t("meeting.type.rider_comes")
+        case .agreedLocation: t("meeting.type.agreed")
         }
     }
 }

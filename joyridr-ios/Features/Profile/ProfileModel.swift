@@ -25,7 +25,7 @@ final class ProfileModel {
         // 1024 px is plenty for a picture shown at most a few hundred points wide.
         guard let data = try? await item.loadTransferable(type: Data.self),
               let (jpeg, _) = JPEGImage.prepare(data, maxSide: 1024) else {
-            errorMessage = "That photo couldn't be read. Try another one."
+            errorMessage = t("profile.error_photo")
             return false
         }
         do {
@@ -41,7 +41,7 @@ final class ProfileModel {
         let username = Username.normalize(text)
         guard username != user.username else { return false }
         guard Username.isValid(username) else {
-            errorMessage = "Usernames are \(Username.rules)"
+            errorMessage = t("auth.username_error", ["rules": Username.rules])
             return false
         }
         errorMessage = nil
@@ -59,7 +59,7 @@ final class ProfileModel {
     /// Returns true once the account is gone; the caller then shows a confirmation and signs out.
     func deleteAccount(password: String) async -> Bool {
         guard !password.isEmpty else {
-            errorMessage = "Enter your password to delete your account."
+            errorMessage = t("profile.error_delete_password")
             return false
         }
         errorMessage = nil

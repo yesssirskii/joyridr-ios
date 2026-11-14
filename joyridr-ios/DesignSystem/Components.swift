@@ -20,12 +20,12 @@ struct HomeHeader: View {
                 .accessibilityAddTraits(.isHeader)
             Spacer(minLength: 16)
             if let badge {
-                CircleIconButton(systemImage: "bell", accessibilityLabel: "Notifications") { showNotifications = true }
+                CircleIconButton(systemImage: "bell", accessibilityLabel: t("notifications.title")) { showNotifications = true }
                     .overlay(alignment: .topTrailing) {
                         CountBadge(count: badge.unreadCount)
                             .offset(x: 4, y: -4)
                     }
-                    .accessibilityValue(badge.unreadCount > 0 ? "\(badge.unreadCount) unread" : "")
+                    .accessibilityValue(badge.unreadCount > 0 ? t("common.unread", count: badge.unreadCount) : "")
                     .matchedTransitionSource(id: "bell", in: headerTransition)
             }
             ProfileButton(avatarUrl: session.me?.user.avatarUrl) { showProfile = true }
@@ -76,7 +76,7 @@ struct ProfileButton: View {
             }
         }
         .glassEffect(.regular.interactive(), in: Circle())
-        .accessibilityLabel("Profile")
+        .accessibilityLabel(t("profile.title"))
     }
 }
 
@@ -170,19 +170,19 @@ struct ChatButton: View {
     let action: () -> Void
 
     var body: some View {
-        CircleIconButton(systemImage: "bubble.left", size: 60, accessibilityLabel: "Messages", action: action)
+        CircleIconButton(systemImage: "bubble.left", size: 60, accessibilityLabel: t("chat.messages"), action: action)
             .overlay(alignment: .topTrailing) {
                 CountBadge(count: unreadCount)
                     .offset(x: 4, y: -4)
             }
-            .accessibilityValue(unreadCount > 0 ? "\(unreadCount) unread" : "")
+            .accessibilityValue(unreadCount > 0 ? t("common.unread", count: unreadCount) : "")
     }
 }
 
 /// Placeholder for screens that aren't built yet.
 struct ComingSoonView: View {
     let title: String
-    var message = "This part of JOYRIDR is coming soon."
+    var message = t("common.coming_soon")
     var systemImage = "hammer"
 
     var body: some View {
@@ -223,14 +223,14 @@ struct StatusChip: View {
 
     private var title: String {
         switch status {
-        case .awaitingPayment: "Awaiting payment"
-        case .requested: "Requested"
-        case .confirmed: "Confirmed"
-        case .inProgress: "In progress"
-        case .completed: "Completed"
-        case .declined: "Declined"
-        case .cancelled: isTimedOut ? "Timed out" : "Cancelled"
-        case .expired: "Expired"
+        case .awaitingPayment: t("ride.status.awaiting_payment")
+        case .requested: t("ride.status.requested")
+        case .confirmed: t("ride.status.confirmed")
+        case .inProgress: t("ride.status.in_progress")
+        case .completed: t("ride.status.completed")
+        case .declined: t("ride.status.declined")
+        case .cancelled: isTimedOut ? t("ride.status.timed_out") : t("ride.status.cancelled")
+        case .expired: t("ride.status.expired")
         }
     }
 
@@ -306,7 +306,7 @@ struct StarRatingPicker: View {
                         .foregroundStyle(star <= rating ? Theme.accentRed : Theme.textSecondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("\(star) star\(star == 1 ? "" : "s")")
+                .accessibilityLabel(t("reviews.stars", count: star))
             }
         }
     }
@@ -315,7 +315,7 @@ struct StarRatingPicker: View {
 extension Decimal {
     /// "180 €" style price, formatted for the user's locale.
     func price(_ currency: String) -> String {
-        formatted(.currency(code: currency).precision(.fractionLength(0...2)))
+        formatted(.currency(code: currency).precision(.fractionLength(0...2)).locale(Localizer.shared.locale))
     }
 }
 
@@ -340,7 +340,7 @@ struct CarSummaryCard: View {
                     .foregroundStyle(Theme.textSecondary)
             }
             Spacer(minLength: 8)
-            CircleIconButton(systemImage: "info", size: 40, accessibilityLabel: "Car and driver details", action: onInfo)
+            CircleIconButton(systemImage: "info", size: 40, accessibilityLabel: t("booking.car_info.accessibility"), action: onInfo)
         }
         .padding(14)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: Theme.cardRadius))

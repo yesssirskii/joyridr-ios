@@ -44,10 +44,10 @@ struct ForgotPasswordView: View {
 
     private var emailStep: some View {
         VStack(spacing: 18) {
-            heading("Forgot your password?", "Enter your email and we'll send you a 6-digit code to set a new one.")
+            heading(t("auth.forgot.title"), t("auth.forgot.subtitle"))
 
             FieldGroup {
-                FormTextField(placeholder: "Email", text: $model.email)
+                FormTextField(placeholder: t("auth.email"), text: $model.email)
                     .textContentType(.username)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
@@ -57,7 +57,7 @@ struct ForgotPasswordView: View {
                     .onSubmit(sendCode)
             }
 
-            Button("Send code", action: sendCode)
+            Button(t("auth.forgot.send_code"), action: sendCode)
                 .buttonStyle(.primary(isLoading: model.isLoading))
                 .disabled(model.isLoading)
                 .padding(.top, 6)
@@ -68,11 +68,11 @@ struct ForgotPasswordView: View {
 
     private var codeStep: some View {
         VStack(spacing: 18) {
-            heading("Check your email", "If \(model.email) has an account, we sent it a code. It works for 15 minutes.")
+            heading(t("auth.forgot.check_title"), t("auth.forgot.check_subtitle", ["email": model.email]))
 
             VStack(alignment: .leading, spacing: 8) {
                 FieldGroup {
-                    FormTextField(placeholder: "6-digit code", text: $model.code)
+                    FormTextField(placeholder: t("auth.forgot.code_placeholder"), text: $model.code)
                         .textContentType(.oneTimeCode)
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .code)
@@ -84,20 +84,20 @@ struct ForgotPasswordView: View {
 
                     FieldDivider()
 
-                    FormTextField(placeholder: "New password", text: $model.newPassword, isSecure: true)
+                    FormTextField(placeholder: t("auth.forgot.new_password"), text: $model.newPassword, isSecure: true)
                         .textContentType(.newPassword)
                         .focused($focusedField, equals: .password)
                         .submitLabel(.go)
                         .onSubmit(reset)
                 }
 
-                Text("Password — at least 8 characters.")
+                Text(t("auth.password_rule"))
                     .font(.caption)
                     .foregroundStyle(model.newPassword.isEmpty || model.newPassword.count >= 8 ? Theme.textSecondary : Theme.accentRed)
                     .padding(.leading, 22)
             }
 
-            Button("Reset password", action: reset)
+            Button(t("auth.forgot.reset"), action: reset)
                 .buttonStyle(.primary(isLoading: model.isLoading))
                 .disabled(model.isLoading)
                 .padding(.top, 6)
@@ -106,14 +106,14 @@ struct ForgotPasswordView: View {
                 // Ticks every second so the countdown on "Resend code" stays current.
                 TimelineView(.periodic(from: .now, by: 1)) { context in
                     let wait = model.secondsUntilResend(at: context.date)
-                    Button(wait > 0 ? "Resend code in \(wait)s" : "Resend code") {
+                    Button(wait > 0 ? t("auth.forgot.resend_in", ["seconds": wait]) : t("auth.forgot.resend")) {
                         Task { await model.resend() }
                     }
                     .underline(wait == 0)
                     .foregroundStyle(wait > 0 ? Theme.textSecondary : .white)
                     .disabled(wait > 0 || model.isLoading)
                 }
-                Button("Use a different email") {
+                Button(t("auth.forgot.different_email")) {
                     model.changeEmail()
                     focusedField = .email
                 }
@@ -178,7 +178,7 @@ final class ForgotPasswordModel {
     func sendCode() async -> Bool {
         let trimmed = email.trimmingCharacters(in: .whitespaces)
         guard trimmed.contains("@") else {
-            errorMessage = "Enter the email you signed up with."
+            errorMessage = t("auth.forgot.error_email")
             return false
         }
         email = trimmed
@@ -201,11 +201,11 @@ final class ForgotPasswordModel {
 
     func reset(using session: SessionStore) async {
         guard code.count == 6 else {
-            errorMessage = "Enter the 6-digit code from the email."
+            errorMessage = t("auth.forgot.error_code")
             return
         }
         guard newPassword.count >= 8 else {
-            errorMessage = "Your new password needs at least 8 characters."
+            errorMessage = t("auth.forgot.error_password")
             return
         }
         guard !isLoading else { return }

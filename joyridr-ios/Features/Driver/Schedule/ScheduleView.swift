@@ -28,7 +28,7 @@ struct ScheduleView: View {
                             }
                         } label: {
                             FilterPill(systemImage: model.isAcceptingRides ? "checkmark.circle.fill" : "pause.circle.fill",
-                                       title: model.isAcceptingRides ? "Accepting rides" : "Paused",
+                                       title: model.isAcceptingRides ? t("schedule.accepting") : t("schedule.paused"),
                                        isSelected: model.isAcceptingRides)
                                 .overlay(alignment: .trailing) {
                                     if model.isUpdatingAccepting {
@@ -42,7 +42,7 @@ struct ScheduleView: View {
                         Button {
                             addingTimeOff = true
                         } label: {
-                            FilterPill(systemImage: "calendar.badge.minus", title: "Time off", fillsWidth: false)
+                            FilterPill(systemImage: "calendar.badge.minus", title: t("schedule.time_off"), fillsWidth: false)
                         }
                         .buttonStyle(.plain)
                         .matchedTransitionSource(id: Self.timeOffSourceID, in: scheduleTransition)
@@ -52,10 +52,10 @@ struct ScheduleView: View {
                         PausedBanner()
                     }
 
-                    SectionTitle(title: "Weekly hours", subtitle: "\(model.weeklyTotal) · \(model.timeZoneCity) time")
+                    SectionTitle(title: t("schedule.weekly_hours"), subtitle: t("schedule.weekly_subtitle", ["total": model.weeklyTotal, "city": model.timeZoneCity]))
                     GlowCard { weekList }
 
-                    SectionTitle(title: "Time off", subtitle: "Riders can't book you during these")
+                    SectionTitle(title: t("schedule.time_off"), subtitle: t("schedule.time_off_subtitle"))
                     GlowCard { timeOffList }
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
@@ -90,28 +90,28 @@ struct ScheduleView: View {
                 }
                 .navigationTransition(.zoom(sourceID: Self.timeOffSourceID, in: scheduleTransition))
             }
-            .confirmationDialog("Pause new ride requests?", isPresented: $confirmPause, titleVisibility: .visible) {
-                Button("Pause requests", role: .destructive) {
+            .confirmationDialog(t("schedule.pause_title"), isPresented: $confirmPause, titleVisibility: .visible) {
+                Button(t("schedule.pause"), role: .destructive) {
                     Task { await model.setAcceptingRides(false) }
                 }
             } message: {
-                Text("Your cars disappear from search until you turn this back on. Rides you already have aren't affected.")
+                Text(t("schedule.pause_message"))
             }
-            .confirmationDialog("Remove this time off?", isPresented: Binding(
+            .confirmationDialog(t("schedule.remove_time_off_title"), isPresented: Binding(
                 get: { deletingTimeOff != nil },
                 set: { if !$0 { deletingTimeOff = nil } }
             ), titleVisibility: .visible, presenting: deletingTimeOff) { item in
-                Button("Remove", role: .destructive) {
+                Button(t("common.remove"), role: .destructive) {
                     Task { await model.deleteTimeOff(item) }
                 }
             } message: { _ in
-                Text("Riders will be able to book you during this time again.")
+                Text(t("schedule.remove_time_off_message"))
             }
-            .alert("Something went wrong", isPresented: Binding(
+            .alert(t("common.something_wrong"), isPresented: Binding(
                 get: { model.errorMessage != nil },
                 set: { if !$0 { model.errorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) {}
+                Button(t("common.ok"), role: .cancel) {}
             } message: {
                 Text(model.errorMessage ?? "")
             }
@@ -130,11 +130,11 @@ struct ScheduleView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load your schedule", systemImage: "exclamationmark.triangle")
+                Label(t("schedule.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
@@ -163,9 +163,9 @@ struct ScheduleView: View {
                     .frame(width: 56, height: 56)
                     .background(Color.white.opacity(0.12), in: Circle())
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("No time off planned")
+                    Text(t("schedule.no_time_off"))
                         .font(.headline)
-                    Text("Going on holiday or the car's in for service? Block it out so nobody books you.")
+                    Text(t("schedule.no_time_off_message"))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
@@ -240,7 +240,7 @@ private struct TimeOffRow: View {
                 Text(rangeText)
                     .font(.headline)
                     .foregroundStyle(.white)
-                Text(item.reason?.isEmpty == false ? item.reason! : "Time off")
+                Text(item.reason?.isEmpty == false ? item.reason! : t("schedule.time_off"))
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
@@ -255,7 +255,7 @@ private struct TimeOffRow: View {
                     .frame(width: 40, height: 40)
             }
             .glassEffect(.regular.interactive(), in: Circle())
-            .accessibilityLabel("Remove time off")
+            .accessibilityLabel(t("schedule.remove_time_off"))
         }
         .padding(.vertical, 6)
     }
@@ -264,8 +264,8 @@ private struct TimeOffRow: View {
     private var rangeText: String {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: timeZoneId) ?? .current
-        var day = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated)
-        var time = Date.FormatStyle.dateTime.hour().minute()
+        var day = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated).locale(Localizer.shared.locale)
+        var time = Date.FormatStyle.dateTime.hour().minute().locale(Localizer.shared.locale)
         day.timeZone = calendar.timeZone
         time.timeZone = calendar.timeZone
 
@@ -288,8 +288,8 @@ private struct TimeOffRow: View {
 private struct PausedBanner: View {
     var body: some View {
         StatusBanner(
-            icon: "pause.circle.fill", color: .orange, title: "New requests are paused",
-            message: "Your cars are hidden from JoyRiders. Tap “Paused” to start taking rides again.")
+            icon: "pause.circle.fill", color: .orange, title: t("schedule.paused_title"),
+            message: t("schedule.paused_message"))
             .transition(.opacity.combined(with: .move(edge: .top)))
     }
 }

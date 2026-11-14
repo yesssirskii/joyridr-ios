@@ -32,7 +32,7 @@ struct ReportSheet: View {
                             .background(Theme.card, in: RoundedRectangle(cornerRadius: 18))
                     }
 
-                    BookingSection("Why?") {
+                    BookingSection(t("moderation.why")) {
                         VStack(spacing: 0) {
                             ForEach(ReportReason.allCases) { option in
                                 Button {
@@ -57,9 +57,9 @@ struct ReportSheet: View {
                         }
                     }
 
-                    BookingSection("Anything else? (optional)") {
+                    BookingSection(t("moderation.anything_else")) {
                         TextField("", text: $details,
-                                  prompt: Text("What happened").foregroundStyle(Theme.textSecondary),
+                                  prompt: Text(t("moderation.what_happened")).foregroundStyle(Theme.textSecondary),
                                   axis: .vertical)
                             .lineLimit(3...6)
                             .onChange(of: details) { _, new in
@@ -68,10 +68,10 @@ struct ReportSheet: View {
                     }
 
                     if let person = target.person {
-                        Toggle("Also block \(person.name)", isOn: $alsoBlock)
+                        Toggle(t("moderation.also_block", ["name": person.name]), isOn: $alsoBlock)
                             .tint(Theme.brandRed)
                             .padding(.horizontal, 4)
-                        Text("You won't be able to message or book each other.")
+                        Text(t("moderation.also_block_message"))
                             .font(.footnote)
                             .foregroundStyle(Theme.textSecondary)
                             .padding(.horizontal, 4)
@@ -80,7 +80,7 @@ struct ReportSheet: View {
 
                     FormError(message: errorMessage)
 
-                    Button("Send report", action: send)
+                    Button(t("moderation.send_report"), action: send)
                         .buttonStyle(.primary(isLoading: isSending))
                         .disabled(reason == nil || isSending)
                 }
@@ -95,13 +95,13 @@ struct ReportSheet: View {
                     CloseButton { dismiss() }
                 }
                 ToolbarItem(placement: .principal) {
-                    Text("Report").displayTitle(18)
+                    Text(t("moderation.report")).displayTitle(18)
                 }
             }
-            .alert("Thanks for telling us", isPresented: $sent) {
-                Button("OK") { dismiss() }
+            .alert(t("moderation.thanks"), isPresented: $sent) {
+                Button(t("common.ok")) { dismiss() }
             } message: {
-                Text("Our team will look at your report within 24 hours.")
+                Text(t("moderation.thanks_message"))
             }
             .animation(.snappy, value: errorMessage)
         }
@@ -110,9 +110,9 @@ struct ReportSheet: View {
 
     private var heading: String {
         switch target {
-        case let .user(_, name): "Report \(name)"
-        case let .message(_, _, name): "Report this message from \(name)"
-        case let .review(review): "Report this review by \(review.authorName)"
+        case let .user(_, name): t("moderation.report_name", ["name": name])
+        case let .message(_, _, name): t("moderation.report_message_from", ["name": name])
+        case let .review(review): t("moderation.report_review_by", ["name": review.authorName])
         }
     }
 

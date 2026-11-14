@@ -20,7 +20,7 @@ struct CarRow: View {
                         Circle()
                             .fill(Theme.available)
                             .frame(width: 8, height: 8)
-                            .accessibilityLabel("Available today")
+                            .accessibilityLabel(t("explore.available_today"))
                     }
                 }
                 .font(.subheadline)
@@ -42,11 +42,11 @@ struct CarRow: View {
 
     /// "180 €/h · 2.3 km · ★ 4.9"
     private var details: String {
-        let price = "\(item.car.pricePerHour.price(item.car.currency))/h"
-        let distance = "\(item.distanceKm.formatted(.number.precision(.fractionLength(0...1)))) km"
+        let price = t("explore.price_per_hour", ["price": item.car.pricePerHour.price(item.car.currency)])
+        let distance = "\(item.distanceKm.formatted(.number.locale(Localizer.shared.locale).precision(.fractionLength(0...1)))) km"
         let rating = item.driver.ratingCount == 0
-            ? "New"
-            : "★ \(item.driver.ratingAverage.formatted(.number.precision(.fractionLength(1))))"
+            ? t("reviews.new")
+            : "★ \(item.driver.ratingAverage.formatted(.number.locale(Localizer.shared.locale).precision(.fractionLength(1))))"
         return [price, distance, rating].joined(separator: " · ")
     }
 }

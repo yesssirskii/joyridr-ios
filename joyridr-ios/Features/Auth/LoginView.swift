@@ -22,14 +22,14 @@ struct LoginView: View {
                     .padding(.top, 110)
                     .padding(.bottom, 44)
 
-                Text("Already a user? Log in")
+                Text(t("auth.login.heading"))
                     .font(.headline)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 12)
 
                 // One box for both, split by a line.
                 FieldGroup {
-                    FormTextField(placeholder: "Email", text: $email)
+                    FormTextField(placeholder: t("auth.email"), text: $email)
                         .textContentType(.username)
                         .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
@@ -40,14 +40,14 @@ struct LoginView: View {
 
                     FieldDivider()
 
-                    FormTextField(placeholder: "Password", text: $password, isSecure: true)
+                    FormTextField(placeholder: t("auth.password"), text: $password, isSecure: true)
                         .textContentType(.password)
                         .focused($focusedField, equals: .password)
                         .submitLabel(.go)
                         .onSubmit(logIn)
                 }
 
-                Button("Forgot password?") { onForgotPassword(email.trimmingCharacters(in: .whitespaces)) }
+                Button(t("auth.login.forgot")) { onForgotPassword(email.trimmingCharacters(in: .whitespaces)) }
                     .font(.footnote)
                     .underline()
                     .foregroundStyle(Theme.textSecondary)
@@ -57,7 +57,7 @@ struct LoginView: View {
                 FormError(message: errorMessage)
                     .padding(.horizontal, 12)
 
-                Button("Log in", action: logIn)
+                Button(t("auth.login.button"), action: logIn)
                     .buttonStyle(.primary(isLoading: isLoading))
                     .disabled(isLoading)
             }
@@ -81,8 +81,8 @@ struct LoginView: View {
             try? await Task.sleep(for: .milliseconds(600))
             notice = message
         }
-        .alert("Account deleted", isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
-            Button("OK", role: .cancel) {}
+        .alert(t("auth.login.account_deleted"), isPresented: Binding(get: { notice != nil }, set: { if !$0 { notice = nil } })) {
+            Button(t("common.ok"), role: .cancel) {}
         } message: {
             Text(notice ?? "")
         }
@@ -90,9 +90,9 @@ struct LoginView: View {
 
     private var footer: some View {
         HStack(spacing: 4) {
-            Text("Don't have an account?")
+            Text(t("auth.login.no_account"))
                 .foregroundStyle(Theme.textSecondary)
-            Button("Sign up.", action: onSignUp)
+            Button(t("auth.login.sign_up_link"), action: onSignUp)
                 .underline()
         }
         .font(.subheadline)
@@ -103,7 +103,7 @@ struct LoginView: View {
         guard !isLoading else { return }
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         guard !trimmedEmail.isEmpty, !password.isEmpty else {
-            errorMessage = "Enter your email and password."
+            errorMessage = t("auth.login.error_missing")
             return
         }
 

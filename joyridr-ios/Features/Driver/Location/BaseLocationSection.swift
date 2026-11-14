@@ -8,18 +8,18 @@ struct BaseLocationSection: View {
     @State private var model = BaseLocationModel()
 
     var body: some View {
-        BookingSection("Base location") {
+        BookingSection(t("base_location.title")) {
             VStack(alignment: .leading, spacing: 14) {
                 if driver.baseLatitude != nil {
-                    LabeledValue(label: "Riders find your cars around", value: driver.baseAddress ?? driver.city ?? "Your saved location")
+                    LabeledValue(label: t("base_location.label"), value: driver.baseAddress ?? driver.city ?? t("base_location.saved"))
                 } else {
-                    Text("Not set yet. Riders can't find your cars until you add it.")
+                    Text(t("base_location.not_set"))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("How far you'll drive to pick riders up")
+                    Text(t("base_location.radius"))
                         .font(.subheadline)
                         .foregroundStyle(Theme.textSecondary)
                     HStack(spacing: 8) {
@@ -40,7 +40,7 @@ struct BaseLocationSection: View {
                     if model.isLocating {
                         ProgressView()
                     } else {
-                        Label(driver.baseLatitude == nil ? "Use my current location" : "Move to my current location",
+                        Label(driver.baseLatitude == nil ? t("base_location.use_current") : t("base_location.move_current"),
                               systemImage: "location.fill")
                     }
                 }

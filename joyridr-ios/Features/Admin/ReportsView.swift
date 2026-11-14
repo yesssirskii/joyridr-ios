@@ -11,7 +11,7 @@ struct ReportsView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     HomeHeader()
 
-                    SectionTitle(title: "Reports", subtitle: model.summary)
+                    SectionTitle(title: t("tabs.reports"), subtitle: model.summary)
 
                     GlowCard {
                         list
@@ -46,17 +46,17 @@ struct ReportsView: View {
                 .frame(maxWidth: .infinity, minHeight: 160)
         case let .failed(message):
             ContentUnavailableView {
-                Label("Couldn't load reports", systemImage: "exclamationmark.triangle")
+                Label(t("admin.reports.load_failed"), systemImage: "exclamationmark.triangle")
             } description: {
                 Text(message)
             } actions: {
-                Button("Try again") { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load() } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.reports.isEmpty:
-            ContentUnavailableView("All caught up", systemImage: "flag",
-                                   description: Text("When someone reports a person, message or review, it shows up here."))
+            ContentUnavailableView(t("admin.caught_up"), systemImage: "flag",
+                                   description: Text(t("admin.reports.empty_message")))
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.reports) { report in
@@ -88,14 +88,14 @@ private struct ReportRow: View {
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
-                Text(report.createdAt.formatted(.relative(presentation: .named)))
+                Text(report.createdAt.formatted(.relative(presentation: .named).locale(Localizer.shared.locale)))
                     .font(.footnote)
                     .foregroundStyle(Theme.textSecondary)
             }
             Spacer(minLength: 8)
             if report.openReportsAboutUser > 1 {
                 CountBadge(count: report.openReportsAboutUser)
-                    .accessibilityLabel("\(report.openReportsAboutUser) open reports about this person")
+                    .accessibilityLabel(t("admin.reports.about_person", count: report.openReportsAboutUser))
             }
             Image(systemName: "arrow.right")
                 .font(.title3)
@@ -124,24 +124,24 @@ struct ReportDetailView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    BookingSection("Report") {
+                    BookingSection(t("moderation.report")) {
                         VStack(alignment: .leading, spacing: 14) {
-                            LabeledValue(label: "What", value: report.kind.title)
-                            LabeledValue(label: "Reason", value: report.reason.title)
+                            LabeledValue(label: t("admin.reports.what"), value: report.kind.title)
+                            LabeledValue(label: t("schedule.reason"), value: report.reason.title)
                             if let details = report.details {
-                                LabeledValue(label: "Details from the reporter", value: details)
+                                LabeledValue(label: t("admin.reports.details"), value: details)
                             }
-                            LabeledValue(label: "Reported", value: report.createdAt.formatted(date: .abbreviated, time: .shortened))
-                            LabeledValue(label: "By", value: "\(report.reporter.displayName) (@\(report.reporter.username))")
+                            LabeledValue(label: t("admin.reports.reported"), value: report.createdAt.localized(date: .abbreviated, time: .shortened))
+                            LabeledValue(label: t("admin.reports.by"), value: "\(report.reporter.displayName) (@\(report.reporter.username))")
                         }
                     }
 
                     if let snapshot = report.contentSnapshot {
-                        BookingSection(report.kind == .message ? "Message" : "Review") {
+                        BookingSection(report.kind == .message ? t("admin.reports.message") : t("moderation.kind.review")) {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(snapshot)
                                 if !report.contentExists {
-                                    Text("Already removed")
+                                    Text(t("admin.reports.already_removed"))
                                         .font(.footnote)
                                         .foregroundStyle(Theme.textSecondary)
                                 }
@@ -149,7 +149,7 @@ struct ReportDetailView: View {
                         }
                     }
 
-                    BookingSection("Reported person") {
+                    BookingSection(t("admin.reports.person")) {
                         HStack(spacing: 14) {
                             RemoteImage(path: person.avatarUrl, placeholder: "person.fill")
                                 .frame(width: 48, height: 48)
@@ -160,7 +160,7 @@ struct ReportDetailView: View {
                                 Text("@\(person.username) · \(person.role.title)")
                                     .font(.subheadline)
                                     .foregroundStyle(Theme.textSecondary)
-                                Text(person.isBanned ? "Banned"
+                                Text(person.isBanned ? t("admin.reports.banned")
                                      : person.openReportsText(report.openReportsAboutUser))
                                     .font(.footnote)
                                     .foregroundStyle(person.isBanned ? Theme.accentRed : Theme.textSecondary)
@@ -172,17 +172,17 @@ struct ReportDetailView: View {
 
                     VStack(spacing: 12) {
                         if report.contentExists {
-                            Button(report.kind == .message ? "Remove message" : "Remove review") { confirmRemove = true }
+                            Button(report.kind == .message ? t("admin.reports.remove_message") : t("admin.reports.remove_review")) { confirmRemove = true }
                                 .buttonStyle(.primary(isLoading: isBusy))
                         }
                         if !person.isBanned && !person.isDeleted && person.role != .admin {
-                            Button("Ban \(person.displayName)") {
+                            Button(t("admin.reports.ban_name", ["name": person.displayName])) {
                                 banReason = ""
                                 showBan = true
                             }
                             .buttonStyle(report.contentExists ? AnyButtonStyle(.secondary) : AnyButtonStyle(.primary(isLoading: isBusy)))
                         }
-                        Button("Dismiss report") {
+                        Button(t("admin.reports.dismiss")) {
                             Task { if await model.dismiss(report) { dismiss() } }
                         }
                         .buttonStyle(.secondary)
@@ -199,27 +199,27 @@ struct ReportDetailView: View {
                     CloseButton { dismiss() }
                 }
                 ToolbarItem(placement: .principal) {
-                    Text("Report").displayTitle(18)
+                    Text(t("moderation.report")).displayTitle(18)
                 }
             }
-            .alert(report.kind == .message ? "Remove this message?" : "Remove this review?", isPresented: $confirmRemove) {
-                Button("Cancel", role: .cancel) {}
-                Button("Remove", role: .destructive) {
+            .alert(report.kind == .message ? t("admin.reports.remove_message_title") : t("admin.reports.remove_review_title"), isPresented: $confirmRemove) {
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("common.remove"), role: .destructive) {
                     Task { if await model.removeContent(report) { dismiss() } }
                 }
             } message: {
                 Text(report.kind == .review
-                     ? "It's deleted for everyone and the rating is worked out again without it."
-                     : "It's deleted for both people in the chat.")
+                     ? t("admin.reports.remove_review_message")
+                     : t("admin.reports.remove_message_message"))
             }
-            .alert("Ban \(person.displayName)?", isPresented: $showBan) {
-                TextField("Reason (only admins see it)", text: $banReason)
-                Button("Cancel", role: .cancel) {}
-                Button("Ban", role: .destructive) {
+            .alert(t("admin.reports.ban_question", ["name": person.displayName]), isPresented: $showBan) {
+                TextField(t("admin.reports.ban_reason"), text: $banReason)
+                Button(t("common.cancel"), role: .cancel) {}
+                Button(t("admin.reports.ban"), role: .destructive) {
                     Task { if await model.ban(report, reason: banReason) { dismiss() } }
                 }
             } message: {
-                Text("They're logged out and can't log back in. Their upcoming rides are cancelled with a full refund to the rider, and a driver's cars are hidden.")
+                Text(t("admin.reports.ban_message"))
             }
             .animation(.snappy, value: model.errorMessage)
         }
@@ -229,7 +229,7 @@ struct ReportDetailView: View {
 
 private extension ReportUser {
     func openReportsText(_ count: Int) -> String {
-        count == 1 ? "1 open report" : "\(count) open reports"
+        t("admin.reports.open", count: count)
     }
 }
 

@@ -21,11 +21,11 @@ struct RequestsView: View {
                         SetupHintCard()
                     }
 
-                    SectionTitle(title: "Ride requests", subtitle: "Confirm before they expire")
+                    SectionTitle(title: t("requests.title"), subtitle: t("requests.subtitle"))
                     requestsSection
 
                     if !model.upcoming.isEmpty {
-                        SectionTitle(title: "Upcoming rides")
+                        SectionTitle(title: t("my_rides.upcoming_title"))
                         GlowCard {
                             VStack(spacing: 14) {
                                 ForEach(model.upcoming) { ride in
@@ -43,7 +43,7 @@ struct RequestsView: View {
                     }
 
                     if !model.timedOut.isEmpty {
-                        SectionTitle(title: "Timed-out rides", subtitle: "Not started in time, so the rider got a full refund")
+                        SectionTitle(title: t("my_rides.timed_out_title"), subtitle: t("my_rides.timed_out_subtitle_driver"))
                         GlowCard {
                             VStack(spacing: 14) {
                                 ForEach(model.timedOut) { ride in
@@ -77,11 +77,11 @@ struct RequestsView: View {
             }
             .refreshable { await model.load() }
             .task { await model.loadIfNeeded() }
-            .alert("Something went wrong", isPresented: Binding(
+            .alert(t("common.something_wrong"), isPresented: Binding(
                 get: { model.actionError != nil },
                 set: { if !$0 { model.actionError = nil } })
             ) {
-                Button("OK", role: .cancel) {}
+                Button(t("common.ok"), role: .cancel) {}
             } message: {
                 Text(model.actionError ?? "")
             }
@@ -108,11 +108,11 @@ struct RequestsView: View {
         case let .failed(message):
             GlowCard {
                 ContentUnavailableView {
-                    Label("Couldn't load rides", systemImage: "exclamationmark.triangle")
+                    Label(t("requests.load_failed"), systemImage: "exclamationmark.triangle")
                 } description: {
                     Text(message)
                 } actions: {
-                    Button("Try again") { Task { await model.load() } }
+                    Button(t("common.try_again")) { Task { await model.load() } }
                         .buttonStyle(.primary)
                         .frame(width: 180)
                 }
@@ -120,9 +120,9 @@ struct RequestsView: View {
         case .loaded where model.requests.isEmpty:
             GlowCard {
                 ContentUnavailableView(
-                    "No requests right now",
+                    t("requests.empty"),
                     systemImage: "tray",
-                    description: Text("When a JoyRider books one of your cars, it shows up here."))
+                    description: Text(t("requests.empty_message")))
             }
         case .loaded:
             VStack(spacing: 14) {
@@ -152,9 +152,9 @@ private struct SetupHintCard: View {
                 .font(.title2)
                 .foregroundStyle(Theme.accentRed)
             VStack(alignment: .leading, spacing: 4) {
-                Text("Finish setting up")
+                Text(t("requests.setup_title"))
                     .font(.headline)
-                Text("Add your base location in Profile (top right) so JoyRiders can find your cars.")
+                Text(t("requests.setup_message"))
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)
             }

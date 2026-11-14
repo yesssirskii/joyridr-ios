@@ -100,7 +100,7 @@ struct CloseButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button("Close", systemImage: "xmark", action: action)
+        Button(t("common.close"), systemImage: "xmark", action: action)
             .tint(.white)
     }
 }

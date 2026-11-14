@@ -13,10 +13,10 @@ struct BlockedUsersView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, minHeight: 200)
                 case let .failed(message):
-                    ContentUnavailableView("Couldn't load", systemImage: "exclamationmark.triangle", description: Text(message))
+                    ContentUnavailableView(t("common.load_failed"), systemImage: "exclamationmark.triangle", description: Text(message))
                 case .loaded where model.users.isEmpty:
-                    ContentUnavailableView("Nobody blocked", systemImage: "hand.raised",
-                                           description: Text("People you block can't message you or book with you, and you won't see their cars."))
+                    ContentUnavailableView(t("moderation.blocked_empty"), systemImage: "hand.raised",
+                                           description: Text(t("moderation.blocked_empty_message")))
                 case .loaded:
                     FormError(message: model.errorMessage)
                     ForEach(model.users) { user in
@@ -27,12 +27,12 @@ struct BlockedUsersView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(user.displayName)
                                     .font(.headline)
-                                Text("Blocked \(user.blockedAt.formatted(.dateTime.day().month(.abbreviated).year()))")
+                                Text(t("moderation.blocked_on", ["date": user.blockedAt.localized(.dateTime.day().month(.abbreviated).year())]))
                                     .font(.footnote)
                                     .foregroundStyle(Theme.textSecondary)
                             }
                             Spacer()
-                            Button("Unblock") { Task { await model.unblock(user) } }
+                            Button(t("moderation.unblock")) { Task { await model.unblock(user) } }
                                 .buttonStyle(ChipStyle(isSelected: false))
                                 .disabled(model.busyID == user.id)
                         }
@@ -49,7 +49,7 @@ struct BlockedUsersView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("Blocked people").displayTitle(18)
+                Text(t("moderation.blocked_title")).displayTitle(18)
             }
         }
         .task { await model.load() }
