@@ -152,7 +152,12 @@ final class NewRideModel {
             note: trimmedNote.isEmpty ? nil : trimmedNote)
 
         do {
-            createdRide = try await rides.request(request)
+            let ride = try await rides.request(request)
+            if ride.status == .awaitingPayment {
+                await pay(for: ride)
+            } else {
+                createdRide = ride
+            }
         } catch let error as APIError where error.code == "slot_unavailable" {
             // Someone else was faster: show fresh times.
             errorMessage = error.localizedDescription
@@ -160,6 +165,20 @@ final class NewRideModel {
             await loadSlots()
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Shows Stripe's payment sheet for the new booking. If the rider backs out (or paying fails),
+    /// the booking is cancelled at once so the time slot is free again, and they stay on this screen.
+    private func pay(for ride: Ride) async {
+        switch await RidePaymentFlow(rides: rides).pay(rideID: ride.id) {
+        case let .paid(paid):
+            createdRide = paid
+        case .canceled:
+            _ = try? await rides.cancel(ride.id)
+        case let .failed(message):
+            errorMessage = message
+            _ = try? await rides.cancel(ride.id)
         }
     }
 

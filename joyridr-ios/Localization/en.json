@@ -244,7 +244,7 @@
         "timed_out": "Ride didn't happen"
       },
       "message": {
-        "awaiting_payment": "Your payment is being processed.",
+        "awaiting_payment": "Pay to send your request. The time slot is held for 15 minutes.",
         "requested": "{{driver}} will confirm soon. You won't be charged until then.",
         "confirmed": "See you {{day}} at {{time}}. Free cancellation until 24 h before.",
         "in_progress": "Enjoy the {{car}}! Ends at {{time}}.",
@@ -256,7 +256,8 @@
         "not_charged": "You weren't charged.",
         "late_cancel": "This late cancellation wasn't refunded.",
         "expired": "{{driver}} didn't respond in time. You haven't been charged."
-      }
+      },
+      "pay_now": "Pay {{price}}"
     },
     "details": "Ride details",
     "duration": "Duration",

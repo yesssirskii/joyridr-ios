@@ -48,6 +48,27 @@ final class RideDetailModel {
         }
     }
 
+    private(set) var isPaying = false
+
+    /// The booking was made but never paid (e.g. the app was closed during payment).
+    var canPay: Bool { ride.status == .awaitingPayment }
+
+    func pay() async {
+        guard !isPaying else { return }
+        isPaying = true
+        errorMessage = nil
+        defer { isPaying = false }
+        switch await RidePaymentFlow(rides: rides).pay(rideID: ride.id) {
+        case let .paid(paid):
+            ride = paid
+        case .canceled:
+            break // still waiting for payment; the slot is released after 15 minutes if they don't pay
+        case let .failed(message):
+            errorMessage = message
+            await refresh()
+        }
+    }
+
     func cancel() async {
         guard !isCancelling else { return }
         isCancelling = true
