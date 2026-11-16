@@ -166,6 +166,14 @@ struct RideDetailView: View {
 
     private var actions: some View {
         VStack(spacing: 12) {
+            if model.canPay {
+                Button(t("ride.rider.pay_now", ["price": ride.price.price(ride.currency)])) {
+                    Task { await model.pay() }
+                }
+                .buttonStyle(.primary(isLoading: model.isPaying))
+                .disabled(model.isPaying)
+            }
+
             Button {
                 showChat = true
             } label: {

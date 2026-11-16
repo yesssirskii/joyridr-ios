@@ -18,9 +18,20 @@ struct RidesService {
         try await api.get("/api/rides/\(rideID.uuidString)")
     }
 
-    /// Books a ride. It starts as "requested" and waits for the driver to confirm.
+    /// Books a ride. With real payments it starts as "awaitingPayment" until the rider pays
+    /// (see `RidePaymentFlow`); with the backend's fake payments it's "requested" straight away.
     func request(_ request: CreateRideRequest) async throws -> Ride {
         try await api.post("/api/rides", body: request)
+    }
+
+    /// What Stripe's payment sheet needs for a ride that's waiting for payment.
+    func paymentSheet(_ rideID: Ride.ID) async throws -> PaymentSheetInfo {
+        try await api.get("/api/rides/\(rideID.uuidString)/payment-sheet")
+    }
+
+    /// Asks the backend to check the payment with Stripe after the sheet closes.
+    func syncPayment(_ rideID: Ride.ID) async throws -> Ride {
+        try await api.post("/api/rides/\(rideID.uuidString)/payment/sync")
     }
 
     func confirm(_ rideID: Ride.ID) async throws -> Ride {

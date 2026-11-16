@@ -6,6 +6,10 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5A7C0F012E00000000000001 /* StripePaymentSheet in Frameworks */ = {isa = PBXBuildFile; productRef = 5A7C0F012E00000000000003 /* StripePaymentSheet */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		6076DB08308A699400DC722B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -51,6 +55,7 @@
 		6076DAF7308A699100DC722B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				5A7C0F012E00000000000001 /* StripePaymentSheet in Frameworks */,
 			);
 		};
 		6076DB04308A699400DC722B /* Frameworks */ = {
@@ -103,6 +108,9 @@
 				6076DAFC308A699100DC722B /* joyridr-ios */,
 			);
 			name = "joyridr-ios";
+			packageProductDependencies = (
+				5A7C0F012E00000000000003 /* StripePaymentSheet */,
+			);
 			productName = "joyridr-ios";
 			productReference = 6076DAFA308A699100DC722B /* joyridr-ios.app */;
 			productType = "com.apple.product-type.application";
@@ -182,6 +190,9 @@
 			);
 			mainGroup = 6076DAF1308A699100DC722B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5A7C0F012E00000000000002 /* XCRemoteSwiftPackageReference "stripe-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6076DAFB308A699100DC722B /* Products */;
 			projectDirPath = "";
@@ -704,6 +715,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5A7C0F012E00000000000002 /* XCRemoteSwiftPackageReference "stripe-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/stripe/stripe-ios";
+			requirement = {
+				kind = exactVersion;
+				version = 26.15.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5A7C0F012E00000000000003 /* StripePaymentSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5A7C0F012E00000000000002 /* XCRemoteSwiftPackageReference "stripe-ios" */;
+			productName = StripePaymentSheet;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 6076DAF2308A699100DC722B /* Project object */;
 	validationLevel = 1;

@@ -245,7 +245,7 @@
         "timed_out": "Vožnja se nije održala"
       },
       "message": {
-        "awaiting_payment": "Plaćanje se obrađuje.",
+        "awaiting_payment": "Plati da pošalješ zahtjev. Termin je rezerviran 15 minuta.",
         "requested": "{{driver}} će uskoro potvrditi. Do tada ti ništa ne naplaćujemo.",
         "confirmed": "Vidimo se {{day}} u {{time}}. Besplatno otkazivanje do 24 h prije.",
         "in_progress": "Uživaj u autu {{car}}! Završava u {{time}}.",
@@ -257,7 +257,8 @@
         "not_charged": "Ništa ti nije naplaćeno.",
         "late_cancel": "Za ovo kasno otkazivanje nema povrata novca.",
         "expired": "Vozač {{driver}} nije odgovorio na vrijeme. Ništa ti nije naplaćeno."
-      }
+      },
+      "pay_now": "Plati {{price}}"
     },
     "details": "Detalji vožnje",
     "duration": "Trajanje",
