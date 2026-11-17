@@ -79,6 +79,8 @@ struct CarReviewsView: View {
 /// One car in the review queue: photo, name and who submitted it.
 struct CarReviewRow: View {
     let car: CarDetail
+    /// Adds the Live / In review / Rejected / Hidden chip (the All cars list mixes every status).
+    var showsStatus = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -87,9 +89,15 @@ struct CarReviewRow: View {
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(car.name)
-                    .font(.headline)
-                    .foregroundStyle(.white)
+                HStack(spacing: 8) {
+                    Text(car.name)
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                    if showsStatus {
+                        CarStatusChip(car: car)
+                    }
+                }
                 Text("\(String(car.year)) · \(car.color) · \(car.category.title)")
                     .font(.subheadline)
                     .foregroundStyle(Theme.textSecondary)

@@ -111,27 +111,38 @@ struct CarReviewDetailView: View {
     private var bottomBar: some View {
         VStack(spacing: 10) {
             FormError(message: model.errorMessage)
+            // Opened from All cars, the car may already be approved or rejected: offer only the other choice.
             HStack(spacing: 12) {
-                Button(t("admin.cars.reject")) {
-                    reason = ""
-                    showReject = true
+                if car.status != .rejected {
+                    Button(t("admin.cars.reject")) {
+                        reason = ""
+                        showReject = true
+                    }
+                    .buttonStyle(.secondary)
                 }
-                .buttonStyle(.secondary)
-                Button(t("admin.cars.approve")) {
-                    Task { if await model.approve(car) { dismiss() } }
+                if car.status != .approved {
+                    Button(t("admin.cars.approve")) {
+                        Task { if await model.approve(car) { dismiss() } }
+                    }
+                    .buttonStyle(.primary(isLoading: isBusy))
                 }
-                .buttonStyle(.primary(isLoading: isBusy))
             }
             .disabled(model.busyID != nil)
-            Text(car.isActive
-                 ? t("admin.cars.approve_note")
-                 : t("admin.cars.hidden_note"))
-                .font(.caption)
-                .foregroundStyle(Theme.textSecondary)
+            if !car.isActive {
+                note(t("admin.cars.hidden_note"))
+            } else if car.status != .approved {
+                note(t("admin.cars.approve_note"))
+            }
         }
         .padding(16)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 30))
         .padding(.horizontal, 12)
         .padding(.bottom, 4)
+    }
+
+    private func note(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(Theme.textSecondary)
     }
 }

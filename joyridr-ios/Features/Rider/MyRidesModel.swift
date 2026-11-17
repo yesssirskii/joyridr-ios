@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// The rider's bookings, split into upcoming (requested/confirmed/in progress) and past.
+/// The rider's bookings, split into upcoming (requested/confirmed/in progress), past and timed out.
 @Observable
 final class MyRidesModel {
     enum LoadState: Equatable {
@@ -12,7 +12,7 @@ final class MyRidesModel {
     var view: RidesService.View = .upcoming
     private(set) var state: LoadState = .idle
     private(set) var unreadMessages = 0
-    /// Both lists are kept, so switching between Upcoming and Past is instant (then refreshed).
+    /// Every list is kept, so switching between Upcoming, Past and Timed out is instant (then refreshed).
     private var ridesByView: [RidesService.View: [Ride]] = [:]
 
     private let rides: RidesService
@@ -25,21 +25,13 @@ final class MyRidesModel {
 
     var currentRides: [Ride] { ridesByView[view] ?? [] }
 
-    /// Shown in their own section under Upcoming, so a ride that never happened doesn't just vanish.
-    private(set) var timedOut: [Ride] = []
-
     func load() async {
         let view = view
         if ridesByView[view] == nil { state = .loading }
         do {
-            if view == .upcoming {
-                // Both requests run at the same time. The timed-out list is extra: if it fails, Upcoming still shows.
-                async let timedOutRides = try? rides.list(.timedOut)
-                ridesByView[view] = try await rides.list(view)
-                timedOut = await timedOutRides ?? timedOut
-            } else {
-                ridesByView[view] = try await rides.list(view)
-            }
+            // Timed out only returns rides from the last few days (the backend's Rides:TimedOutVisibleDays),
+            // so they drop off this screen on their own. They also stay in Past.
+            ridesByView[view] = try await rides.list(view)
             if view == self.view { state = .loaded }
         } catch {
             if Task.isCancelled { return }
