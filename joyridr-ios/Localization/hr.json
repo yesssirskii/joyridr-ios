@@ -23,7 +23,8 @@
     "yesterday": "Jučer",
     "delete": "Izbriši",
     "load_failed": "Učitavanje nije uspjelo",
-    "save": "Spremi"
+    "save": "Spremi",
+    "show_more": "Prikaži više"
   },
   "app": {
     "offline": {
@@ -588,18 +589,21 @@
   "my_rides": {
     "upcoming": "Nadolazeće",
     "past": "Prošle",
+    "timed_out": "Propuštene",
     "upcoming_title": "Nadolazeće vožnje",
     "past_title": "Prošle vožnje",
     "upcoming_subtitle": "Zatražene i potvrđene",
     "past_subtitle": "Završene, otkazane i odbijene",
     "timed_out_title": "Propuštene vožnje",
-    "timed_out_subtitle_rider": "Nisu započele pa ti je vraćen cijeli iznos",
+    "timed_out_subtitle_rider": "Zadnjih 7 dana · nisu započele pa ti je vraćen cijeli iznos",
     "load_failed": "Vožnje se nisu mogle učitati",
     "upcoming_empty": "Nema nadolazećih vožnji",
     "upcoming_empty_message": "Rezerviraj vožnju i pojavit će se ovdje.",
     "find_car": "Pronađi auto",
     "past_empty": "Još nema prošlih vožnji",
     "past_empty_message": "Ovdje se prikazuju završene, otkazane i odbijene vožnje.",
+    "timed_out_empty": "Nema propuštenih vožnji",
+    "timed_out_empty_message": "Vožnje koje nisu započele ovdje se prikazuju 7 dana.",
     "timed_out_subtitle_driver": "Nisu započete na vrijeme pa je putniku vraćen cijeli iznos"
   },
   "requests": {
@@ -783,6 +787,26 @@
       "ban_reason": "Razlog (vide ga samo administratori)",
       "ban": "Zabrani",
       "ban_message": "Korisnik se odjavljuje i ne može se ponovno prijaviti. Nadolazeće vožnje se otkazuju uz povrat cijelog iznosa putniku, a auti vozača se skrivaju."
+    },
+    "all_cars": {
+      "title": "Svi auti",
+      "subtitle": {
+        "one": "{{count}} auto",
+        "few": "{{count}} auta",
+        "other": "{{count}} auta"
+      },
+      "empty": "Još nema auta",
+      "load_failed": "Svi auti se nisu mogli učitati"
+    },
+    "all_rides": {
+      "title": "Sve vožnje",
+      "subtitle": {
+        "one": "{{count}} vožnja",
+        "few": "{{count}} vožnje",
+        "other": "{{count}} vožnji"
+      },
+      "empty": "Još nema vožnji",
+      "load_failed": "Sve vožnje se nisu mogle učitati"
     }
   }
 }

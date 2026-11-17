@@ -2,9 +2,12 @@ import SwiftUI
 
 /// Rider home: nearby cars, closest first.
 struct ExploreView: View {
+    @Environment(SessionStore.self) private var session
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     @State private var model = ExploreModel()
+    /// Admins also get every car on the platform under their own list.
+    @State private var allCars = AllCarsModel()
     @State private var showChat = false
     /// The car whose booking sheet is open.
     @State private var selectedCar: NearbyCar?
@@ -41,6 +44,10 @@ struct ExploreView: View {
                     GlowCard {
                         carList
                     }
+
+                    if isAdmin {
+                        AllCarsSection(model: allCars)
+                    }
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
                 .padding(.top, 8)
@@ -57,8 +64,14 @@ struct ExploreView: View {
                 ChatButton(unreadCount: model.unreadMessages) { showChat = true }
                     .padding(Theme.horizontalPadding)
             }
-            .refreshable { await model.load() }
+            .refreshable {
+                await model.load()
+                if isAdmin { await allCars.load() }
+            }
             .task { await model.loadIfNeeded() }
+            .task(id: isAdmin) {
+                if isAdmin { await allCars.load() }
+            }
             .onChange(of: model.radiusKm) {
                 Task { await model.load() }
             }
@@ -78,6 +91,8 @@ struct ExploreView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
     }
+
+    private var isAdmin: Bool { session.me?.user.role == .admin }
 
     @ViewBuilder
     private var carList: some View {

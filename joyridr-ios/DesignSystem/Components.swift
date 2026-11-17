@@ -108,16 +108,20 @@ struct FilterPill: View {
     var fillsWidth = true
     /// When used as a toggle (e.g. Upcoming / Past), the unselected pill is dimmed.
     var isSelected = true
+    /// Narrower sides for a row of three pills (My rides).
+    var horizontalPadding: CGFloat = 18
 
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: systemImage)
             Text(title)
                 .lineLimit(1)
+                // Three pills in a row (My rides) are tight with longer Croatian words.
+                .minimumScaleFactor(0.75)
         }
         .font(.subheadline.weight(.semibold))
         .foregroundStyle(isSelected ? .white : Theme.textSecondary)
-        .padding(.horizontal, 18)
+        .padding(.horizontal, horizontalPadding)
         .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: 44)
         .background {
             RedGlow()

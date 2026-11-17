@@ -9,6 +9,16 @@ struct AdminService {
         try await api.get("/api/admin/cars", query: ["status": CarStatus.pendingReview.rawValue])
     }
 
+    /// Every car on the platform whatever its status, newest first.
+    func allCars() async throws -> [CarDetail] {
+        try await api.get("/api/admin/cars/all")
+    }
+
+    /// Every ride on the platform, latest start first, one page at a time.
+    func allRides(page: Int, pageSize: Int = 30) async throws -> Page<Ride> {
+        try await api.get("/api/admin/rides", query: ["page": String(page), "pageSize": String(pageSize)])
+    }
+
     /// Lists the car so riders can find and book it.
     func approve(_ carID: CarDetail.ID) async throws -> CarDetail {
         try await api.post("/api/admin/cars/\(carID.uuidString)/approve")

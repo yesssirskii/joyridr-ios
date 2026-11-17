@@ -22,7 +22,8 @@
     "yesterday": "Yesterday",
     "delete": "Delete",
     "load_failed": "Couldn't load",
-    "save": "Save"
+    "save": "Save",
+    "show_more": "Show more"
   },
   "app": {
     "offline": {
@@ -581,18 +582,21 @@
   "my_rides": {
     "upcoming": "Upcoming",
     "past": "Past",
+    "timed_out": "Timed out",
     "upcoming_title": "Upcoming rides",
     "past_title": "Past rides",
     "upcoming_subtitle": "Requested and confirmed",
     "past_subtitle": "Completed, cancelled and declined",
     "timed_out_title": "Timed-out rides",
-    "timed_out_subtitle_rider": "Never started, so you got a full refund",
+    "timed_out_subtitle_rider": "Last 7 days · never started, so you got a full refund",
     "load_failed": "Couldn't load your rides",
     "upcoming_empty": "No upcoming rides",
     "upcoming_empty_message": "Book a ride and it'll show up here.",
     "find_car": "Find a car",
     "past_empty": "No past rides yet",
     "past_empty_message": "Finished, cancelled and declined rides show up here.",
+    "timed_out_empty": "No timed-out rides",
+    "timed_out_empty_message": "Rides that never started show up here for 7 days.",
     "timed_out_subtitle_driver": "Not started in time, so the rider got a full refund"
   },
   "requests": {
@@ -771,6 +775,24 @@
       "ban_reason": "Reason (only admins see it)",
       "ban": "Ban",
       "ban_message": "They're logged out and can't log back in. Their upcoming rides are cancelled with a full refund to the rider, and a driver's cars are hidden."
+    },
+    "all_cars": {
+      "title": "All cars",
+      "subtitle": {
+        "one": "{{count}} car",
+        "other": "{{count}} cars"
+      },
+      "empty": "No cars yet",
+      "load_failed": "Couldn't load all cars"
+    },
+    "all_rides": {
+      "title": "All rides",
+      "subtitle": {
+        "one": "{{count}} ride",
+        "other": "{{count}} rides"
+      },
+      "empty": "No rides yet",
+      "load_failed": "Couldn't load all rides"
     }
   }
 }
