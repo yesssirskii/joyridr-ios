@@ -38,6 +38,14 @@ struct ScheduleView: View {
                         }
                         .buttonStyle(.plain)
                         .disabled(model.profile == nil || model.isUpdatingAccepting)
+                        // On the button itself, so on iOS 26 the pop-up points at it instead of the middle of the screen.
+                        .confirmationDialog(t("schedule.pause_title"), isPresented: $confirmPause, titleVisibility: .visible) {
+                            Button(t("schedule.pause"), role: .destructive) {
+                                Task { await model.setAcceptingRides(false) }
+                            }
+                        } message: {
+                            Text(t("schedule.pause_message"))
+                        }
 
                         Button {
                             addingTimeOff = true
@@ -89,23 +97,6 @@ struct ScheduleView: View {
                     try await model.addTimeOff(startsAt: start, endsAt: end, reason: reason)
                 }
                 .navigationTransition(.zoom(sourceID: Self.timeOffSourceID, in: scheduleTransition))
-            }
-            .confirmationDialog(t("schedule.pause_title"), isPresented: $confirmPause, titleVisibility: .visible) {
-                Button(t("schedule.pause"), role: .destructive) {
-                    Task { await model.setAcceptingRides(false) }
-                }
-            } message: {
-                Text(t("schedule.pause_message"))
-            }
-            .confirmationDialog(t("schedule.remove_time_off_title"), isPresented: Binding(
-                get: { deletingTimeOff != nil },
-                set: { if !$0 { deletingTimeOff = nil } }
-            ), titleVisibility: .visible, presenting: deletingTimeOff) { item in
-                Button(t("common.remove"), role: .destructive) {
-                    Task { await model.deleteTimeOff(item) }
-                }
-            } message: { _ in
-                Text(t("schedule.remove_time_off_message"))
             }
             .alert(t("common.something_wrong"), isPresented: Binding(
                 get: { model.errorMessage != nil },
@@ -176,6 +167,17 @@ struct ScheduleView: View {
                 ForEach(model.timeOff) { item in
                     TimeOffRow(item: item, timeZoneId: model.timeZoneId) {
                         deletingTimeOff = item
+                    }
+                    // On each row, so the pop-up points at the row being removed.
+                    .confirmationDialog(t("schedule.remove_time_off_title"), isPresented: Binding(
+                        get: { deletingTimeOff?.id == item.id },
+                        set: { if !$0 { deletingTimeOff = nil } }
+                    ), titleVisibility: .visible) {
+                        Button(t("common.remove"), role: .destructive) {
+                            Task { await model.deleteTimeOff(item) }
+                        }
+                    } message: {
+                        Text(t("schedule.remove_time_off_message"))
                     }
                 }
             }

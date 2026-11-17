@@ -128,6 +128,14 @@ struct CarEditorView: View {
                         }
                         .buttonStyle(.secondary)
                         .disabled(model.isDeleting)
+                        // On the button itself, so on iOS 26 the pop-up points at it instead of the middle of the screen.
+                        .confirmationDialog(t("cars.editor.delete_title"), isPresented: $confirmDelete, titleVisibility: .visible) {
+                            Button(t("cars.editor.delete"), role: .destructive) {
+                                Task { if await model.delete() { dismiss() } }
+                            }
+                        } message: {
+                            Text(t("cars.editor.delete_message"))
+                        }
                     }
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
@@ -162,13 +170,6 @@ struct CarEditorView: View {
                 await model.addPhotos(items)
                 pickerItems = []
             }
-        }
-        .confirmationDialog(t("cars.editor.delete_title"), isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button(t("cars.editor.delete"), role: .destructive) {
-                Task { if await model.delete() { dismiss() } }
-            }
-        } message: {
-            Text(t("cars.editor.delete_message"))
         }
     }
 

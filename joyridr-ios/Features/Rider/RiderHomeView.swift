@@ -19,7 +19,8 @@ extension EnvironmentValues {
     @Entry var selectRiderTab = SelectRiderTabAction()
 }
 
-/// The rider's app: Explore and My rides tabs. Admins use it too and get an extra Reviews tab.
+/// The rider's app: Explore and My rides tabs. Admins use it too, with Reviews and Reports tabs added.
+/// Admins never book, so their first two tabs are "Drivers" (every car) and "Rides" (every ride).
 struct RiderHomeView: View {
     @Environment(SessionStore.self) private var session
     @State private var tab: RiderTab = .explore
@@ -28,13 +29,13 @@ struct RiderHomeView: View {
 
     var body: some View {
         TabView(selection: $tab) {
-            Tab(t("tabs.explore"), systemImage: "magnifyingglass", value: .explore) {
+            Tab(isAdmin ? t("tabs.drivers") : t("tabs.explore"), systemImage: isAdmin ? "steeringwheel" : "magnifyingglass", value: .explore) {
                 ExploreView()
             }
-            Tab(t("tabs.my_rides"), systemImage: "car.fill", value: .myRides) {
+            Tab(isAdmin ? t("tabs.rides") : t("tabs.my_rides"), systemImage: "car.fill", value: .myRides) {
                 MyRidesView()
             }
-            if session.me?.user.role == .admin {
+            if isAdmin {
                 Tab(t("tabs.car_reviews"), systemImage: "checkmark.seal.fill", value: .reviews) {
                     CarReviewsView()
                 }
@@ -50,4 +51,6 @@ struct RiderHomeView: View {
             if phase == .active { Task { await notificationBadge.refresh() } }
         }
     }
+
+    private var isAdmin: Bool { session.me?.user.role == .admin }
 }

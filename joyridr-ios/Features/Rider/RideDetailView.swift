@@ -94,14 +94,6 @@ struct RideDetailView: View {
         .sheet(isPresented: $showCarInfo) {
             CarInfoSheet(carID: ride.car.id, driverID: ride.driver.id)
         }
-        .confirmationDialog(t("ride.cancel_confirm_title"), isPresented: $confirmCancel, titleVisibility: .visible) {
-            Button(t("ride.cancel"), role: .destructive) {
-                Task { await model.cancel() }
-            }
-            Button(t("ride.keep"), role: .cancel) {}
-        } message: {
-            Text(model.cancelConsequence)
-        }
         .sheet(isPresented: $showChat) {
             ConversationSheet(otherUser: ChatParticipant(
                 id: ride.driver.id, displayName: ride.driver.displayName,
@@ -193,6 +185,15 @@ struct RideDetailView: View {
                 }
                 .buttonStyle(.secondary)
                 .disabled(model.isCancelling)
+                // On the button itself, so on iOS 26 the pop-up points at it instead of the middle of the screen.
+                .confirmationDialog(t("ride.cancel_confirm_title"), isPresented: $confirmCancel, titleVisibility: .visible) {
+                    Button(t("ride.cancel"), role: .destructive) {
+                        Task { await model.cancel() }
+                    }
+                    Button(t("ride.keep"), role: .cancel) {}
+                } message: {
+                    Text(model.cancelConsequence)
+                }
             }
         }
     }

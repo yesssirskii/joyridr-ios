@@ -549,6 +549,8 @@
   "tabs": {
     "explore": "Explore",
     "my_rides": "My rides",
+    "drivers": "Drivers",
+    "rides": "Rides",
     "car_reviews": "Reviews",
     "reports": "Reports",
     "requests": "Requests",
@@ -777,7 +779,7 @@
       "ban_message": "They're logged out and can't log back in. Their upcoming rides are cancelled with a full refund to the rider, and a driver's cars are hidden."
     },
     "all_cars": {
-      "title": "All cars",
+      "title": "All drivers",
       "subtitle": {
         "one": "{{count}} car",
         "other": "{{count}} cars"
@@ -786,12 +788,13 @@
       "load_failed": "Couldn't load all cars"
     },
     "all_rides": {
-      "title": "All rides",
+      "upcoming_title": "All upcoming rides",
+      "past_title": "All past rides",
+      "timed_out_title": "All timed-out rides",
       "subtitle": {
         "one": "{{count}} ride",
         "other": "{{count}} rides"
       },
-      "empty": "No rides yet",
       "load_failed": "Couldn't load all rides"
     }
   }
