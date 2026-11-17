@@ -14,9 +14,10 @@ struct AdminService {
         try await api.get("/api/admin/cars/all")
     }
 
-    /// Every ride on the platform, latest start first, one page at a time.
-    func allRides(page: Int, pageSize: Int = 30) async throws -> Page<Ride> {
-        try await api.get("/api/admin/rides", query: ["page": String(page), "pageSize": String(pageSize)])
+    /// Every ride on the platform in one of My rides' views (upcoming, past, timed out), sorted the same way,
+    /// one page at a time.
+    func allRides(_ view: RidesService.View, page: Int, pageSize: Int = 30) async throws -> Page<Ride> {
+        try await api.get("/api/admin/rides", query: ["view": view.rawValue, "page": String(page), "pageSize": String(pageSize)])
     }
 
     /// Lists the car so riders can find and book it.

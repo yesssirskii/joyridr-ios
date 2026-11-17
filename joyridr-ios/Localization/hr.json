@@ -556,6 +556,8 @@
   "tabs": {
     "explore": "Istraži",
     "my_rides": "Moje vožnje",
+    "drivers": "Vozači",
+    "rides": "Vožnje",
     "car_reviews": "Pregled auta",
     "reports": "Prijave",
     "requests": "Zahtjevi",
@@ -789,7 +791,7 @@
       "ban_message": "Korisnik se odjavljuje i ne može se ponovno prijaviti. Nadolazeće vožnje se otkazuju uz povrat cijelog iznosa putniku, a auti vozača se skrivaju."
     },
     "all_cars": {
-      "title": "Svi auti",
+      "title": "Svi vozači",
       "subtitle": {
         "one": "{{count}} auto",
         "few": "{{count}} auta",
@@ -799,13 +801,14 @@
       "load_failed": "Svi auti se nisu mogli učitati"
     },
     "all_rides": {
-      "title": "Sve vožnje",
+      "upcoming_title": "Sve nadolazeće vožnje",
+      "past_title": "Sve prošle vožnje",
+      "timed_out_title": "Sve propuštene vožnje",
       "subtitle": {
         "one": "{{count}} vožnja",
         "few": "{{count}} vožnje",
         "other": "{{count}} vožnji"
       },
-      "empty": "Još nema vožnji",
       "load_failed": "Sve vožnje se nisu mogle učitati"
     }
   }

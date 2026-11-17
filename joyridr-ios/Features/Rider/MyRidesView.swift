@@ -5,7 +5,7 @@ struct MyRidesView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.selectRiderTab) private var selectRiderTab
     @State private var model = MyRidesModel()
-    /// Admins also get every ride on the platform under their own upcoming rides.
+    /// Admins never book rides, so instead of their own they see every ride on the platform, in the same filter.
     @State private var allRides = AllRidesModel()
     @State private var showChat = false
     @State private var selectedRide: Ride?
@@ -24,14 +24,14 @@ struct MyRidesView: View {
                         viewPill(.timedOut, title: t("my_rides.timed_out"), systemImage: "hourglass")
                     }
 
-                    SectionTitle(title: sectionTitle, subtitle: sectionSubtitle)
-
-                    GlowCard {
-                        rideList
-                    }
-
-                    if isAdmin && model.view == .upcoming {
+                    if isAdmin {
                         AllRidesSection(model: allRides)
+                    } else {
+                        SectionTitle(title: sectionTitle, subtitle: sectionSubtitle)
+
+                        GlowCard {
+                            rideList
+                        }
                     }
                 }
                 .padding(.horizontal, Theme.horizontalPadding)
@@ -46,17 +46,18 @@ struct MyRidesView: View {
                 .ignoresSafeArea()
             }
             .overlay(alignment: .bottomTrailing) {
-                ChatButton(unreadCount: model.unreadMessages) { showChat = true }
-                    .padding(Theme.horizontalPadding)
+                // Chats belong to rides, and admins don't have any.
+                if !isAdmin {
+                    ChatButton(unreadCount: model.unreadMessages) { showChat = true }
+                        .padding(Theme.horizontalPadding)
+                }
             }
             .refreshable {
-                await model.load()
-                if isAdmin { await allRides.load() }
+                if isAdmin { await allRides.load(model.view) } else { await model.load() }
             }
             // Runs every time the tab is shown and whenever the filter changes.
-            .task(id: model.view) { await model.load() }
-            .task(id: isAdmin) {
-                if isAdmin { await allRides.load() }
+            .task(id: RidesKey(isAdmin: isAdmin, view: model.view)) {
+                if isAdmin { await allRides.load(model.view) } else { await model.load() }
             }
             .animation(.snappy, value: model.view)
             .sheet(item: $selectedRide, onDismiss: { Task { await model.load() } }) { ride in
@@ -71,6 +72,12 @@ struct MyRidesView: View {
     }
 
     private var isAdmin: Bool { session.me?.user.role == .admin }
+
+    /// Reloads when the filter changes or the user turns out to be an admin.
+    private struct RidesKey: Equatable {
+        let isAdmin: Bool
+        let view: RidesService.View
+    }
 
     private var sectionTitle: String {
         switch model.view {

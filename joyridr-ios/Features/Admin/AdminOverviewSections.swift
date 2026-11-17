@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// "All cars" under Explore's list, for admins only. Tapping a car opens the same review screen
+/// "All drivers" (every car and who drives it), the admin's Drivers tab in place of Explore's nearby cars. Tapping a car opens the same review screen
 /// as the Reviews tab, so an admin can also reject a live car or approve a rejected one from here.
 struct AllCarsSection: View {
     let model: AllCarsModel
@@ -61,14 +61,15 @@ struct AllCarsSection: View {
     }
 }
 
-/// "All rides" under My rides' upcoming list, for admins only: who booked whom, when, and how it went.
+/// "All rides", the admin's Rides tab in place of their own bookings: who booked whom, when, and how it went,
+/// in whichever filter (upcoming, past, timed out) is selected at the top.
 /// The rows don't open anything yet, because the ride screen is built for the rider (pay, cancel, review).
 struct AllRidesSection: View {
     let model: AllRidesModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
-            SectionTitle(title: t("admin.all_rides.title"), subtitle: subtitle)
+            SectionTitle(title: title, subtitle: subtitle)
 
             GlowCard {
                 content
@@ -76,8 +77,25 @@ struct AllRidesSection: View {
         }
     }
 
+    private var title: String {
+        switch model.view {
+        case .past: t("admin.all_rides.past_title")
+        case .timedOut: t("admin.all_rides.timed_out_title")
+        default: t("admin.all_rides.upcoming_title")
+        }
+    }
+
     private var subtitle: String? {
         model.state == .loaded ? t("admin.all_rides.subtitle", count: model.totalCount) : nil
+    }
+
+    /// Same wording as the admin's own empty list above, since it's the same filter.
+    private var emptyTitle: String {
+        switch model.view {
+        case .past: t("my_rides.past_empty")
+        case .timedOut: t("my_rides.timed_out_empty")
+        default: t("my_rides.upcoming_empty")
+        }
     }
 
     @ViewBuilder
@@ -92,12 +110,12 @@ struct AllRidesSection: View {
             } description: {
                 Text(message)
             } actions: {
-                Button(t("common.try_again")) { Task { await model.load() } }
+                Button(t("common.try_again")) { Task { await model.load(model.view) } }
                     .buttonStyle(.primary)
                     .frame(width: 180)
             }
         case .loaded where model.rides.isEmpty:
-            ContentUnavailableView(t("admin.all_rides.empty"), systemImage: "car.side")
+            ContentUnavailableView(emptyTitle, systemImage: model.view == .timedOut ? "hourglass" : "car.side")
         case .loaded:
             LazyVStack(spacing: 6) {
                 ForEach(model.rides) { ride in

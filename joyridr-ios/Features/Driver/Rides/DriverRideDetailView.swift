@@ -133,13 +133,6 @@ struct DriverRideDetailView: View {
         } message: {
             Text(t("ride.driver.cancel_message", ["name": model.riderFirstName]))
         }
-        .confirmationDialog(t("ride.driver.finish_title"), isPresented: $confirmComplete, titleVisibility: .visible) {
-            Button(t("ride.driver.complete")) {
-                Task { await model.complete() }
-            }
-        } message: {
-            Text(t("ride.driver.finish_message", ["name": model.riderFirstName]))
-        }
         .sheet(isPresented: $showChat) {
             ConversationSheet(otherUser: ChatParticipant(
                 id: ride.rider.id, displayName: ride.rider.displayName,
@@ -191,6 +184,14 @@ struct DriverRideDetailView: View {
                 default:
                     Button(t("ride.driver.complete")) { confirmComplete = true }
                         .buttonStyle(.primary(isLoading: model.busyAction == .complete))
+                        // On the button itself, so on iOS 26 the pop-up points at it instead of the middle of the screen.
+                        .confirmationDialog(t("ride.driver.finish_title"), isPresented: $confirmComplete, titleVisibility: .visible) {
+                            Button(t("ride.driver.complete")) {
+                                Task { await model.complete() }
+                            }
+                        } message: {
+                            Text(t("ride.driver.finish_message", ["name": model.riderFirstName]))
+                        }
                     Text(t("ride.driver.ends_at", ["time": ride.endsAt.localized(date: .omitted, time: .shortened)]))
                         .font(.caption)
                         .foregroundStyle(Theme.textSecondary)

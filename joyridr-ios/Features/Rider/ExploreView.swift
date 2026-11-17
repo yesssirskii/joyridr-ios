@@ -1,12 +1,13 @@
 import SwiftUI
 
 /// Rider home: nearby cars, closest first.
+/// Admins never book rides, so for them this is the "Drivers" tab: just every car on the platform.
 struct ExploreView: View {
     @Environment(SessionStore.self) private var session
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     @State private var model = ExploreModel()
-    /// Admins also get every car on the platform under their own list.
+    /// What admins see instead of the nearby cars.
     @State private var allCars = AllCarsModel()
     @State private var showChat = false
     /// The car whose booking sheet is open.
@@ -20,6 +21,62 @@ struct ExploreView: View {
                 VStack(alignment: .leading, spacing: 22) {
                     HomeHeader()
 
+                    if isAdmin {
+                        AllCarsSection(model: allCars)
+                    } else {
+                        riderContent
+                    }
+                }
+                .padding(.horizontal, Theme.horizontalPadding)
+                .padding(.top, 8)
+                .padding(.bottom, 90) // room for the chat button
+            }
+            .background {
+                ZStack(alignment: .top) {
+                    Theme.background
+                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
+                }
+                .ignoresSafeArea()
+            }
+            .overlay(alignment: .bottomTrailing) {
+                // Chats belong to rides, and admins don't have any.
+                if !isAdmin {
+                    ChatButton(unreadCount: model.unreadMessages) { showChat = true }
+                        .padding(Theme.horizontalPadding)
+                }
+            }
+            .refreshable {
+                if isAdmin { await allCars.load() } else { await model.load() }
+            }
+            // Admins never need the rider's location, so don't ask for it.
+            .task(id: isAdmin) {
+                if isAdmin { await allCars.load() } else { await model.loadIfNeeded() }
+            }
+            .onChange(of: model.radiusKm) {
+                Task { await model.load() }
+            }
+            // Coming back from Settings with location turned on.
+            .onChange(of: scenePhase) {
+                if scenePhase == .active, model.state == .locationOff {
+                    Task { await model.load() }
+                }
+            }
+            .sheet(item: $selectedCar, onDismiss: { Task { await model.load() } }) { item in
+                NewRideView(car: item)
+                    .navigationTransition(.zoom(sourceID: item.id, in: rideTransition))
+            }
+            .sheet(isPresented: $showChat, onDismiss: { Task { await model.loadUnreadCount() } }) {
+                InboxView()
+            }
+            .toolbar(.hidden, for: .navigationBar)
+        }
+    }
+
+    private var isAdmin: Bool { session.me?.user.role == .admin }
+
+    /// Location and sort pills, then the nearby cars.
+    @ViewBuilder
+    private var riderContent: some View {
                     HStack(spacing: 14) {
                         Menu {
                             Picker(t("explore.radius"), selection: $model.radiusKm) {
@@ -44,55 +101,7 @@ struct ExploreView: View {
                     GlowCard {
                         carList
                     }
-
-                    if isAdmin {
-                        AllCarsSection(model: allCars)
-                    }
-                }
-                .padding(.horizontal, Theme.horizontalPadding)
-                .padding(.top, 8)
-                .padding(.bottom, 90) // room for the chat button
-            }
-            .background {
-                ZStack(alignment: .top) {
-                    Theme.background
-                    RacingStripes(count: 4, lineWidth: 14, spacing: 36, startX: -0.15)
-                }
-                .ignoresSafeArea()
-            }
-            .overlay(alignment: .bottomTrailing) {
-                ChatButton(unreadCount: model.unreadMessages) { showChat = true }
-                    .padding(Theme.horizontalPadding)
-            }
-            .refreshable {
-                await model.load()
-                if isAdmin { await allCars.load() }
-            }
-            .task { await model.loadIfNeeded() }
-            .task(id: isAdmin) {
-                if isAdmin { await allCars.load() }
-            }
-            .onChange(of: model.radiusKm) {
-                Task { await model.load() }
-            }
-            // Coming back from Settings with location turned on.
-            .onChange(of: scenePhase) {
-                if scenePhase == .active, model.state == .locationOff {
-                    Task { await model.load() }
-                }
-            }
-            .sheet(item: $selectedCar, onDismiss: { Task { await model.load() } }) { item in
-                NewRideView(car: item)
-                    .navigationTransition(.zoom(sourceID: item.id, in: rideTransition))
-            }
-            .sheet(isPresented: $showChat, onDismiss: { Task { await model.loadUnreadCount() } }) {
-                InboxView()
-            }
-            .toolbar(.hidden, for: .navigationBar)
-        }
     }
-
-    private var isAdmin: Bool { session.me?.user.role == .admin }
 
     @ViewBuilder
     private var carList: some View {
