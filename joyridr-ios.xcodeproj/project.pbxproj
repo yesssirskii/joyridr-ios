@@ -408,6 +408,7 @@
 				DEVELOPMENT_TEAM = 5H7T3AKKZY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = "joyridr-ios/joyridr-ios.entitlements";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = JOYRIDR;
 				INFOPLIST_KEY_NSCameraUsageDescription = "JOYRIDR uses the camera only if you choose to scan your card when paying.";
@@ -445,6 +446,7 @@
 				DEVELOPMENT_TEAM = 5H7T3AKKZY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = "joyridr-ios/joyridr-ios.entitlements";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = JOYRIDR;
 				INFOPLIST_KEY_NSCameraUsageDescription = "JOYRIDR uses the camera only if you choose to scan your card when paying.";
@@ -587,6 +589,7 @@
 				DEVELOPMENT_TEAM = 5H7T3AKKZY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				CODE_SIGN_ENTITLEMENTS = "joyridr-ios/joyridr-ios.entitlements";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = JOYRIDR;
 				INFOPLIST_KEY_NSCameraUsageDescription = "JOYRIDR uses the camera only if you choose to scan your card when paying.";
