@@ -7,8 +7,6 @@
 		<string>en</string>
 		<string>hr</string>
 	</array>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>JoyridrAPIURL</key>
 	<string>$(JOYRIDR_API_URL)</string>
 	<key>UIAppFonts</key>
